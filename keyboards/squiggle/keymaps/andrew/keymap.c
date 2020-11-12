@@ -183,8 +183,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
     SH_A,   CT_S,   AL_D,   KC_F,   KC_G,       KC_H,   KC_J,   AL_K,   CT_L,   SH_SCLN,
     KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
-                            KC_TAB,KC_LSHIFT,                KC_CLCK, KC_BSPACE,
-                            KC_LGUI,RAISE,    LOWER,RS_SPC
+                            KC_TAB,KC_LSHIFT, KC_CLCK, KC_BSPACE,
+                            KC_LGUI,LOWER,    RAISE,RS_SPC
 ),
 [_RAISE] = LAYOUT_complicated(
     KC_EXLM,    KC_AT,  KC_HASH,    KC_DOLLAR,KC_PERCENT,    KC_CIRCUMFLEX,KC_AMPERSAND,   KC_ASTERISK,   KC_LEFT_PAREN,   KC_RIGHT_PAREN ,
@@ -201,7 +201,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_LOWER] = LAYOUT_complicated(
-    KC_1, KC_2,KC_3,    KC_4,  KC_5,                  KC_6,    KC_7,    KC_8,  KC_9,    KC_0,
+    KC_1, KC_2,KC_3,KC_4,  KC_5, KC_6,    KC_7,    KC_8,  KC_9,    KC_0,
     LCTL_T(KC_ESC),  LSFT_T(KC_TAB), KC_LALT,LGUI_T(KC_BTN1),  LCTL_T(KC_BTN2),    KC_LEFT,     KC_DOWN,    KC_EQUAL,KC_MINUS,   KC_QUOTE,
     KC_CLCK,         G(KC_X),G(KC_C),G(KC_V),G(KC_Z),        KC_LEFT,  KC_UP,    KC_DOWN,    KC_RIGHT, KC_ENTER,
                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
