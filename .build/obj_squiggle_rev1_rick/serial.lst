@@ -1,0 +1,2429 @@
+   1               		.file	"serial.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.sync_recv,"ax",@progbits
+  12               	sync_recv:
+  13               	.LFB16:
+  14               		.file 1 "drivers/avr/serial.c"
+   1:drivers/avr/serial.c **** /*
+   2:drivers/avr/serial.c ****  * WARNING: be careful changing this code, it is very timing dependent
+   3:drivers/avr/serial.c ****  *
+   4:drivers/avr/serial.c ****  * 2018-10-28 checked
+   5:drivers/avr/serial.c ****  *  avr-gcc 4.9.2
+   6:drivers/avr/serial.c ****  *  avr-gcc 5.4.0
+   7:drivers/avr/serial.c ****  *  avr-gcc 7.3.0
+   8:drivers/avr/serial.c ****  */
+   9:drivers/avr/serial.c **** 
+  10:drivers/avr/serial.c **** #ifndef F_CPU
+  11:drivers/avr/serial.c **** #    define F_CPU 16000000
+  12:drivers/avr/serial.c **** #endif
+  13:drivers/avr/serial.c **** 
+  14:drivers/avr/serial.c **** #include <avr/io.h>
+  15:drivers/avr/serial.c **** #include <avr/interrupt.h>
+  16:drivers/avr/serial.c **** #include <util/delay.h>
+  17:drivers/avr/serial.c **** #include <stddef.h>
+  18:drivers/avr/serial.c **** #include <stdbool.h>
+  19:drivers/avr/serial.c **** #include "serial.h"
+  20:drivers/avr/serial.c **** 
+  21:drivers/avr/serial.c **** #ifdef SOFT_SERIAL_PIN
+  22:drivers/avr/serial.c **** 
+  23:drivers/avr/serial.c **** #    ifdef __AVR_ATmega32U4__
+  24:drivers/avr/serial.c **** // if using ATmega32U4 I2C, can not use PD0 and PD1 in soft serial.
+  25:drivers/avr/serial.c **** #        ifdef USE_AVR_I2C
+  26:drivers/avr/serial.c **** #            if SOFT_SERIAL_PIN == D0 || SOFT_SERIAL_PIN == D1
+  27:drivers/avr/serial.c **** #                error Using ATmega32U4 I2C, so can not use PD0, PD1
+  28:drivers/avr/serial.c **** #            endif
+  29:drivers/avr/serial.c **** #        endif
+  30:drivers/avr/serial.c **** 
+  31:drivers/avr/serial.c **** #        define setPinInputHigh(pin) (DDRx_ADDRESS(pin) &= ~_BV((pin)&0xF), PORTx_ADDRESS(pin) |= _
+  32:drivers/avr/serial.c **** #        define setPinOutput(pin) (DDRx_ADDRESS(pin) |= _BV((pin)&0xF))
+  33:drivers/avr/serial.c **** #        define writePinHigh(pin) (PORTx_ADDRESS(pin) |= _BV((pin)&0xF))
+  34:drivers/avr/serial.c **** #        define writePinLow(pin) (PORTx_ADDRESS(pin) &= ~_BV((pin)&0xF))
+  35:drivers/avr/serial.c **** #        define readPin(pin) ((bool)(PINx_ADDRESS(pin) & _BV((pin)&0xF)))
+  36:drivers/avr/serial.c **** 
+  37:drivers/avr/serial.c **** #        if SOFT_SERIAL_PIN >= D0 && SOFT_SERIAL_PIN <= D3
+  38:drivers/avr/serial.c **** #            if SOFT_SERIAL_PIN == D0
+  39:drivers/avr/serial.c **** #                define EIMSK_BIT _BV(INT0)
+  40:drivers/avr/serial.c **** #                define EICRx_BIT (~(_BV(ISC00) | _BV(ISC01)))
+  41:drivers/avr/serial.c **** #                define SERIAL_PIN_INTERRUPT INT0_vect
+  42:drivers/avr/serial.c **** #            elif SOFT_SERIAL_PIN == D1
+  43:drivers/avr/serial.c **** #                define EIMSK_BIT _BV(INT1)
+  44:drivers/avr/serial.c **** #                define EICRx_BIT (~(_BV(ISC10) | _BV(ISC11)))
+  45:drivers/avr/serial.c **** #                define SERIAL_PIN_INTERRUPT INT1_vect
+  46:drivers/avr/serial.c **** #            elif SOFT_SERIAL_PIN == D2
+  47:drivers/avr/serial.c **** #                define EIMSK_BIT _BV(INT2)
+  48:drivers/avr/serial.c **** #                define EICRx_BIT (~(_BV(ISC20) | _BV(ISC21)))
+  49:drivers/avr/serial.c **** #                define SERIAL_PIN_INTERRUPT INT2_vect
+  50:drivers/avr/serial.c **** #            elif SOFT_SERIAL_PIN == D3
+  51:drivers/avr/serial.c **** #                define EIMSK_BIT _BV(INT3)
+  52:drivers/avr/serial.c **** #                define EICRx_BIT (~(_BV(ISC30) | _BV(ISC31)))
+  53:drivers/avr/serial.c **** #                define SERIAL_PIN_INTERRUPT INT3_vect
+  54:drivers/avr/serial.c **** #            endif
+  55:drivers/avr/serial.c **** #        elif SOFT_SERIAL_PIN == E6
+  56:drivers/avr/serial.c **** #            define EIMSK_BIT _BV(INT6)
+  57:drivers/avr/serial.c **** #            define EICRx_BIT (~(_BV(ISC60) | _BV(ISC61)))
+  58:drivers/avr/serial.c **** #            define SERIAL_PIN_INTERRUPT INT6_vect
+  59:drivers/avr/serial.c **** #        else
+  60:drivers/avr/serial.c **** #            error invalid SOFT_SERIAL_PIN value
+  61:drivers/avr/serial.c **** #        endif
+  62:drivers/avr/serial.c **** 
+  63:drivers/avr/serial.c **** #    else
+  64:drivers/avr/serial.c **** #        error serial.c now support ATmega32U4 only
+  65:drivers/avr/serial.c **** #    endif
+  66:drivers/avr/serial.c **** 
+  67:drivers/avr/serial.c **** #    define ALWAYS_INLINE __attribute__((always_inline))
+  68:drivers/avr/serial.c **** #    define NO_INLINE __attribute__((noinline))
+  69:drivers/avr/serial.c **** #    define _delay_sub_us(x) __builtin_avr_delay_cycles(x)
+  70:drivers/avr/serial.c **** 
+  71:drivers/avr/serial.c **** // parity check
+  72:drivers/avr/serial.c **** #    define ODD_PARITY 1
+  73:drivers/avr/serial.c **** #    define EVEN_PARITY 0
+  74:drivers/avr/serial.c **** #    define PARITY EVEN_PARITY
+  75:drivers/avr/serial.c **** 
+  76:drivers/avr/serial.c **** #    ifdef SERIAL_DELAY
+  77:drivers/avr/serial.c **** // custom setup in config.h
+  78:drivers/avr/serial.c **** // #define TID_SEND_ADJUST 2
+  79:drivers/avr/serial.c **** // #define SERIAL_DELAY 6             // micro sec
+  80:drivers/avr/serial.c **** // #define READ_WRITE_START_ADJUST 30 // cycles
+  81:drivers/avr/serial.c **** // #define READ_WRITE_WIDTH_ADJUST 8 // cycles
+  82:drivers/avr/serial.c **** #    else
+  83:drivers/avr/serial.c **** // ============ Standard setups ============
+  84:drivers/avr/serial.c **** 
+  85:drivers/avr/serial.c **** #        ifndef SELECT_SOFT_SERIAL_SPEED
+  86:drivers/avr/serial.c **** #            define SELECT_SOFT_SERIAL_SPEED 1
+  87:drivers/avr/serial.c **** //  0: about 189kbps (Experimental only)
+  88:drivers/avr/serial.c **** //  1: about 137kbps (default)
+  89:drivers/avr/serial.c **** //  2: about 75kbps
+  90:drivers/avr/serial.c **** //  3: about 39kbps
+  91:drivers/avr/serial.c **** //  4: about 26kbps
+  92:drivers/avr/serial.c **** //  5: about 20kbps
+  93:drivers/avr/serial.c **** #        endif
+  94:drivers/avr/serial.c **** 
+  95:drivers/avr/serial.c **** #        if __GNUC__ < 6
+  96:drivers/avr/serial.c **** #            define TID_SEND_ADJUST 14
+  97:drivers/avr/serial.c **** #        else
+  98:drivers/avr/serial.c **** #            define TID_SEND_ADJUST 2
+  99:drivers/avr/serial.c **** #        endif
+ 100:drivers/avr/serial.c **** 
+ 101:drivers/avr/serial.c **** #        if SELECT_SOFT_SERIAL_SPEED == 0
+ 102:drivers/avr/serial.c **** // Very High speed
+ 103:drivers/avr/serial.c **** #            define SERIAL_DELAY 4  // micro sec
+ 104:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 105:drivers/avr/serial.c **** #                define READ_WRITE_START_ADJUST 33  // cycles
+ 106:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3   // cycles
+ 107:drivers/avr/serial.c **** #            else
+ 108:drivers/avr/serial.c **** #                define READ_WRITE_START_ADJUST 34  // cycles
+ 109:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7   // cycles
+ 110:drivers/avr/serial.c **** #            endif
+ 111:drivers/avr/serial.c **** #        elif SELECT_SOFT_SERIAL_SPEED == 1
+ 112:drivers/avr/serial.c **** // High speed
+ 113:drivers/avr/serial.c **** #            define SERIAL_DELAY 6  // micro sec
+ 114:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 115:drivers/avr/serial.c **** #                define READ_WRITE_START_ADJUST 30  // cycles
+ 116:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3   // cycles
+ 117:drivers/avr/serial.c **** #            else
+ 118:drivers/avr/serial.c **** #                define READ_WRITE_START_ADJUST 33  // cycles
+ 119:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7   // cycles
+ 120:drivers/avr/serial.c **** #            endif
+ 121:drivers/avr/serial.c **** #        elif SELECT_SOFT_SERIAL_SPEED == 2
+ 122:drivers/avr/serial.c **** // Middle speed
+ 123:drivers/avr/serial.c **** #            define SERIAL_DELAY 12             // micro sec
+ 124:drivers/avr/serial.c **** #            define READ_WRITE_START_ADJUST 30  // cycles
+ 125:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 126:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3  // cycles
+ 127:drivers/avr/serial.c **** #            else
+ 128:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7  // cycles
+ 129:drivers/avr/serial.c **** #            endif
+ 130:drivers/avr/serial.c **** #        elif SELECT_SOFT_SERIAL_SPEED == 3
+ 131:drivers/avr/serial.c **** // Low speed
+ 132:drivers/avr/serial.c **** #            define SERIAL_DELAY 24             // micro sec
+ 133:drivers/avr/serial.c **** #            define READ_WRITE_START_ADJUST 30  // cycles
+ 134:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 135:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3  // cycles
+ 136:drivers/avr/serial.c **** #            else
+ 137:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7  // cycles
+ 138:drivers/avr/serial.c **** #            endif
+ 139:drivers/avr/serial.c **** #        elif SELECT_SOFT_SERIAL_SPEED == 4
+ 140:drivers/avr/serial.c **** // Very Low speed
+ 141:drivers/avr/serial.c **** #            define SERIAL_DELAY 36             // micro sec
+ 142:drivers/avr/serial.c **** #            define READ_WRITE_START_ADJUST 30  // cycles
+ 143:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 144:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3  // cycles
+ 145:drivers/avr/serial.c **** #            else
+ 146:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7  // cycles
+ 147:drivers/avr/serial.c **** #            endif
+ 148:drivers/avr/serial.c **** #        elif SELECT_SOFT_SERIAL_SPEED == 5
+ 149:drivers/avr/serial.c **** // Ultra Low speed
+ 150:drivers/avr/serial.c **** #            define SERIAL_DELAY 48             // micro sec
+ 151:drivers/avr/serial.c **** #            define READ_WRITE_START_ADJUST 30  // cycles
+ 152:drivers/avr/serial.c **** #            if __GNUC__ < 6
+ 153:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 3  // cycles
+ 154:drivers/avr/serial.c **** #            else
+ 155:drivers/avr/serial.c **** #                define READ_WRITE_WIDTH_ADJUST 7  // cycles
+ 156:drivers/avr/serial.c **** #            endif
+ 157:drivers/avr/serial.c **** #        else
+ 158:drivers/avr/serial.c **** #            error invalid SELECT_SOFT_SERIAL_SPEED value
+ 159:drivers/avr/serial.c **** #        endif /* SELECT_SOFT_SERIAL_SPEED */
+ 160:drivers/avr/serial.c **** #    endif     /* SERIAL_DELAY */
+ 161:drivers/avr/serial.c **** 
+ 162:drivers/avr/serial.c **** #    define SERIAL_DELAY_HALF1 (SERIAL_DELAY / 2)
+ 163:drivers/avr/serial.c **** #    define SERIAL_DELAY_HALF2 (SERIAL_DELAY - SERIAL_DELAY / 2)
+ 164:drivers/avr/serial.c **** 
+ 165:drivers/avr/serial.c **** #    define SLAVE_INT_WIDTH_US 1
+ 166:drivers/avr/serial.c **** #    ifndef SERIAL_USE_MULTI_TRANSACTION
+ 167:drivers/avr/serial.c **** #        define SLAVE_INT_RESPONSE_TIME SERIAL_DELAY
+ 168:drivers/avr/serial.c **** #    else
+ 169:drivers/avr/serial.c **** #        define SLAVE_INT_ACK_WIDTH_UNIT 2
+ 170:drivers/avr/serial.c **** #        define SLAVE_INT_ACK_WIDTH 4
+ 171:drivers/avr/serial.c **** #    endif
+ 172:drivers/avr/serial.c **** 
+ 173:drivers/avr/serial.c **** static SSTD_t *Transaction_table      = NULL;
+ 174:drivers/avr/serial.c **** static uint8_t Transaction_table_size = 0;
+ 175:drivers/avr/serial.c **** 
+ 176:drivers/avr/serial.c **** inline static void serial_delay(void) ALWAYS_INLINE;
+ 177:drivers/avr/serial.c **** inline static void serial_delay(void) { _delay_us(SERIAL_DELAY); }
+ 178:drivers/avr/serial.c **** 
+ 179:drivers/avr/serial.c **** inline static void serial_delay_half1(void) ALWAYS_INLINE;
+ 180:drivers/avr/serial.c **** inline static void serial_delay_half1(void) { _delay_us(SERIAL_DELAY_HALF1); }
+ 181:drivers/avr/serial.c **** 
+ 182:drivers/avr/serial.c **** inline static void serial_delay_half2(void) ALWAYS_INLINE;
+ 183:drivers/avr/serial.c **** inline static void serial_delay_half2(void) { _delay_us(SERIAL_DELAY_HALF2); }
+ 184:drivers/avr/serial.c **** 
+ 185:drivers/avr/serial.c **** inline static void serial_output(void) ALWAYS_INLINE;
+ 186:drivers/avr/serial.c **** inline static void serial_output(void) { setPinOutput(SOFT_SERIAL_PIN); }
+ 187:drivers/avr/serial.c **** 
+ 188:drivers/avr/serial.c **** // make the serial pin an input with pull-up resistor
+ 189:drivers/avr/serial.c **** inline static void serial_input_with_pullup(void) ALWAYS_INLINE;
+ 190:drivers/avr/serial.c **** inline static void serial_input_with_pullup(void) { setPinInputHigh(SOFT_SERIAL_PIN); }
+ 191:drivers/avr/serial.c **** 
+ 192:drivers/avr/serial.c **** inline static uint8_t serial_read_pin(void) ALWAYS_INLINE;
+ 193:drivers/avr/serial.c **** inline static uint8_t serial_read_pin(void) { return !!readPin(SOFT_SERIAL_PIN); }
+ 194:drivers/avr/serial.c **** 
+ 195:drivers/avr/serial.c **** inline static void serial_low(void) ALWAYS_INLINE;
+ 196:drivers/avr/serial.c **** inline static void serial_low(void) { writePinLow(SOFT_SERIAL_PIN); }
+ 197:drivers/avr/serial.c **** 
+ 198:drivers/avr/serial.c **** inline static void serial_high(void) ALWAYS_INLINE;
+ 199:drivers/avr/serial.c **** inline static void serial_high(void) { writePinHigh(SOFT_SERIAL_PIN); }
+ 200:drivers/avr/serial.c **** 
+ 201:drivers/avr/serial.c **** void soft_serial_initiator_init(SSTD_t *sstd_table, int sstd_table_size) {
+ 202:drivers/avr/serial.c ****     Transaction_table      = sstd_table;
+ 203:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 204:drivers/avr/serial.c ****     serial_output();
+ 205:drivers/avr/serial.c ****     serial_high();
+ 206:drivers/avr/serial.c **** }
+ 207:drivers/avr/serial.c **** 
+ 208:drivers/avr/serial.c **** void soft_serial_target_init(SSTD_t *sstd_table, int sstd_table_size) {
+ 209:drivers/avr/serial.c ****     Transaction_table      = sstd_table;
+ 210:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 211:drivers/avr/serial.c ****     serial_input_with_pullup();
+ 212:drivers/avr/serial.c **** 
+ 213:drivers/avr/serial.c ****     // Enable INT0-INT3,INT6
+ 214:drivers/avr/serial.c ****     EIMSK |= EIMSK_BIT;
+ 215:drivers/avr/serial.c **** #    if SOFT_SERIAL_PIN == E6
+ 216:drivers/avr/serial.c ****     // Trigger on falling edge of INT6
+ 217:drivers/avr/serial.c ****     EICRB &= EICRx_BIT;
+ 218:drivers/avr/serial.c **** #    else
+ 219:drivers/avr/serial.c ****     // Trigger on falling edge of INT0-INT3
+ 220:drivers/avr/serial.c ****     EICRA &= EICRx_BIT;
+ 221:drivers/avr/serial.c **** #    endif
+ 222:drivers/avr/serial.c **** }
+ 223:drivers/avr/serial.c **** 
+ 224:drivers/avr/serial.c **** // Used by the sender to synchronize timing with the reciver.
+ 225:drivers/avr/serial.c **** static void sync_recv(void) NO_INLINE;
+ 226:drivers/avr/serial.c **** static void sync_recv(void) {
+  15               		.loc 1 226 29 view -0
+  16               		.cfi_startproc
+  17               	/* prologue: function */
+  18               	/* frame size = 0 */
+  19               	/* stack size = 0 */
+  20               	.L__stack_usage = 0
+ 227:drivers/avr/serial.c ****     for (uint8_t i = 0; i < SERIAL_DELAY * 5 && serial_read_pin(); i++) {
+  21               		.loc 1 227 5 view .LVU1
+  22               	.LBB129:
+  23               		.loc 1 227 10 view .LVU2
+  24               	.LVL0:
+  25               		.loc 1 227 25 view .LVU3
+  26               	.LBE129:
+ 226:drivers/avr/serial.c ****     for (uint8_t i = 0; i < SERIAL_DELAY * 5 && serial_read_pin(); i++) {
+  27               		.loc 1 226 29 is_stmt 0 view .LVU4
+  28 0000 8EE1      		ldi r24,lo8(30)
+  29               	.LVL1:
+  30               	.L2:
+  31               	.LBB132:
+  32               	.LBB130:
+  33               	.LBI130:
+ 193:drivers/avr/serial.c **** 
+  34               		.loc 1 193 23 is_stmt 1 view .LVU5
+  35               	.LBB131:
+ 193:drivers/avr/serial.c **** 
+  36               		.loc 1 193 47 view .LVU6
+  37               	.LBE131:
+  38               	.LBE130:
+  39               		.loc 1 227 46 is_stmt 0 view .LVU7
+  40 0002 489B      		sbis 0x9,0
+  41 0004 00C0      		rjmp .L7
+ 228:drivers/avr/serial.c ****     }
+  42               		.loc 1 228 5 is_stmt 1 discriminator 4 view .LVU8
+ 227:drivers/avr/serial.c ****     }
+  43               		.loc 1 227 68 discriminator 4 view .LVU9
+  44               	.LVL2:
+ 227:drivers/avr/serial.c ****     }
+  45               		.loc 1 227 25 discriminator 4 view .LVU10
+  46 0006 8150      		subi r24,lo8(-(-1))
+  47               	.LVL3:
+ 227:drivers/avr/serial.c ****     }
+  48               		.loc 1 227 5 is_stmt 0 discriminator 4 view .LVU11
+  49 0008 01F4      		brne .L2
+  50               	.LVL4:
+  51               	.L7:
+ 227:drivers/avr/serial.c ****     }
+  52               		.loc 1 227 5 discriminator 4 view .LVU12
+  53               	.LBE132:
+ 229:drivers/avr/serial.c ****     // This shouldn't hang if the target disconnects because the
+ 230:drivers/avr/serial.c ****     // serial line will float to high if the target does disconnect.
+ 231:drivers/avr/serial.c ****     while (!serial_read_pin())
+ 232:drivers/avr/serial.c ****         ;
+  54               		.loc 1 232 9 is_stmt 1 discriminator 1 view .LVU13
+ 231:drivers/avr/serial.c ****         ;
+  55               		.loc 1 231 11 discriminator 1 view .LVU14
+  56               	.LBB133:
+  57               	.LBI133:
+ 193:drivers/avr/serial.c **** 
+  58               		.loc 1 193 23 discriminator 1 view .LVU15
+  59               	.LBB134:
+ 193:drivers/avr/serial.c **** 
+  60               		.loc 1 193 47 discriminator 1 view .LVU16
+  61               	.LBE134:
+  62               	.LBE133:
+ 231:drivers/avr/serial.c ****         ;
+  63               		.loc 1 231 11 is_stmt 0 discriminator 1 view .LVU17
+  64 000a 489B      		sbis 0x9,0
+  65 000c 00C0      		rjmp .L7
+  66               	/* epilogue start */
+ 233:drivers/avr/serial.c **** }
+  67               		.loc 1 233 1 view .LVU18
+  68 000e 0895      		ret
+  69               		.cfi_endproc
+  70               	.LFE16:
+  72               		.section	.text.sync_send,"ax",@progbits
+  74               	sync_send:
+  75               	.LFB17:
+ 234:drivers/avr/serial.c **** 
+ 235:drivers/avr/serial.c **** // Used by the reciver to send a synchronization signal to the sender.
+ 236:drivers/avr/serial.c **** static void sync_send(void) NO_INLINE;
+ 237:drivers/avr/serial.c **** static void sync_send(void) {
+  76               		.loc 1 237 29 is_stmt 1 view -0
+  77               		.cfi_startproc
+  78               	/* prologue: function */
+  79               	/* frame size = 0 */
+  80               	/* stack size = 0 */
+  81               	.L__stack_usage = 0
+ 238:drivers/avr/serial.c ****     serial_low();
+  82               		.loc 1 238 5 view .LVU20
+  83               	.LBB135:
+  84               	.LBI135:
+ 196:drivers/avr/serial.c **** 
+  85               		.loc 1 196 20 view .LVU21
+  86               	.LBB136:
+ 196:drivers/avr/serial.c **** 
+  87               		.loc 1 196 39 view .LVU22
+  88 0000 5898      		cbi 0xb,0
+  89               	.LBE136:
+  90               	.LBE135:
+ 239:drivers/avr/serial.c ****     serial_delay();
+  91               		.loc 1 239 5 view .LVU23
+  92               	.LBB137:
+  93               	.LBI137:
+ 177:drivers/avr/serial.c **** 
+  94               		.loc 1 177 20 view .LVU24
+  95               	.LBE137:
+ 177:drivers/avr/serial.c **** 
+  96               		.loc 1 177 41 view .LVU25
+  97               	.LVL5:
+  98               	.LBB140:
+  99               	.LBB138:
+ 100               	.LBI138:
+ 101               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h"
+   1:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    All rights reserved.
+   5:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+   6:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+   9:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  12:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      distribution.
+  16:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  17:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  21:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  33:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /* $Id: delay.h.in 2506 2016-02-08 10:05:45Z joerg_wunsch $ */
+  34:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  35:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  38:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #ifndef __DOXYGEN__
+  39:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #  ifndef __HAS_DELAY_CYCLES
+  40:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #    define __HAS_DELAY_CYCLES 1
+  41:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #  endif
+  42:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif  /* __DOXYGEN__ */
+  43:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  44:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #include <inttypes.h>
+  45:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #include <util/delay_basic.h>
+  46:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #include <math.h>
+  47:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  48:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /** \file */
+  49:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  50:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \code
+  51:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  52:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  53:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     #include <util/delay.h>
+  54:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \endcode
+  55:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  56:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  57:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  58:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  59:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     used.
+  60:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  61:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  62:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  63:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  64:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  65:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  66:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  67:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  68:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  69:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  70:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  71:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  72:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  73:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  74:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  75:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  76:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  77:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     routines linked into the application.
+  78:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  79:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  80:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  81:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  82:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  83:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** */
+  84:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  85:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  86:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** static __inline__ void _delay_us(double __us) __attribute__((__always_inline__));
+  87:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** static __inline__ void _delay_ms(double __ms) __attribute__((__always_inline__));
+  88:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif
+  89:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  90:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #ifndef F_CPU
+  91:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  92:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  93:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /** \ingroup util_delay
+  94:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \def F_CPU
+  95:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     \brief CPU frequency in Hz
+  96:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+  97:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     The macro F_CPU specifies the CPU frequency to be considered by
+  98:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     the delay macros.  This macro is normally supplied by the
+  99:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     environment (e.g. from within a project header, or the project's
+ 100:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     Makefile).  The value 1 MHz here is only provided as a "vanilla"
+ 101:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     fallback if no such user-provided definition could be found.
+ 102:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 103:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     In terms of the delay functions, the CPU frequency can be given as
+ 104:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     a floating-point constant (e.g. 3.6864E6 for 3.6864 MHz).
+ 105:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     However, the macros in <util/setbaud.h> require it to be an
+ 106:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****     integer value.
+ 107:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****  */
+ 108:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** # define F_CPU 1000000UL
+ 109:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif
+ 110:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 111:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+ 112:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+ 113:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif
+ 114:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 115:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 116:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 117:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 118:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #  include <math.h>
+ 119:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif
+ 120:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 121:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /**
+ 122:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \ingroup util_delay
+ 123:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 124:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 125:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 126:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 127:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 128:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 129:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 130:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 131:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 132:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 133:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 134:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 135:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 136:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 137:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles()
+ 138:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 139:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    values greater than the maximal possible delay, overflows results in
+ 140:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    no delay i.e., 0ms.
+ 141:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 142:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Conversion of \c __ms into clock cycles may not always result in
+ 143:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    integer.  By default, the clock cycles rounded up to next
+ 144:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    integer. This ensures that the user gets at least \c __ms
+ 145:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    microseconds of delay.
+ 146:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 147:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Alternatively, by defining the macro \c __DELAY_ROUND_DOWN__, or
+ 148:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \c __DELAY_ROUND_CLOSEST__, before including this header file, the
+ 149:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    algorithm can be made to round down, or round to closest integer,
+ 150:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    respectively.
+ 151:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 152:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \note
+ 153:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 154:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The implementation of _delay_ms() based on
+ 155:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    __builtin_avr_delay_cycles() is not backward compatible with older
+ 156:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    implementations.  In order to get functionality backward compatible
+ 157:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    with previous versions, the macro \c "__DELAY_BACKWARD_COMPATIBLE__"
+ 158:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    must be defined before including this header file. Also, the
+ 159:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    backward compatible algorithm will be chosen if the code is
+ 160:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    compiled in a <em>freestanding environment</em> (GCC option
+ 161:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \c -ffreestanding), as the math functions required for rounding are
+ 162:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    not available to the compiler then.
+ 163:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 164:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****  */
+ 165:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** void
+ 166:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** _delay_ms(double __ms)
+ 167:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 168:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	double __tmp ;
+ 169:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 170:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 171:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 172:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 173:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 174:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 175:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 176:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 177:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 178:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 179:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 180:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 181:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 182:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#else
+ 183:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		//round up by default
+ 184:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 185:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 186:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 187:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 188:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 189:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #else
+ 190:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	uint16_t __ticks;
+ 191:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 4e3) * __ms;
+ 192:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	if (__tmp < 1.0)
+ 193:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks = 1;
+ 194:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	else if (__tmp > 65535)
+ 195:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	{
+ 196:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		//	__ticks = requested delay in 1/10 ms
+ 197:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks = (uint16_t) (__ms * 10.0);
+ 198:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		while(__ticks)
+ 199:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		{
+ 200:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 			// wait 1/10 ms
+ 201:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 			_delay_loop_2(((F_CPU) / 4e3) / 10);
+ 202:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 			__ticks --;
+ 203:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		}
+ 204:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		return;
+ 205:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	}
+ 206:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	else
+ 207:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks = (uint16_t)__tmp;
+ 208:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	_delay_loop_2(__ticks);
+ 209:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #endif
+ 210:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** }
+ 211:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 212:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** /**
+ 213:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \ingroup util_delay
+ 214:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 215:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Perform a delay of \c __us microseconds, using _delay_loop_1().
+ 216:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 217:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 218:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 219:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 220:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The maximal possible delay is 768 us / F_CPU in MHz.
+ 221:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 222:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    If the user requests a delay greater than the maximal possible one,
+ 223:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    _delay_us() will automatically call _delay_ms() instead.  The user
+ 224:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    will not be informed about this case.
+ 225:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 226:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles()
+ 227:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 us/ F_CPU in MHz. For
+ 228:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    values greater than the maximal possible delay, overflow results in
+ 229:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    no delay i.e., 0us.
+ 230:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 231:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Conversion of \c __us into clock cycles may not always result in
+ 232:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    integer.  By default, the clock cycles rounded up to next
+ 233:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    integer. This ensures that the user gets at least \c __us
+ 234:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    microseconds of delay.
+ 235:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 236:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    Alternatively, by defining the macro \c __DELAY_ROUND_DOWN__, or
+ 237:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \c __DELAY_ROUND_CLOSEST__, before including this header file, the
+ 238:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    algorithm can be made to round down, or round to closest integer,
+ 239:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    respectively.
+ 240:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 241:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \note
+ 242:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 243:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    The implementation of _delay_ms() based on
+ 244:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    __builtin_avr_delay_cycles() is not backward compatible with older
+ 245:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    implementations.  In order to get functionality backward compatible
+ 246:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    with previous versions, the macro \c __DELAY_BACKWARD_COMPATIBLE__
+ 247:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    must be defined before including this header file. Also, the
+ 248:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    backward compatible algorithm will be chosen if the code is
+ 249:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    compiled in a <em>freestanding environment</em> (GCC option
+ 250:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    \c -ffreestanding), as the math functions required for rounding are
+ 251:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****    not available to the compiler then.
+ 252:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 253:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****  */
+ 254:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** void
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** _delay_us(double __us)
+ 102               		.loc 2 255 1 view .LVU26
+ 103               	.LBB139:
+ 256:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	double __tmp ;
+ 104               		.loc 2 257 2 view .LVU27
+ 258:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 259:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 260:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 105               		.loc 2 261 2 view .LVU28
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 106               		.loc 2 262 2 view .LVU29
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 107               		.loc 2 263 2 view .LVU30
+ 264:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 265:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 266:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 267:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 268:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 269:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 270:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 271:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#else
+ 272:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		//round up by default
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 108               		.loc 2 273 3 view .LVU31
+ 274:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 275:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 276:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 109               		.loc 2 276 2 view .LVU32
+ 110 0002 80E2      		ldi r24,lo8(32)
+ 111 0004 8A95      	1:	dec r24
+ 112 0006 01F4      		brne 1b
+ 113               	.LVL6:
+ 114               		.loc 2 276 2 is_stmt 0 view .LVU33
+ 115               	.LBE139:
+ 116               	.LBE138:
+ 117               	.LBE140:
+ 240:drivers/avr/serial.c ****     serial_high();
+ 118               		.loc 1 240 5 is_stmt 1 view .LVU34
+ 119               	.LBB141:
+ 120               	.LBI141:
+ 199:drivers/avr/serial.c **** 
+ 121               		.loc 1 199 20 view .LVU35
+ 122               	.LBB142:
+ 199:drivers/avr/serial.c **** 
+ 123               		.loc 1 199 40 view .LVU36
+ 124 0008 589A      		sbi 0xb,0
+ 125               	/* epilogue start */
+ 126               	.LBE142:
+ 127               	.LBE141:
+ 241:drivers/avr/serial.c **** }
+ 128               		.loc 1 241 1 is_stmt 0 view .LVU37
+ 129 000a 0895      		ret
+ 130               		.cfi_endproc
+ 131               	.LFE17:
+ 133               		.section	.text.serial_read_chunk.constprop.0,"ax",@progbits
+ 135               	serial_read_chunk.constprop.0:
+ 136               	.LVL7:
+ 137               	.LFB27:
+ 242:drivers/avr/serial.c **** 
+ 243:drivers/avr/serial.c **** // Reads a byte from the serial line
+ 244:drivers/avr/serial.c **** static uint8_t serial_read_chunk(uint8_t *pterrcount, uint8_t bit) NO_INLINE;
+ 245:drivers/avr/serial.c **** static uint8_t serial_read_chunk(uint8_t *pterrcount, uint8_t bit) {
+ 138               		.loc 1 245 16 is_stmt 1 view -0
+ 139               		.cfi_startproc
+ 140               	/* prologue: function */
+ 141               	/* frame size = 0 */
+ 142               	/* stack size = 0 */
+ 143               	.L__stack_usage = 0
+ 144               		.loc 1 245 16 is_stmt 0 view .LVU39
+ 145 0000 FC01      		movw r30,r24
+ 146               	.LVL8:
+ 246:drivers/avr/serial.c ****     uint8_t byte, i, p, pb;
+ 147               		.loc 1 246 5 is_stmt 1 view .LVU40
+ 247:drivers/avr/serial.c **** 
+ 248:drivers/avr/serial.c ****     _delay_sub_us(READ_WRITE_START_ADJUST);
+ 148               		.loc 1 248 5 view .LVU41
+ 149 0002 3BE0      		ldi r19,lo8(11)
+ 150 0004 3A95      	1:	dec r19
+ 151 0006 01F4      		brne 1b
+ 249:drivers/avr/serial.c ****     for (i = 0, byte = 0, p = PARITY; i < bit; i++) {
+ 152               		.loc 1 249 5 view .LVU42
+ 153               	.LVL9:
+ 154               		.loc 1 249 39 view .LVU43
+ 248:drivers/avr/serial.c ****     for (i = 0, byte = 0, p = PARITY; i < bit; i++) {
+ 155               		.loc 1 248 5 is_stmt 0 view .LVU44
+ 156 0008 98E0      		ldi r25,lo8(8)
+ 157               		.loc 1 249 29 view .LVU45
+ 158 000a 20E0      		ldi r18,0
+ 159               		.loc 1 249 22 view .LVU46
+ 160 000c 80E0      		ldi r24,0
+ 161               	.LVL10:
+ 250:drivers/avr/serial.c ****         serial_delay_half1();  // read the middle of pulses
+ 251:drivers/avr/serial.c ****         if (serial_read_pin()) {
+ 252:drivers/avr/serial.c ****             byte = (byte << 1) | 1;
+ 253:drivers/avr/serial.c ****             p ^= 1;
+ 162               		.loc 1 253 15 view .LVU47
+ 163 000e 31E0      		ldi r19,lo8(1)
+ 164               	.LVL11:
+ 165               	.L14:
+ 250:drivers/avr/serial.c ****         serial_delay_half1();  // read the middle of pulses
+ 166               		.loc 1 250 9 is_stmt 1 view .LVU48
+ 167               	.LBB143:
+ 168               	.LBI143:
+ 180:drivers/avr/serial.c **** 
+ 169               		.loc 1 180 20 view .LVU49
+ 170               	.LBE143:
+ 180:drivers/avr/serial.c **** 
+ 171               		.loc 1 180 47 view .LVU50
+ 172               	.LBB146:
+ 173               	.LBB144:
+ 174               	.LBI144:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 175               		.loc 2 255 1 view .LVU51
+ 176               	.LBB145:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 177               		.loc 2 257 2 view .LVU52
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 178               		.loc 2 261 2 view .LVU53
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 179               		.loc 2 262 2 view .LVU54
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 180               		.loc 2 263 2 view .LVU55
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 181               		.loc 2 273 3 view .LVU56
+ 182               		.loc 2 276 2 view .LVU57
+ 183 0010 40E1      		ldi r20,lo8(16)
+ 184 0012 4A95      	1:	dec r20
+ 185 0014 01F4      		brne 1b
+ 186               	.LVL12:
+ 187               		.loc 2 276 2 is_stmt 0 view .LVU58
+ 188               	.LBE145:
+ 189               	.LBE144:
+ 190               	.LBE146:
+ 251:drivers/avr/serial.c ****             byte = (byte << 1) | 1;
+ 191               		.loc 1 251 9 is_stmt 1 view .LVU59
+ 192               	.LBB147:
+ 193               	.LBI147:
+ 193:drivers/avr/serial.c **** 
+ 194               		.loc 1 193 23 view .LVU60
+ 195               	.LBB148:
+ 193:drivers/avr/serial.c **** 
+ 196               		.loc 1 193 47 view .LVU61
+ 197               	.LBE148:
+ 198               	.LBE147:
+ 252:drivers/avr/serial.c ****             p ^= 1;
+ 199               		.loc 1 252 26 is_stmt 0 view .LVU62
+ 200 0016 880F      		lsl r24
+ 201               	.LVL13:
+ 251:drivers/avr/serial.c ****             byte = (byte << 1) | 1;
+ 202               		.loc 1 251 12 view .LVU63
+ 203 0018 489B      		sbis 0x9,0
+ 204 001a 00C0      		rjmp .L13
+ 252:drivers/avr/serial.c ****             p ^= 1;
+ 205               		.loc 1 252 13 is_stmt 1 view .LVU64
+ 252:drivers/avr/serial.c ****             p ^= 1;
+ 206               		.loc 1 252 32 is_stmt 0 view .LVU65
+ 207 001c 8160      		ori r24,lo8(1)
+ 208               	.LVL14:
+ 209               		.loc 1 253 13 is_stmt 1 view .LVU66
+ 210               		.loc 1 253 15 is_stmt 0 view .LVU67
+ 211 001e 2327      		eor r18,r19
+ 212               	.LVL15:
+ 213               	.L13:
+ 254:drivers/avr/serial.c ****         } else {
+ 255:drivers/avr/serial.c ****             byte = (byte << 1) | 0;
+ 256:drivers/avr/serial.c ****             p ^= 0;
+ 257:drivers/avr/serial.c ****         }
+ 258:drivers/avr/serial.c ****         _delay_sub_us(READ_WRITE_WIDTH_ADJUST);
+ 214               		.loc 1 258 9 is_stmt 1 view .LVU68
+ 215 0020 42E0      		ldi r20,lo8(2)
+ 216 0022 4A95      	1:	dec r20
+ 217 0024 01F4      		brne 1b
+ 218 0026 0000      		nop
+ 259:drivers/avr/serial.c ****         serial_delay_half2();
+ 219               		.loc 1 259 9 view .LVU69
+ 220               	.LBB149:
+ 221               	.LBI149:
+ 183:drivers/avr/serial.c **** 
+ 222               		.loc 1 183 20 view .LVU70
+ 223               	.LBE149:
+ 183:drivers/avr/serial.c **** 
+ 224               		.loc 1 183 47 view .LVU71
+ 225               	.LVL16:
+ 226               	.LBB152:
+ 227               	.LBB150:
+ 228               	.LBI150:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 229               		.loc 2 255 1 view .LVU72
+ 230               	.LBB151:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 231               		.loc 2 257 2 view .LVU73
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 232               		.loc 2 261 2 view .LVU74
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 233               		.loc 2 262 2 view .LVU75
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 234               		.loc 2 263 2 view .LVU76
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 235               		.loc 2 273 3 view .LVU77
+ 236               		.loc 2 276 2 view .LVU78
+ 237 0028 40E1      		ldi r20,lo8(16)
+ 238 002a 4A95      	1:	dec r20
+ 239 002c 01F4      		brne 1b
+ 240               	.LVL17:
+ 241               		.loc 2 276 2 is_stmt 0 view .LVU79
+ 242               	.LBE151:
+ 243               	.LBE150:
+ 244               	.LBE152:
+ 249:drivers/avr/serial.c ****         serial_delay_half1();  // read the middle of pulses
+ 245               		.loc 1 249 48 is_stmt 1 view .LVU80
+ 249:drivers/avr/serial.c ****         serial_delay_half1();  // read the middle of pulses
+ 246               		.loc 1 249 39 view .LVU81
+ 247 002e 9150      		subi r25,lo8(-(-1))
+ 248               	.LVL18:
+ 249:drivers/avr/serial.c ****         serial_delay_half1();  // read the middle of pulses
+ 249               		.loc 1 249 5 is_stmt 0 view .LVU82
+ 250 0030 01F4      		brne .L14
+ 260:drivers/avr/serial.c ****     }
+ 261:drivers/avr/serial.c ****     /* recive parity bit */
+ 262:drivers/avr/serial.c ****     serial_delay_half1();  // read the middle of pulses
+ 251               		.loc 1 262 5 is_stmt 1 view .LVU83
+ 252               	.LBB153:
+ 253               	.LBI153:
+ 180:drivers/avr/serial.c **** 
+ 254               		.loc 1 180 20 view .LVU84
+ 255               	.LBE153:
+ 180:drivers/avr/serial.c **** 
+ 256               		.loc 1 180 47 view .LVU85
+ 257               	.LVL19:
+ 258               	.LBB156:
+ 259               	.LBB154:
+ 260               	.LBI154:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 261               		.loc 2 255 1 view .LVU86
+ 262               	.LBB155:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 263               		.loc 2 257 2 view .LVU87
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 264               		.loc 2 261 2 view .LVU88
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 265               		.loc 2 262 2 view .LVU89
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 266               		.loc 2 263 2 view .LVU90
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 267               		.loc 2 273 3 view .LVU91
+ 268               		.loc 2 276 2 view .LVU92
+ 269 0032 90E1      		ldi r25,lo8(16)
+ 270 0034 9A95      	1:	dec r25
+ 271 0036 01F4      		brne 1b
+ 272               	.LVL20:
+ 273               		.loc 2 276 2 is_stmt 0 view .LVU93
+ 274               	.LBE155:
+ 275               	.LBE154:
+ 276               	.LBE156:
+ 263:drivers/avr/serial.c ****     pb = serial_read_pin();
+ 277               		.loc 1 263 5 is_stmt 1 view .LVU94
+ 278               	.LBB157:
+ 279               	.LBI157:
+ 193:drivers/avr/serial.c **** 
+ 280               		.loc 1 193 23 view .LVU95
+ 281               	.LBB158:
+ 193:drivers/avr/serial.c **** 
+ 282               		.loc 1 193 47 view .LVU96
+ 193:drivers/avr/serial.c **** 
+ 283               		.loc 1 193 56 is_stmt 0 view .LVU97
+ 284 0038 99B1      		in r25,0x9
+ 285               	.LVL21:
+ 193:drivers/avr/serial.c **** 
+ 286               		.loc 1 193 56 view .LVU98
+ 287               	.LBE158:
+ 288               	.LBE157:
+ 264:drivers/avr/serial.c ****     _delay_sub_us(READ_WRITE_WIDTH_ADJUST);
+ 289               		.loc 1 264 5 is_stmt 1 view .LVU99
+ 290 003a 32E0      		ldi r19,lo8(2)
+ 291 003c 3A95      	1:	dec r19
+ 292 003e 01F4      		brne 1b
+ 293 0040 0000      		nop
+ 265:drivers/avr/serial.c ****     serial_delay_half2();
+ 294               		.loc 1 265 5 view .LVU100
+ 295               	.LBB159:
+ 296               	.LBI159:
+ 183:drivers/avr/serial.c **** 
+ 297               		.loc 1 183 20 view .LVU101
+ 298               	.LBE159:
+ 183:drivers/avr/serial.c **** 
+ 299               		.loc 1 183 47 view .LVU102
+ 300               	.LVL22:
+ 301               	.LBB162:
+ 302               	.LBB160:
+ 303               	.LBI160:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 304               		.loc 2 255 1 view .LVU103
+ 305               	.LBB161:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 306               		.loc 2 257 2 view .LVU104
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 307               		.loc 2 261 2 view .LVU105
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 308               		.loc 2 262 2 view .LVU106
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 309               		.loc 2 263 2 view .LVU107
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 310               		.loc 2 273 3 view .LVU108
+ 311               		.loc 2 276 2 view .LVU109
+ 312 0042 40E1      		ldi r20,lo8(16)
+ 313 0044 4A95      	1:	dec r20
+ 314 0046 01F4      		brne 1b
+ 315               	.LVL23:
+ 316               		.loc 2 276 2 is_stmt 0 view .LVU110
+ 317               	.LBE161:
+ 318               	.LBE160:
+ 319               	.LBE162:
+ 266:drivers/avr/serial.c **** 
+ 267:drivers/avr/serial.c ****     *pterrcount += (p != pb) ? 1 : 0;
+ 320               		.loc 1 267 5 is_stmt 1 view .LVU111
+ 321               		.loc 1 267 17 is_stmt 0 view .LVU112
+ 322 0048 9170      		andi r25,lo8(1)
+ 323               	.LVL24:
+ 324               		.loc 1 267 17 view .LVU113
+ 325 004a 9227      		eor r25,r18
+ 326               	.LVL25:
+ 327               		.loc 1 267 17 view .LVU114
+ 328 004c 2081      		ld r18,Z
+ 329               	.LVL26:
+ 330               		.loc 1 267 17 view .LVU115
+ 331 004e 920F      		add r25,r18
+ 332 0050 9083      		st Z,r25
+ 268:drivers/avr/serial.c **** 
+ 269:drivers/avr/serial.c ****     return byte;
+ 333               		.loc 1 269 5 is_stmt 1 view .LVU116
+ 334               	/* epilogue start */
+ 270:drivers/avr/serial.c **** }
+ 335               		.loc 1 270 1 is_stmt 0 view .LVU117
+ 336 0052 0895      		ret
+ 337               		.cfi_endproc
+ 338               	.LFE27:
+ 340               		.section	.text.serial_recive_packet,"ax",@progbits
+ 342               	serial_recive_packet:
+ 343               	.LVL27:
+ 344               	.LFB21:
+ 271:drivers/avr/serial.c **** 
+ 272:drivers/avr/serial.c **** // Sends a byte with MSB ordering
+ 273:drivers/avr/serial.c **** void serial_write_chunk(uint8_t data, uint8_t bit) NO_INLINE;
+ 274:drivers/avr/serial.c **** void serial_write_chunk(uint8_t data, uint8_t bit) {
+ 275:drivers/avr/serial.c ****     uint8_t b, p;
+ 276:drivers/avr/serial.c ****     for (p = PARITY, b = 1 << (bit - 1); b; b >>= 1) {
+ 277:drivers/avr/serial.c ****         if (data & b) {
+ 278:drivers/avr/serial.c ****             serial_high();
+ 279:drivers/avr/serial.c ****             p ^= 1;
+ 280:drivers/avr/serial.c ****         } else {
+ 281:drivers/avr/serial.c ****             serial_low();
+ 282:drivers/avr/serial.c ****             p ^= 0;
+ 283:drivers/avr/serial.c ****         }
+ 284:drivers/avr/serial.c ****         serial_delay();
+ 285:drivers/avr/serial.c ****     }
+ 286:drivers/avr/serial.c ****     /* send parity bit */
+ 287:drivers/avr/serial.c ****     if (p & 1) {
+ 288:drivers/avr/serial.c ****         serial_high();
+ 289:drivers/avr/serial.c ****     } else {
+ 290:drivers/avr/serial.c ****         serial_low();
+ 291:drivers/avr/serial.c ****     }
+ 292:drivers/avr/serial.c ****     serial_delay();
+ 293:drivers/avr/serial.c **** 
+ 294:drivers/avr/serial.c ****     serial_low();  // sync_send() / senc_recv() need raise edge
+ 295:drivers/avr/serial.c **** }
+ 296:drivers/avr/serial.c **** 
+ 297:drivers/avr/serial.c **** static void serial_send_packet(uint8_t *buffer, uint8_t size) NO_INLINE;
+ 298:drivers/avr/serial.c **** static void serial_send_packet(uint8_t *buffer, uint8_t size) {
+ 299:drivers/avr/serial.c ****     for (uint8_t i = 0; i < size; ++i) {
+ 300:drivers/avr/serial.c ****         uint8_t data;
+ 301:drivers/avr/serial.c ****         data = buffer[i];
+ 302:drivers/avr/serial.c ****         sync_send();
+ 303:drivers/avr/serial.c ****         serial_write_chunk(data, 8);
+ 304:drivers/avr/serial.c ****     }
+ 305:drivers/avr/serial.c **** }
+ 306:drivers/avr/serial.c **** 
+ 307:drivers/avr/serial.c **** static uint8_t serial_recive_packet(uint8_t *buffer, uint8_t size) NO_INLINE;
+ 308:drivers/avr/serial.c **** static uint8_t serial_recive_packet(uint8_t *buffer, uint8_t size) {
+ 345               		.loc 1 308 68 is_stmt 1 view -0
+ 346               		.cfi_startproc
+ 347               		.loc 1 308 68 is_stmt 0 view .LVU119
+ 348 0000 EF92      		push r14
+ 349               	.LCFI0:
+ 350               		.cfi_def_cfa_offset 3
+ 351               		.cfi_offset 14, -2
+ 352 0002 FF92      		push r15
+ 353               	.LCFI1:
+ 354               		.cfi_def_cfa_offset 4
+ 355               		.cfi_offset 15, -3
+ 356 0004 0F93      		push r16
+ 357               	.LCFI2:
+ 358               		.cfi_def_cfa_offset 5
+ 359               		.cfi_offset 16, -4
+ 360 0006 1F93      		push r17
+ 361               	.LCFI3:
+ 362               		.cfi_def_cfa_offset 6
+ 363               		.cfi_offset 17, -5
+ 364 0008 CF93      		push r28
+ 365               	.LCFI4:
+ 366               		.cfi_def_cfa_offset 7
+ 367               		.cfi_offset 28, -6
+ 368 000a DF93      		push r29
+ 369               	.LCFI5:
+ 370               		.cfi_def_cfa_offset 8
+ 371               		.cfi_offset 29, -7
+ 372 000c 0F92      		push __tmp_reg__
+ 373               	.LCFI6:
+ 374               		.cfi_def_cfa_offset 9
+ 375 000e CDB7      		in r28,__SP_L__
+ 376 0010 DEB7      		in r29,__SP_H__
+ 377               	.LCFI7:
+ 378               		.cfi_def_cfa_register 28
+ 379               	/* prologue: function */
+ 380               	/* frame size = 1 */
+ 381               	/* stack size = 7 */
+ 382               	.L__stack_usage = 7
+ 309:drivers/avr/serial.c ****     uint8_t pecount = 0;
+ 383               		.loc 1 309 5 is_stmt 1 view .LVU120
+ 384               		.loc 1 309 13 is_stmt 0 view .LVU121
+ 385 0012 1982      		std Y+1,__zero_reg__
+ 310:drivers/avr/serial.c ****     for (uint8_t i = 0; i < size; ++i) {
+ 386               		.loc 1 310 5 is_stmt 1 view .LVU122
+ 387               	.LBB163:
+ 388               		.loc 1 310 10 view .LVU123
+ 389               	.LVL28:
+ 390               		.loc 1 310 10 is_stmt 0 view .LVU124
+ 391 0014 8C01      		movw r16,r24
+ 392 0016 7C01      		movw r14,r24
+ 393 0018 E60E      		add r14,r22
+ 394 001a F11C      		adc r15,__zero_reg__
+ 395               	.LVL29:
+ 396               	.L17:
+ 397               		.loc 1 310 25 is_stmt 1 discriminator 1 view .LVU125
+ 398               		.loc 1 310 5 is_stmt 0 discriminator 1 view .LVU126
+ 399 001c 0E15      		cp r16,r14
+ 400 001e 1F05      		cpc r17,r15
+ 401 0020 01F4      		brne .L18
+ 402               	.LBE163:
+ 311:drivers/avr/serial.c ****         uint8_t data;
+ 312:drivers/avr/serial.c ****         sync_recv();
+ 313:drivers/avr/serial.c ****         data      = serial_read_chunk(&pecount, 8);
+ 314:drivers/avr/serial.c ****         buffer[i] = data;
+ 315:drivers/avr/serial.c ****     }
+ 316:drivers/avr/serial.c ****     return pecount == 0;
+ 403               		.loc 1 316 5 is_stmt 1 view .LVU127
+ 404               		.loc 1 316 20 is_stmt 0 view .LVU128
+ 405 0022 81E0      		ldi r24,lo8(1)
+ 406 0024 9981      		ldd r25,Y+1
+ 407 0026 9111      		cpse r25,__zero_reg__
+ 408 0028 80E0      		ldi r24,0
+ 409               	.L16:
+ 410               	/* epilogue start */
+ 317:drivers/avr/serial.c **** }
+ 411               		.loc 1 317 1 view .LVU129
+ 412 002a 0F90      		pop __tmp_reg__
+ 413 002c DF91      		pop r29
+ 414 002e CF91      		pop r28
+ 415 0030 1F91      		pop r17
+ 416 0032 0F91      		pop r16
+ 417               	.LVL30:
+ 418               		.loc 1 317 1 view .LVU130
+ 419 0034 FF90      		pop r15
+ 420 0036 EF90      		pop r14
+ 421 0038 0895      		ret
+ 422               	.LVL31:
+ 423               	.L18:
+ 424               	.LBB165:
+ 425               	.LBB164:
+ 311:drivers/avr/serial.c ****         uint8_t data;
+ 426               		.loc 1 311 9 is_stmt 1 discriminator 3 view .LVU131
+ 312:drivers/avr/serial.c ****         data      = serial_read_chunk(&pecount, 8);
+ 427               		.loc 1 312 9 discriminator 3 view .LVU132
+ 428 003a 0E94 0000 		call sync_recv
+ 429               	.LVL32:
+ 313:drivers/avr/serial.c ****         buffer[i] = data;
+ 430               		.loc 1 313 9 discriminator 3 view .LVU133
+ 313:drivers/avr/serial.c ****         buffer[i] = data;
+ 431               		.loc 1 313 21 is_stmt 0 discriminator 3 view .LVU134
+ 432 003e CE01      		movw r24,r28
+ 433 0040 0196      		adiw r24,1
+ 434 0042 0E94 0000 		call serial_read_chunk.constprop.0
+ 435               	.LVL33:
+ 314:drivers/avr/serial.c ****     }
+ 436               		.loc 1 314 9 is_stmt 1 discriminator 3 view .LVU135
+ 314:drivers/avr/serial.c ****     }
+ 437               		.loc 1 314 19 is_stmt 0 discriminator 3 view .LVU136
+ 438 0046 F801      		movw r30,r16
+ 439 0048 8193      		st Z+,r24
+ 440 004a 8F01      		movw r16,r30
+ 441               	.LVL34:
+ 314:drivers/avr/serial.c ****     }
+ 442               		.loc 1 314 19 discriminator 3 view .LVU137
+ 443               	.LBE164:
+ 310:drivers/avr/serial.c ****         uint8_t data;
+ 444               		.loc 1 310 35 is_stmt 1 discriminator 3 view .LVU138
+ 310:drivers/avr/serial.c ****         uint8_t data;
+ 445               		.loc 1 310 35 is_stmt 0 discriminator 3 view .LVU139
+ 446 004c 00C0      		rjmp .L17
+ 447               	.LBE165:
+ 448               		.cfi_endproc
+ 449               	.LFE21:
+ 451               		.section	.text.soft_serial_initiator_init,"ax",@progbits
+ 452               	.global	soft_serial_initiator_init
+ 454               	soft_serial_initiator_init:
+ 455               	.LVL35:
+ 456               	.LFB14:
+ 201:drivers/avr/serial.c ****     Transaction_table      = sstd_table;
+ 457               		.loc 1 201 74 is_stmt 1 view -0
+ 458               		.cfi_startproc
+ 459               	/* prologue: function */
+ 460               	/* frame size = 0 */
+ 461               	/* stack size = 0 */
+ 462               	.L__stack_usage = 0
+ 202:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 463               		.loc 1 202 5 view .LVU141
+ 202:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 464               		.loc 1 202 28 is_stmt 0 view .LVU142
+ 465 0000 9093 0000 		sts Transaction_table+1,r25
+ 466 0004 8093 0000 		sts Transaction_table,r24
+ 203:drivers/avr/serial.c ****     serial_output();
+ 467               		.loc 1 203 5 is_stmt 1 view .LVU143
+ 204:drivers/avr/serial.c ****     serial_high();
+ 468               		.loc 1 204 5 view .LVU144
+ 469               	.LBB166:
+ 470               	.LBI166:
+ 186:drivers/avr/serial.c **** 
+ 471               		.loc 1 186 20 view .LVU145
+ 472               	.LBB167:
+ 186:drivers/avr/serial.c **** 
+ 473               		.loc 1 186 42 view .LVU146
+ 474 0008 509A      		sbi 0xa,0
+ 475               	.LBE167:
+ 476               	.LBE166:
+ 205:drivers/avr/serial.c **** }
+ 477               		.loc 1 205 5 view .LVU147
+ 478               	.LBB168:
+ 479               	.LBI168:
+ 199:drivers/avr/serial.c **** 
+ 480               		.loc 1 199 20 view .LVU148
+ 481               	.LBB169:
+ 199:drivers/avr/serial.c **** 
+ 482               		.loc 1 199 40 view .LVU149
+ 483 000a 589A      		sbi 0xb,0
+ 484               	/* epilogue start */
+ 485               	.LBE169:
+ 486               	.LBE168:
+ 206:drivers/avr/serial.c **** 
+ 487               		.loc 1 206 1 is_stmt 0 view .LVU150
+ 488 000c 0895      		ret
+ 489               		.cfi_endproc
+ 490               	.LFE14:
+ 492               		.section	.text.soft_serial_target_init,"ax",@progbits
+ 493               	.global	soft_serial_target_init
+ 495               	soft_serial_target_init:
+ 496               	.LVL36:
+ 497               	.LFB15:
+ 208:drivers/avr/serial.c ****     Transaction_table      = sstd_table;
+ 498               		.loc 1 208 71 is_stmt 1 view -0
+ 499               		.cfi_startproc
+ 500               	/* prologue: function */
+ 501               	/* frame size = 0 */
+ 502               	/* stack size = 0 */
+ 503               	.L__stack_usage = 0
+ 209:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 504               		.loc 1 209 5 view .LVU152
+ 209:drivers/avr/serial.c ****     Transaction_table_size = (uint8_t)sstd_table_size;
+ 505               		.loc 1 209 28 is_stmt 0 view .LVU153
+ 506 0000 9093 0000 		sts Transaction_table+1,r25
+ 507 0004 8093 0000 		sts Transaction_table,r24
+ 210:drivers/avr/serial.c ****     serial_input_with_pullup();
+ 508               		.loc 1 210 5 is_stmt 1 view .LVU154
+ 211:drivers/avr/serial.c **** 
+ 509               		.loc 1 211 5 view .LVU155
+ 510               	.LBB170:
+ 511               	.LBI170:
+ 190:drivers/avr/serial.c **** 
+ 512               		.loc 1 190 20 view .LVU156
+ 513               	.LBB171:
+ 190:drivers/avr/serial.c **** 
+ 514               		.loc 1 190 53 view .LVU157
+ 515 0008 5098      		cbi 0xa,0
+ 516 000a 589A      		sbi 0xb,0
+ 517               	.LBE171:
+ 518               	.LBE170:
+ 214:drivers/avr/serial.c **** #    if SOFT_SERIAL_PIN == E6
+ 519               		.loc 1 214 5 view .LVU158
+ 214:drivers/avr/serial.c **** #    if SOFT_SERIAL_PIN == E6
+ 520               		.loc 1 214 11 is_stmt 0 view .LVU159
+ 521 000c E89A      		sbi 0x1d,0
+ 220:drivers/avr/serial.c **** #    endif
+ 522               		.loc 1 220 5 is_stmt 1 view .LVU160
+ 220:drivers/avr/serial.c **** #    endif
+ 523               		.loc 1 220 11 is_stmt 0 view .LVU161
+ 524 000e E9E6      		ldi r30,lo8(105)
+ 525 0010 F0E0      		ldi r31,0
+ 526 0012 8081      		ld r24,Z
+ 527               	.LVL37:
+ 220:drivers/avr/serial.c **** #    endif
+ 528               		.loc 1 220 11 view .LVU162
+ 529 0014 8C7F      		andi r24,lo8(-4)
+ 530 0016 8083      		st Z,r24
+ 531               	.LVL38:
+ 532               	/* epilogue start */
+ 222:drivers/avr/serial.c **** 
+ 533               		.loc 1 222 1 view .LVU163
+ 534 0018 0895      		ret
+ 535               		.cfi_endproc
+ 536               	.LFE15:
+ 538               		.section	.text.serial_write_chunk,"ax",@progbits
+ 539               	.global	serial_write_chunk
+ 541               	serial_write_chunk:
+ 542               	.LVL39:
+ 543               	.LFB19:
+ 274:drivers/avr/serial.c ****     uint8_t b, p;
+ 544               		.loc 1 274 52 is_stmt 1 view -0
+ 545               		.cfi_startproc
+ 546               	/* prologue: function */
+ 547               	/* frame size = 0 */
+ 548               	/* stack size = 0 */
+ 549               	.L__stack_usage = 0
+ 275:drivers/avr/serial.c ****     for (p = PARITY, b = 1 << (bit - 1); b; b >>= 1) {
+ 550               		.loc 1 275 5 view .LVU165
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 551               		.loc 1 276 5 view .LVU166
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 552               		.loc 1 276 36 is_stmt 0 view .LVU167
+ 553 0000 6150      		subi r22,1
+ 554 0002 770B      		sbc r23,r23
+ 555               	.LVL40:
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 556               		.loc 1 276 24 view .LVU168
+ 557 0004 91E0      		ldi r25,lo8(1)
+ 558 0006 00C0      		rjmp 2f
+ 559               		1:
+ 560 0008 990F      		lsl r25
+ 561               		2:
+ 562 000a 6A95      		dec r22
+ 563 000c 02F4      		brpl 1b
+ 564               	.LVL41:
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 565               		.loc 1 276 12 view .LVU169
+ 566 000e 20E0      		ldi r18,0
+ 279:drivers/avr/serial.c ****         } else {
+ 567               		.loc 1 279 15 view .LVU170
+ 568 0010 31E0      		ldi r19,lo8(1)
+ 569               	.LVL42:
+ 570               	.L26:
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 571               		.loc 1 276 42 is_stmt 1 discriminator 1 view .LVU171
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 572               		.loc 1 276 5 is_stmt 0 discriminator 1 view .LVU172
+ 573 0012 9111      		cpse r25,__zero_reg__
+ 574 0014 00C0      		rjmp .L29
+ 287:drivers/avr/serial.c ****         serial_high();
+ 575               		.loc 1 287 5 is_stmt 1 view .LVU173
+ 287:drivers/avr/serial.c ****         serial_high();
+ 576               		.loc 1 287 8 is_stmt 0 view .LVU174
+ 577 0016 2223      		tst r18
+ 578 0018 01F0      		breq .L30
+ 288:drivers/avr/serial.c ****     } else {
+ 579               		.loc 1 288 9 is_stmt 1 view .LVU175
+ 580               	.LBB172:
+ 581               	.LBI172:
+ 199:drivers/avr/serial.c **** 
+ 582               		.loc 1 199 20 view .LVU176
+ 583               	.LBB173:
+ 199:drivers/avr/serial.c **** 
+ 584               		.loc 1 199 40 view .LVU177
+ 585 001a 589A      		sbi 0xb,0
+ 586               	.L31:
+ 587               	.LBE173:
+ 588               	.LBE172:
+ 292:drivers/avr/serial.c **** 
+ 589               		.loc 1 292 5 view .LVU178
+ 590               	.LBB174:
+ 591               	.LBI174:
+ 177:drivers/avr/serial.c **** 
+ 592               		.loc 1 177 20 view .LVU179
+ 593               	.LBE174:
+ 177:drivers/avr/serial.c **** 
+ 594               		.loc 1 177 41 view .LVU180
+ 595               	.LVL43:
+ 596               	.LBB177:
+ 597               	.LBB175:
+ 598               	.LBI175:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 599               		.loc 2 255 1 view .LVU181
+ 600               	.LBB176:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 601               		.loc 2 257 2 view .LVU182
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 602               		.loc 2 261 2 view .LVU183
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 603               		.loc 2 262 2 view .LVU184
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 604               		.loc 2 263 2 view .LVU185
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 605               		.loc 2 273 3 view .LVU186
+ 606               		.loc 2 276 2 view .LVU187
+ 607 001c 80E2      		ldi r24,lo8(32)
+ 608 001e 8A95      	1:	dec r24
+ 609 0020 01F4      		brne 1b
+ 610               	.LVL44:
+ 611               		.loc 2 276 2 is_stmt 0 view .LVU188
+ 612               	.LBE176:
+ 613               	.LBE175:
+ 614               	.LBE177:
+ 294:drivers/avr/serial.c **** }
+ 615               		.loc 1 294 5 is_stmt 1 view .LVU189
+ 616               	.LBB178:
+ 617               	.LBI178:
+ 196:drivers/avr/serial.c **** 
+ 618               		.loc 1 196 20 view .LVU190
+ 619               	.LBB179:
+ 196:drivers/avr/serial.c **** 
+ 620               		.loc 1 196 39 view .LVU191
+ 621 0022 5898      		cbi 0xb,0
+ 622               	/* epilogue start */
+ 623               	.LBE179:
+ 624               	.LBE178:
+ 295:drivers/avr/serial.c **** 
+ 625               		.loc 1 295 1 is_stmt 0 view .LVU192
+ 626 0024 0895      		ret
+ 627               	.LVL45:
+ 628               	.L29:
+ 277:drivers/avr/serial.c ****             serial_high();
+ 629               		.loc 1 277 9 is_stmt 1 view .LVU193
+ 277:drivers/avr/serial.c ****             serial_high();
+ 630               		.loc 1 277 13 is_stmt 0 view .LVU194
+ 631 0026 492F      		mov r20,r25
+ 632 0028 4823      		and r20,r24
+ 277:drivers/avr/serial.c ****             serial_high();
+ 633               		.loc 1 277 12 view .LVU195
+ 634 002a 01F0      		breq .L27
+ 278:drivers/avr/serial.c ****             p ^= 1;
+ 635               		.loc 1 278 13 is_stmt 1 view .LVU196
+ 636               	.LBB180:
+ 637               	.LBI180:
+ 199:drivers/avr/serial.c **** 
+ 638               		.loc 1 199 20 view .LVU197
+ 639               	.LBB181:
+ 199:drivers/avr/serial.c **** 
+ 640               		.loc 1 199 40 view .LVU198
+ 641 002c 589A      		sbi 0xb,0
+ 642               	.LBE181:
+ 643               	.LBE180:
+ 279:drivers/avr/serial.c ****         } else {
+ 644               		.loc 1 279 13 view .LVU199
+ 279:drivers/avr/serial.c ****         } else {
+ 645               		.loc 1 279 15 is_stmt 0 view .LVU200
+ 646 002e 2327      		eor r18,r19
+ 647               	.LVL46:
+ 648               	.L28:
+ 284:drivers/avr/serial.c ****     }
+ 649               		.loc 1 284 9 is_stmt 1 discriminator 2 view .LVU201
+ 650               	.LBB182:
+ 651               	.LBI182:
+ 177:drivers/avr/serial.c **** 
+ 652               		.loc 1 177 20 discriminator 2 view .LVU202
+ 653               	.LBE182:
+ 177:drivers/avr/serial.c **** 
+ 654               		.loc 1 177 41 discriminator 2 view .LVU203
+ 655               	.LBB185:
+ 656               	.LBB183:
+ 657               	.LBI183:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 658               		.loc 2 255 1 discriminator 2 view .LVU204
+ 659               	.LBB184:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 660               		.loc 2 257 2 discriminator 2 view .LVU205
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 661               		.loc 2 261 2 discriminator 2 view .LVU206
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 662               		.loc 2 262 2 discriminator 2 view .LVU207
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 663               		.loc 2 263 2 discriminator 2 view .LVU208
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 664               		.loc 2 273 3 discriminator 2 view .LVU209
+ 665               		.loc 2 276 2 discriminator 2 view .LVU210
+ 666 0030 40E2      		ldi r20,lo8(32)
+ 667 0032 4A95      	1:	dec r20
+ 668 0034 01F4      		brne 1b
+ 669               	.LVL47:
+ 670               		.loc 2 276 2 is_stmt 0 discriminator 2 view .LVU211
+ 671               	.LBE184:
+ 672               	.LBE183:
+ 673               	.LBE185:
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 674               		.loc 1 276 45 is_stmt 1 discriminator 2 view .LVU212
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 675               		.loc 1 276 47 is_stmt 0 discriminator 2 view .LVU213
+ 676 0036 9695      		lsr r25
+ 677               	.LVL48:
+ 276:drivers/avr/serial.c ****         if (data & b) {
+ 678               		.loc 1 276 47 discriminator 2 view .LVU214
+ 679 0038 00C0      		rjmp .L26
+ 680               	.L27:
+ 281:drivers/avr/serial.c ****             p ^= 0;
+ 681               		.loc 1 281 13 is_stmt 1 view .LVU215
+ 682               	.LBB186:
+ 683               	.LBI186:
+ 196:drivers/avr/serial.c **** 
+ 684               		.loc 1 196 20 view .LVU216
+ 685               	.LBB187:
+ 196:drivers/avr/serial.c **** 
+ 686               		.loc 1 196 39 view .LVU217
+ 687 003a 5898      		cbi 0xb,0
+ 688               	.LBE187:
+ 689               	.LBE186:
+ 282:drivers/avr/serial.c ****         }
+ 690               		.loc 1 282 13 view .LVU218
+ 282:drivers/avr/serial.c ****         }
+ 691               		.loc 1 282 13 is_stmt 0 view .LVU219
+ 692 003c 00C0      		rjmp .L28
+ 693               	.L30:
+ 290:drivers/avr/serial.c ****     }
+ 694               		.loc 1 290 9 is_stmt 1 view .LVU220
+ 695               	.LBB188:
+ 696               	.LBI188:
+ 196:drivers/avr/serial.c **** 
+ 697               		.loc 1 196 20 view .LVU221
+ 698               	.LBB189:
+ 196:drivers/avr/serial.c **** 
+ 699               		.loc 1 196 39 view .LVU222
+ 700 003e 5898      		cbi 0xb,0
+ 701 0040 00C0      		rjmp .L31
+ 702               	.LBE189:
+ 703               	.LBE188:
+ 704               		.cfi_endproc
+ 705               	.LFE19:
+ 707               		.section	.text.serial_send_packet,"ax",@progbits
+ 709               	serial_send_packet:
+ 710               	.LVL49:
+ 711               	.LFB20:
+ 298:drivers/avr/serial.c ****     for (uint8_t i = 0; i < size; ++i) {
+ 712               		.loc 1 298 63 view -0
+ 713               		.cfi_startproc
+ 298:drivers/avr/serial.c ****     for (uint8_t i = 0; i < size; ++i) {
+ 714               		.loc 1 298 63 is_stmt 0 view .LVU224
+ 715 0000 FF92      		push r15
+ 716               	.LCFI8:
+ 717               		.cfi_def_cfa_offset 3
+ 718               		.cfi_offset 15, -2
+ 719 0002 0F93      		push r16
+ 720               	.LCFI9:
+ 721               		.cfi_def_cfa_offset 4
+ 722               		.cfi_offset 16, -3
+ 723 0004 1F93      		push r17
+ 724               	.LCFI10:
+ 725               		.cfi_def_cfa_offset 5
+ 726               		.cfi_offset 17, -4
+ 727 0006 CF93      		push r28
+ 728               	.LCFI11:
+ 729               		.cfi_def_cfa_offset 6
+ 730               		.cfi_offset 28, -5
+ 731 0008 DF93      		push r29
+ 732               	.LCFI12:
+ 733               		.cfi_def_cfa_offset 7
+ 734               		.cfi_offset 29, -6
+ 735               	/* prologue: function */
+ 736               	/* frame size = 0 */
+ 737               	/* stack size = 5 */
+ 738               	.L__stack_usage = 5
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 739               		.loc 1 299 5 is_stmt 1 view .LVU225
+ 740               	.LBB190:
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 741               		.loc 1 299 10 view .LVU226
+ 742               	.LVL50:
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 743               		.loc 1 299 10 is_stmt 0 view .LVU227
+ 744 000a EC01      		movw r28,r24
+ 745 000c 8C01      		movw r16,r24
+ 746 000e 060F      		add r16,r22
+ 747 0010 111D      		adc r17,__zero_reg__
+ 748               	.LVL51:
+ 749               	.L33:
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 750               		.loc 1 299 25 is_stmt 1 discriminator 1 view .LVU228
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 751               		.loc 1 299 5 is_stmt 0 discriminator 1 view .LVU229
+ 752 0012 C017      		cp r28,r16
+ 753 0014 D107      		cpc r29,r17
+ 754 0016 01F4      		brne .L34
+ 755               	/* epilogue start */
+ 756               	.LBE190:
+ 305:drivers/avr/serial.c **** 
+ 757               		.loc 1 305 1 view .LVU230
+ 758 0018 DF91      		pop r29
+ 759 001a CF91      		pop r28
+ 760               	.LVL52:
+ 305:drivers/avr/serial.c **** 
+ 761               		.loc 1 305 1 view .LVU231
+ 762 001c 1F91      		pop r17
+ 763 001e 0F91      		pop r16
+ 764 0020 FF90      		pop r15
+ 765 0022 0895      		ret
+ 766               	.LVL53:
+ 767               	.L34:
+ 768               	.LBB192:
+ 769               	.LBB191:
+ 300:drivers/avr/serial.c ****         data = buffer[i];
+ 770               		.loc 1 300 9 is_stmt 1 discriminator 3 view .LVU232
+ 301:drivers/avr/serial.c ****         sync_send();
+ 771               		.loc 1 301 9 discriminator 3 view .LVU233
+ 301:drivers/avr/serial.c ****         sync_send();
+ 772               		.loc 1 301 14 is_stmt 0 discriminator 3 view .LVU234
+ 773 0024 F990      		ld r15,Y+
+ 774               	.LVL54:
+ 302:drivers/avr/serial.c ****         serial_write_chunk(data, 8);
+ 775               		.loc 1 302 9 is_stmt 1 discriminator 3 view .LVU235
+ 776 0026 0E94 0000 		call sync_send
+ 777               	.LVL55:
+ 303:drivers/avr/serial.c ****     }
+ 778               		.loc 1 303 9 discriminator 3 view .LVU236
+ 779 002a 68E0      		ldi r22,lo8(8)
+ 780 002c 8F2D      		mov r24,r15
+ 781 002e 0E94 0000 		call serial_write_chunk
+ 782               	.LVL56:
+ 783               	.LBE191:
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 784               		.loc 1 299 35 discriminator 3 view .LVU237
+ 299:drivers/avr/serial.c ****         uint8_t data;
+ 785               		.loc 1 299 35 is_stmt 0 discriminator 3 view .LVU238
+ 786 0032 00C0      		rjmp .L33
+ 787               	.LBE192:
+ 788               		.cfi_endproc
+ 789               	.LFE20:
+ 791               		.section	.text.__vector_1,"ax",@progbits
+ 792               	.global	__vector_1
+ 794               	__vector_1:
+ 795               	.LFB25:
+ 318:drivers/avr/serial.c **** 
+ 319:drivers/avr/serial.c **** inline static void change_sender2reciver(void) {
+ 320:drivers/avr/serial.c ****     sync_send();                 // 0
+ 321:drivers/avr/serial.c ****     serial_delay_half1();        // 1
+ 322:drivers/avr/serial.c ****     serial_low();                // 2
+ 323:drivers/avr/serial.c ****     serial_input_with_pullup();  // 2
+ 324:drivers/avr/serial.c ****     serial_delay_half1();        // 3
+ 325:drivers/avr/serial.c **** }
+ 326:drivers/avr/serial.c **** 
+ 327:drivers/avr/serial.c **** inline static void change_reciver2sender(void) {
+ 328:drivers/avr/serial.c ****     sync_recv();           // 0
+ 329:drivers/avr/serial.c ****     serial_delay();        // 1
+ 330:drivers/avr/serial.c ****     serial_low();          // 3
+ 331:drivers/avr/serial.c ****     serial_output();       // 3
+ 332:drivers/avr/serial.c ****     serial_delay_half1();  // 4
+ 333:drivers/avr/serial.c **** }
+ 334:drivers/avr/serial.c **** 
+ 335:drivers/avr/serial.c **** static inline uint8_t nibble_bits_count(uint8_t bits) {
+ 336:drivers/avr/serial.c ****     bits = (bits & 0x5) + (bits >> 1 & 0x5);
+ 337:drivers/avr/serial.c ****     bits = (bits & 0x3) + (bits >> 2 & 0x3);
+ 338:drivers/avr/serial.c ****     return bits;
+ 339:drivers/avr/serial.c **** }
+ 340:drivers/avr/serial.c **** 
+ 341:drivers/avr/serial.c **** // interrupt handle to be used by the target device
+ 342:drivers/avr/serial.c **** ISR(SERIAL_PIN_INTERRUPT) {
+ 796               		.loc 1 342 27 is_stmt 1 view -0
+ 797               		.cfi_startproc
+ 798 0000 1F92      		push r1
+ 799               	.LCFI13:
+ 800               		.cfi_def_cfa_offset 3
+ 801               		.cfi_offset 1, -2
+ 802 0002 0F92      		push r0
+ 803               	.LCFI14:
+ 804               		.cfi_def_cfa_offset 4
+ 805               		.cfi_offset 0, -3
+ 806 0004 0FB6      		in r0,__SREG__
+ 807 0006 0F92      		push r0
+ 808 0008 1124      		clr __zero_reg__
+ 809 000a 2F93      		push r18
+ 810               	.LCFI15:
+ 811               		.cfi_def_cfa_offset 5
+ 812               		.cfi_offset 18, -4
+ 813 000c 3F93      		push r19
+ 814               	.LCFI16:
+ 815               		.cfi_def_cfa_offset 6
+ 816               		.cfi_offset 19, -5
+ 817 000e 4F93      		push r20
+ 818               	.LCFI17:
+ 819               		.cfi_def_cfa_offset 7
+ 820               		.cfi_offset 20, -6
+ 821 0010 5F93      		push r21
+ 822               	.LCFI18:
+ 823               		.cfi_def_cfa_offset 8
+ 824               		.cfi_offset 21, -7
+ 825 0012 6F93      		push r22
+ 826               	.LCFI19:
+ 827               		.cfi_def_cfa_offset 9
+ 828               		.cfi_offset 22, -8
+ 829 0014 7F93      		push r23
+ 830               	.LCFI20:
+ 831               		.cfi_def_cfa_offset 10
+ 832               		.cfi_offset 23, -9
+ 833 0016 8F93      		push r24
+ 834               	.LCFI21:
+ 835               		.cfi_def_cfa_offset 11
+ 836               		.cfi_offset 24, -10
+ 837 0018 9F93      		push r25
+ 838               	.LCFI22:
+ 839               		.cfi_def_cfa_offset 12
+ 840               		.cfi_offset 25, -11
+ 841 001a AF93      		push r26
+ 842               	.LCFI23:
+ 843               		.cfi_def_cfa_offset 13
+ 844               		.cfi_offset 26, -12
+ 845 001c BF93      		push r27
+ 846               	.LCFI24:
+ 847               		.cfi_def_cfa_offset 14
+ 848               		.cfi_offset 27, -13
+ 849 001e CF93      		push r28
+ 850               	.LCFI25:
+ 851               		.cfi_def_cfa_offset 15
+ 852               		.cfi_offset 28, -14
+ 853 0020 DF93      		push r29
+ 854               	.LCFI26:
+ 855               		.cfi_def_cfa_offset 16
+ 856               		.cfi_offset 29, -15
+ 857 0022 EF93      		push r30
+ 858               	.LCFI27:
+ 859               		.cfi_def_cfa_offset 17
+ 860               		.cfi_offset 30, -16
+ 861 0024 FF93      		push r31
+ 862               	.LCFI28:
+ 863               		.cfi_def_cfa_offset 18
+ 864               		.cfi_offset 31, -17
+ 865               	/* prologue: Signal */
+ 866               	/* frame size = 0 */
+ 867               	/* stack size = 17 */
+ 868               	.L__stack_usage = 17
+ 343:drivers/avr/serial.c **** #    ifndef SERIAL_USE_MULTI_TRANSACTION
+ 344:drivers/avr/serial.c ****     serial_low();
+ 869               		.loc 1 344 5 view .LVU240
+ 870               	.LBB209:
+ 871               	.LBI209:
+ 196:drivers/avr/serial.c **** 
+ 872               		.loc 1 196 20 view .LVU241
+ 873               	.LBB210:
+ 196:drivers/avr/serial.c **** 
+ 874               		.loc 1 196 39 view .LVU242
+ 875 0026 5898      		cbi 0xb,0
+ 876               	.LBE210:
+ 877               	.LBE209:
+ 345:drivers/avr/serial.c ****     serial_output();
+ 878               		.loc 1 345 5 view .LVU243
+ 879               	.LBB211:
+ 880               	.LBI211:
+ 186:drivers/avr/serial.c **** 
+ 881               		.loc 1 186 20 view .LVU244
+ 882               	.LBB212:
+ 186:drivers/avr/serial.c **** 
+ 883               		.loc 1 186 42 view .LVU245
+ 884 0028 509A      		sbi 0xa,0
+ 885               	.LBE212:
+ 886               	.LBE211:
+ 346:drivers/avr/serial.c ****     SSTD_t *trans = Transaction_table;
+ 887               		.loc 1 346 5 view .LVU246
+ 888               		.loc 1 346 13 is_stmt 0 view .LVU247
+ 889 002a C091 0000 		lds r28,Transaction_table
+ 890 002e D091 0000 		lds r29,Transaction_table+1
+ 891               	.LVL57:
+ 347:drivers/avr/serial.c **** #    else
+ 348:drivers/avr/serial.c ****     // recive transaction table index
+ 349:drivers/avr/serial.c ****     uint8_t tid, bits;
+ 350:drivers/avr/serial.c ****     uint8_t pecount = 0;
+ 351:drivers/avr/serial.c ****     sync_recv();
+ 352:drivers/avr/serial.c ****     bits = serial_read_chunk(&pecount, 7);
+ 353:drivers/avr/serial.c ****     tid  = bits >> 3;
+ 354:drivers/avr/serial.c ****     bits = (bits & 7) != nibble_bits_count(tid);
+ 355:drivers/avr/serial.c ****     if (bits || pecount > 0 || tid > Transaction_table_size) {
+ 356:drivers/avr/serial.c ****         return;
+ 357:drivers/avr/serial.c ****     }
+ 358:drivers/avr/serial.c ****     serial_delay_half1();
+ 359:drivers/avr/serial.c **** 
+ 360:drivers/avr/serial.c ****     serial_high();  // response step1 low->high
+ 361:drivers/avr/serial.c ****     serial_output();
+ 362:drivers/avr/serial.c ****     _delay_sub_us(SLAVE_INT_ACK_WIDTH_UNIT * SLAVE_INT_ACK_WIDTH);
+ 363:drivers/avr/serial.c ****     SSTD_t *trans = &Transaction_table[tid];
+ 364:drivers/avr/serial.c ****     serial_low();  // response step2 ack high->low
+ 365:drivers/avr/serial.c **** #    endif
+ 366:drivers/avr/serial.c **** 
+ 367:drivers/avr/serial.c ****     // target send phase
+ 368:drivers/avr/serial.c ****     if (trans->target2initiator_buffer_size > 0) serial_send_packet((uint8_t *)trans->target2initia
+ 892               		.loc 1 368 5 is_stmt 1 view .LVU248
+ 893               		.loc 1 368 14 is_stmt 0 view .LVU249
+ 894 0032 6D81      		ldd r22,Y+5
+ 895               		.loc 1 368 8 view .LVU250
+ 896 0034 6623      		tst r22
+ 897 0036 01F0      		breq .L36
+ 898               		.loc 1 368 50 is_stmt 1 discriminator 1 view .LVU251
+ 899 0038 8E81      		ldd r24,Y+6
+ 900 003a 9F81      		ldd r25,Y+7
+ 901 003c 0E94 0000 		call serial_send_packet
+ 902               	.LVL58:
+ 903               	.L36:
+ 369:drivers/avr/serial.c ****     // target switch to input
+ 370:drivers/avr/serial.c ****     change_sender2reciver();
+ 904               		.loc 1 370 5 view .LVU252
+ 905               	.LBB213:
+ 906               	.LBI213:
+ 319:drivers/avr/serial.c ****     sync_send();                 // 0
+ 907               		.loc 1 319 20 view .LVU253
+ 908               	.LBB214:
+ 320:drivers/avr/serial.c ****     serial_delay_half1();        // 1
+ 909               		.loc 1 320 5 view .LVU254
+ 910 0040 0E94 0000 		call sync_send
+ 911               	.LVL59:
+ 321:drivers/avr/serial.c ****     serial_low();                // 2
+ 912               		.loc 1 321 5 view .LVU255
+ 913               	.LBB215:
+ 914               	.LBI215:
+ 180:drivers/avr/serial.c **** 
+ 915               		.loc 1 180 20 view .LVU256
+ 916               	.LBE215:
+ 917               	.LBE214:
+ 918               	.LBE213:
+ 180:drivers/avr/serial.c **** 
+ 919               		.loc 1 180 47 view .LVU257
+ 920               	.LBB229:
+ 921               	.LBB227:
+ 922               	.LBB218:
+ 923               	.LBB216:
+ 924               	.LBI216:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 925               		.loc 2 255 1 view .LVU258
+ 926               	.LBB217:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 927               		.loc 2 257 2 view .LVU259
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 928               		.loc 2 261 2 view .LVU260
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 929               		.loc 2 262 2 view .LVU261
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 930               		.loc 2 263 2 view .LVU262
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 931               		.loc 2 273 3 view .LVU263
+ 932               		.loc 2 276 2 view .LVU264
+ 933 0044 80E1      		ldi r24,lo8(16)
+ 934 0046 8A95      	1:	dec r24
+ 935 0048 01F4      		brne 1b
+ 936               	.LVL60:
+ 937               		.loc 2 276 2 is_stmt 0 view .LVU265
+ 938               	.LBE217:
+ 939               	.LBE216:
+ 940               	.LBE218:
+ 322:drivers/avr/serial.c ****     serial_input_with_pullup();  // 2
+ 941               		.loc 1 322 5 is_stmt 1 view .LVU266
+ 942               	.LBB219:
+ 943               	.LBI219:
+ 196:drivers/avr/serial.c **** 
+ 944               		.loc 1 196 20 view .LVU267
+ 945               	.LBB220:
+ 196:drivers/avr/serial.c **** 
+ 946               		.loc 1 196 39 view .LVU268
+ 947 004a 5898      		cbi 0xb,0
+ 948               	.LBE220:
+ 949               	.LBE219:
+ 323:drivers/avr/serial.c ****     serial_delay_half1();        // 3
+ 950               		.loc 1 323 5 view .LVU269
+ 951               	.LBB221:
+ 952               	.LBI221:
+ 190:drivers/avr/serial.c **** 
+ 953               		.loc 1 190 20 view .LVU270
+ 954               	.LBB222:
+ 190:drivers/avr/serial.c **** 
+ 955               		.loc 1 190 53 view .LVU271
+ 956 004c 5098      		cbi 0xa,0
+ 957 004e 589A      		sbi 0xb,0
+ 958               	.LBE222:
+ 959               	.LBE221:
+ 324:drivers/avr/serial.c **** }
+ 960               		.loc 1 324 5 view .LVU272
+ 961               	.LBB223:
+ 962               	.LBI223:
+ 180:drivers/avr/serial.c **** 
+ 963               		.loc 1 180 20 view .LVU273
+ 964               	.LBE223:
+ 965               	.LBE227:
+ 966               	.LBE229:
+ 180:drivers/avr/serial.c **** 
+ 967               		.loc 1 180 47 view .LVU274
+ 968               	.LVL61:
+ 969               	.LBB230:
+ 970               	.LBB228:
+ 971               	.LBB226:
+ 972               	.LBB224:
+ 973               	.LBI224:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 974               		.loc 2 255 1 view .LVU275
+ 975               	.LBB225:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 976               		.loc 2 257 2 view .LVU276
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 977               		.loc 2 261 2 view .LVU277
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 978               		.loc 2 262 2 view .LVU278
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 979               		.loc 2 263 2 view .LVU279
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 980               		.loc 2 273 3 view .LVU280
+ 981               		.loc 2 276 2 view .LVU281
+ 982 0050 80E1      		ldi r24,lo8(16)
+ 983 0052 8A95      	1:	dec r24
+ 984 0054 01F4      		brne 1b
+ 985               	.LVL62:
+ 986               		.loc 2 276 2 is_stmt 0 view .LVU282
+ 987               	.LBE225:
+ 988               	.LBE224:
+ 989               	.LBE226:
+ 990               	.LBE228:
+ 991               	.LBE230:
+ 371:drivers/avr/serial.c **** 
+ 372:drivers/avr/serial.c ****     // target recive phase
+ 373:drivers/avr/serial.c ****     if (trans->initiator2target_buffer_size > 0) {
+ 992               		.loc 1 373 5 is_stmt 1 view .LVU283
+ 993               		.loc 1 373 14 is_stmt 0 view .LVU284
+ 994 0056 6A81      		ldd r22,Y+2
+ 995               		.loc 1 373 8 view .LVU285
+ 996 0058 6623      		tst r22
+ 997 005a 01F0      		breq .L37
+ 374:drivers/avr/serial.c ****         if (serial_recive_packet((uint8_t *)trans->initiator2target_buffer, trans->initiator2target
+ 998               		.loc 1 374 9 is_stmt 1 view .LVU286
+ 999               		.loc 1 374 13 is_stmt 0 view .LVU287
+ 1000 005c 8B81      		ldd r24,Y+3
+ 1001 005e 9C81      		ldd r25,Y+4
+ 1002 0060 0E94 0000 		call serial_recive_packet
+ 1003               	.LVL63:
+ 1004 0064 E881      		ld r30,Y
+ 1005 0066 F981      		ldd r31,Y+1
+ 1006               		.loc 1 374 12 view .LVU288
+ 1007 0068 8823      		tst r24
+ 1008 006a 01F0      		breq .L38
+ 1009               	.L43:
+ 375:drivers/avr/serial.c ****             *trans->status = TRANSACTION_ACCEPTED;
+ 376:drivers/avr/serial.c ****         } else {
+ 377:drivers/avr/serial.c ****             *trans->status = TRANSACTION_DATA_ERROR;
+ 378:drivers/avr/serial.c ****         }
+ 379:drivers/avr/serial.c ****     } else {
+ 380:drivers/avr/serial.c ****         *trans->status = TRANSACTION_ACCEPTED;
+ 1010               		.loc 1 380 24 view .LVU289
+ 1011 006c 88E0      		ldi r24,lo8(8)
+ 1012 006e 00C0      		rjmp .L44
+ 1013               	.L38:
+ 377:drivers/avr/serial.c ****         }
+ 1014               		.loc 1 377 13 is_stmt 1 view .LVU290
+ 377:drivers/avr/serial.c ****         }
+ 1015               		.loc 1 377 28 is_stmt 0 view .LVU291
+ 1016 0070 82E0      		ldi r24,lo8(2)
+ 1017               	.L44:
+ 1018               		.loc 1 380 24 view .LVU292
+ 1019 0072 8083      		st Z,r24
+ 381:drivers/avr/serial.c ****     }
+ 382:drivers/avr/serial.c **** 
+ 383:drivers/avr/serial.c ****     sync_recv();  // weit initiator output to high
+ 1020               		.loc 1 383 5 is_stmt 1 view .LVU293
+ 1021 0074 0E94 0000 		call sync_recv
+ 1022               	.LVL64:
+ 1023               	/* epilogue start */
+ 384:drivers/avr/serial.c **** }
+ 1024               		.loc 1 384 1 is_stmt 0 view .LVU294
+ 1025 0078 FF91      		pop r31
+ 1026 007a EF91      		pop r30
+ 1027 007c DF91      		pop r29
+ 1028 007e CF91      		pop r28
+ 1029               	.LVL65:
+ 1030               		.loc 1 384 1 view .LVU295
+ 1031 0080 BF91      		pop r27
+ 1032 0082 AF91      		pop r26
+ 1033 0084 9F91      		pop r25
+ 1034 0086 8F91      		pop r24
+ 1035 0088 7F91      		pop r23
+ 1036 008a 6F91      		pop r22
+ 1037 008c 5F91      		pop r21
+ 1038 008e 4F91      		pop r20
+ 1039 0090 3F91      		pop r19
+ 1040 0092 2F91      		pop r18
+ 1041 0094 0F90      		pop r0
+ 1042 0096 0FBE      		out __SREG__,r0
+ 1043 0098 0F90      		pop r0
+ 1044 009a 1F90      		pop r1
+ 1045 009c 1895      		reti
+ 1046               	.LVL66:
+ 1047               	.L37:
+ 380:drivers/avr/serial.c ****     }
+ 1048               		.loc 1 380 9 is_stmt 1 view .LVU296
+ 380:drivers/avr/serial.c ****     }
+ 1049               		.loc 1 380 15 is_stmt 0 view .LVU297
+ 1050 009e E881      		ld r30,Y
+ 1051 00a0 F981      		ldd r31,Y+1
+ 1052 00a2 00C0      		rjmp .L43
+ 1053               		.cfi_endproc
+ 1054               	.LFE25:
+ 1056               		.section	.text.soft_serial_transaction,"ax",@progbits
+ 1057               	.global	soft_serial_transaction
+ 1059               	soft_serial_transaction:
+ 1060               	.LFB26:
+ 385:drivers/avr/serial.c **** 
+ 386:drivers/avr/serial.c **** /////////
+ 387:drivers/avr/serial.c **** //  start transaction by initiator
+ 388:drivers/avr/serial.c **** //
+ 389:drivers/avr/serial.c **** // int  soft_serial_transaction(int sstd_index)
+ 390:drivers/avr/serial.c **** //
+ 391:drivers/avr/serial.c **** // Returns:
+ 392:drivers/avr/serial.c **** //    TRANSACTION_END
+ 393:drivers/avr/serial.c **** //    TRANSACTION_NO_RESPONSE
+ 394:drivers/avr/serial.c **** //    TRANSACTION_DATA_ERROR
+ 395:drivers/avr/serial.c **** // this code is very time dependent, so we need to disable interrupts
+ 396:drivers/avr/serial.c **** #    ifndef SERIAL_USE_MULTI_TRANSACTION
+ 397:drivers/avr/serial.c **** int soft_serial_transaction(void) {
+ 1061               		.loc 1 397 35 is_stmt 1 view -0
+ 1062               		.cfi_startproc
+ 1063 0000 CF93      		push r28
+ 1064               	.LCFI29:
+ 1065               		.cfi_def_cfa_offset 3
+ 1066               		.cfi_offset 28, -2
+ 1067 0002 DF93      		push r29
+ 1068               	.LCFI30:
+ 1069               		.cfi_def_cfa_offset 4
+ 1070               		.cfi_offset 29, -3
+ 1071               	/* prologue: function */
+ 1072               	/* frame size = 0 */
+ 1073               	/* stack size = 2 */
+ 1074               	.L__stack_usage = 2
+ 398:drivers/avr/serial.c ****     SSTD_t *trans = Transaction_table;
+ 1075               		.loc 1 398 5 view .LVU299
+ 1076               		.loc 1 398 13 is_stmt 0 view .LVU300
+ 1077 0004 C091 0000 		lds r28,Transaction_table
+ 1078 0008 D091 0000 		lds r29,Transaction_table+1
+ 1079               	.LVL67:
+ 399:drivers/avr/serial.c **** #    else
+ 400:drivers/avr/serial.c **** int soft_serial_transaction(int sstd_index) {
+ 401:drivers/avr/serial.c ****     if (sstd_index > Transaction_table_size) return TRANSACTION_TYPE_ERROR;
+ 402:drivers/avr/serial.c ****     SSTD_t *trans = &Transaction_table[sstd_index];
+ 403:drivers/avr/serial.c **** #    endif
+ 404:drivers/avr/serial.c ****     cli();
+ 1080               		.loc 1 404 5 is_stmt 1 view .LVU301
+ 1081               	/* #APP */
+ 1082               	 ;  404 "drivers/avr/serial.c" 1
+ 1083 000c F894      		cli
+ 1084               	 ;  0 "" 2
+ 405:drivers/avr/serial.c **** 
+ 406:drivers/avr/serial.c ****     // signal to the target that we want to start a transaction
+ 407:drivers/avr/serial.c ****     serial_output();
+ 1085               		.loc 1 407 5 view .LVU302
+ 1086               	/* #NOAPP */
+ 1087               	.LBB263:
+ 1088               	.LBI263:
+ 186:drivers/avr/serial.c **** 
+ 1089               		.loc 1 186 20 view .LVU303
+ 1090               	.LBB264:
+ 186:drivers/avr/serial.c **** 
+ 1091               		.loc 1 186 42 view .LVU304
+ 1092 000e 509A      		sbi 0xa,0
+ 1093               	.LBE264:
+ 1094               	.LBE263:
+ 408:drivers/avr/serial.c ****     serial_low();
+ 1095               		.loc 1 408 5 view .LVU305
+ 1096               	.LBB265:
+ 1097               	.LBI265:
+ 196:drivers/avr/serial.c **** 
+ 1098               		.loc 1 196 20 view .LVU306
+ 1099               	.LBB266:
+ 196:drivers/avr/serial.c **** 
+ 1100               		.loc 1 196 39 view .LVU307
+ 1101 0010 5898      		cbi 0xb,0
+ 1102               	.LBE266:
+ 1103               	.LBE265:
+ 409:drivers/avr/serial.c ****     _delay_us(SLAVE_INT_WIDTH_US);
+ 1104               		.loc 1 409 5 view .LVU308
+ 1105               	.LVL68:
+ 1106               	.LBB267:
+ 1107               	.LBI267:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 1108               		.loc 2 255 1 view .LVU309
+ 1109               	.LBB268:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 1110               		.loc 2 257 2 view .LVU310
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 1111               		.loc 2 261 2 view .LVU311
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 1112               		.loc 2 262 2 view .LVU312
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 1113               		.loc 2 263 2 view .LVU313
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 1114               		.loc 2 273 3 view .LVU314
+ 1115               		.loc 2 276 2 view .LVU315
+ 1116 0012 85E0      		ldi r24,lo8(5)
+ 1117 0014 8A95      	1:	dec r24
+ 1118 0016 01F4      		brne 1b
+ 1119 0018 0000      		nop
+ 1120               	.LVL69:
+ 1121               		.loc 2 276 2 is_stmt 0 view .LVU316
+ 1122               	.LBE268:
+ 1123               	.LBE267:
+ 410:drivers/avr/serial.c **** 
+ 411:drivers/avr/serial.c **** #    ifndef SERIAL_USE_MULTI_TRANSACTION
+ 412:drivers/avr/serial.c ****     // wait for the target response
+ 413:drivers/avr/serial.c ****     serial_input_with_pullup();
+ 1124               		.loc 1 413 5 is_stmt 1 view .LVU317
+ 1125               	.LBB269:
+ 1126               	.LBI269:
+ 190:drivers/avr/serial.c **** 
+ 1127               		.loc 1 190 20 view .LVU318
+ 1128               	.LBB270:
+ 190:drivers/avr/serial.c **** 
+ 1129               		.loc 1 190 53 view .LVU319
+ 1130 001a 5098      		cbi 0xa,0
+ 1131 001c 589A      		sbi 0xb,0
+ 1132               	.LBE270:
+ 1133               	.LBE269:
+ 414:drivers/avr/serial.c ****     _delay_us(SLAVE_INT_RESPONSE_TIME);
+ 1134               		.loc 1 414 5 view .LVU320
+ 1135               	.LVL70:
+ 1136               	.LBB271:
+ 1137               	.LBI271:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 1138               		.loc 2 255 1 view .LVU321
+ 1139               	.LBB272:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 1140               		.loc 2 257 2 view .LVU322
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 1141               		.loc 2 261 2 view .LVU323
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 1142               		.loc 2 262 2 view .LVU324
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 1143               		.loc 2 263 2 view .LVU325
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 1144               		.loc 2 273 3 view .LVU326
+ 1145               		.loc 2 276 2 view .LVU327
+ 1146 001e 80E2      		ldi r24,lo8(32)
+ 1147 0020 8A95      	1:	dec r24
+ 1148 0022 01F4      		brne 1b
+ 1149               	.LVL71:
+ 1150               		.loc 2 276 2 is_stmt 0 view .LVU328
+ 1151               	.LBE272:
+ 1152               	.LBE271:
+ 415:drivers/avr/serial.c **** 
+ 416:drivers/avr/serial.c ****     // check if the target is present
+ 417:drivers/avr/serial.c ****     if (serial_read_pin()) {
+ 1153               		.loc 1 417 5 is_stmt 1 view .LVU329
+ 1154               	.LBB273:
+ 1155               	.LBI273:
+ 193:drivers/avr/serial.c **** 
+ 1156               		.loc 1 193 23 view .LVU330
+ 1157               	.LBB274:
+ 193:drivers/avr/serial.c **** 
+ 1158               		.loc 1 193 47 view .LVU331
+ 1159               	.LBE274:
+ 1160               	.LBE273:
+ 1161               		.loc 1 417 8 is_stmt 0 view .LVU332
+ 1162 0024 489B      		sbis 0x9,0
+ 1163 0026 00C0      		rjmp .L46
+ 418:drivers/avr/serial.c ****         // target failed to pull the line low, assume not present
+ 419:drivers/avr/serial.c ****         serial_output();
+ 1164               		.loc 1 419 9 is_stmt 1 view .LVU333
+ 1165               	.LBB275:
+ 1166               	.LBI275:
+ 186:drivers/avr/serial.c **** 
+ 1167               		.loc 1 186 20 view .LVU334
+ 1168               	.LBB276:
+ 186:drivers/avr/serial.c **** 
+ 1169               		.loc 1 186 42 view .LVU335
+ 1170 0028 509A      		sbi 0xa,0
+ 1171               	.LBE276:
+ 1172               	.LBE275:
+ 420:drivers/avr/serial.c ****         serial_high();
+ 1173               		.loc 1 420 9 view .LVU336
+ 1174               	.LBB277:
+ 1175               	.LBI277:
+ 199:drivers/avr/serial.c **** 
+ 1176               		.loc 1 199 20 view .LVU337
+ 1177               	.LBB278:
+ 199:drivers/avr/serial.c **** 
+ 1178               		.loc 1 199 40 view .LVU338
+ 1179 002a 589A      		sbi 0xb,0
+ 1180               	.LBE278:
+ 1181               	.LBE277:
+ 421:drivers/avr/serial.c ****         *trans->status = TRANSACTION_NO_RESPONSE;
+ 1182               		.loc 1 421 9 view .LVU339
+ 1183               		.loc 1 421 15 is_stmt 0 view .LVU340
+ 1184 002c E881      		ld r30,Y
+ 1185 002e F981      		ldd r31,Y+1
+ 1186               		.loc 1 421 24 view .LVU341
+ 1187 0030 81E0      		ldi r24,lo8(1)
+ 1188 0032 8083      		st Z,r24
+ 422:drivers/avr/serial.c ****         sei();
+ 1189               		.loc 1 422 9 is_stmt 1 view .LVU342
+ 1190               	/* #APP */
+ 1191               	 ;  422 "drivers/avr/serial.c" 1
+ 1192 0034 7894      		sei
+ 1193               	 ;  0 "" 2
+ 423:drivers/avr/serial.c ****         return TRANSACTION_NO_RESPONSE;
+ 1194               		.loc 1 423 9 view .LVU343
+ 1195               		.loc 1 423 16 is_stmt 0 view .LVU344
+ 1196               	/* #NOAPP */
+ 1197 0036 81E0      		ldi r24,lo8(1)
+ 1198 0038 90E0      		ldi r25,0
+ 1199               	.L45:
+ 1200               	/* epilogue start */
+ 424:drivers/avr/serial.c ****     }
+ 425:drivers/avr/serial.c **** 
+ 426:drivers/avr/serial.c **** #    else
+ 427:drivers/avr/serial.c ****     // send transaction table index
+ 428:drivers/avr/serial.c ****     int tid = (sstd_index << 3) | (7 & nibble_bits_count(sstd_index));
+ 429:drivers/avr/serial.c ****     sync_send();
+ 430:drivers/avr/serial.c ****     _delay_sub_us(TID_SEND_ADJUST);
+ 431:drivers/avr/serial.c ****     serial_write_chunk(tid, 7);
+ 432:drivers/avr/serial.c ****     serial_delay_half1();
+ 433:drivers/avr/serial.c **** 
+ 434:drivers/avr/serial.c ****     // wait for the target response (step1 low->high)
+ 435:drivers/avr/serial.c ****     serial_input_with_pullup();
+ 436:drivers/avr/serial.c ****     while (!serial_read_pin()) {
+ 437:drivers/avr/serial.c ****         _delay_sub_us(2);
+ 438:drivers/avr/serial.c ****     }
+ 439:drivers/avr/serial.c **** 
+ 440:drivers/avr/serial.c ****     // check if the target is present (step2 high->low)
+ 441:drivers/avr/serial.c ****     for (int i = 0; serial_read_pin(); i++) {
+ 442:drivers/avr/serial.c ****         if (i > SLAVE_INT_ACK_WIDTH + 1) {
+ 443:drivers/avr/serial.c ****             // slave failed to pull the line low, assume not present
+ 444:drivers/avr/serial.c ****             serial_output();
+ 445:drivers/avr/serial.c ****             serial_high();
+ 446:drivers/avr/serial.c ****             *trans->status = TRANSACTION_NO_RESPONSE;
+ 447:drivers/avr/serial.c ****             sei();
+ 448:drivers/avr/serial.c ****             return TRANSACTION_NO_RESPONSE;
+ 449:drivers/avr/serial.c ****         }
+ 450:drivers/avr/serial.c ****         _delay_sub_us(SLAVE_INT_ACK_WIDTH_UNIT);
+ 451:drivers/avr/serial.c ****     }
+ 452:drivers/avr/serial.c **** #    endif
+ 453:drivers/avr/serial.c **** 
+ 454:drivers/avr/serial.c ****     // initiator recive phase
+ 455:drivers/avr/serial.c ****     // if the target is present syncronize with it
+ 456:drivers/avr/serial.c ****     if (trans->target2initiator_buffer_size > 0) {
+ 457:drivers/avr/serial.c ****         if (!serial_recive_packet((uint8_t *)trans->target2initiator_buffer, trans->target2initiato
+ 458:drivers/avr/serial.c ****             serial_output();
+ 459:drivers/avr/serial.c ****             serial_high();
+ 460:drivers/avr/serial.c ****             *trans->status = TRANSACTION_DATA_ERROR;
+ 461:drivers/avr/serial.c ****             sei();
+ 462:drivers/avr/serial.c ****             return TRANSACTION_DATA_ERROR;
+ 463:drivers/avr/serial.c ****         }
+ 464:drivers/avr/serial.c ****     }
+ 465:drivers/avr/serial.c **** 
+ 466:drivers/avr/serial.c ****     // initiator switch to output
+ 467:drivers/avr/serial.c ****     change_reciver2sender();
+ 468:drivers/avr/serial.c **** 
+ 469:drivers/avr/serial.c ****     // initiator send phase
+ 470:drivers/avr/serial.c ****     if (trans->initiator2target_buffer_size > 0) {
+ 471:drivers/avr/serial.c ****         serial_send_packet((uint8_t *)trans->initiator2target_buffer, trans->initiator2target_buffe
+ 472:drivers/avr/serial.c ****     }
+ 473:drivers/avr/serial.c **** 
+ 474:drivers/avr/serial.c ****     // always, release the line when not in use
+ 475:drivers/avr/serial.c ****     sync_send();
+ 476:drivers/avr/serial.c **** 
+ 477:drivers/avr/serial.c ****     *trans->status = TRANSACTION_END;
+ 478:drivers/avr/serial.c ****     sei();
+ 479:drivers/avr/serial.c ****     return TRANSACTION_END;
+ 480:drivers/avr/serial.c **** }
+ 1201               		.loc 1 480 1 view .LVU345
+ 1202 003a DF91      		pop r29
+ 1203 003c CF91      		pop r28
+ 1204               	.LVL72:
+ 1205               		.loc 1 480 1 view .LVU346
+ 1206 003e 0895      		ret
+ 1207               	.LVL73:
+ 1208               	.L46:
+ 456:drivers/avr/serial.c ****         if (!serial_recive_packet((uint8_t *)trans->target2initiator_buffer, trans->target2initiato
+ 1209               		.loc 1 456 5 is_stmt 1 view .LVU347
+ 456:drivers/avr/serial.c ****         if (!serial_recive_packet((uint8_t *)trans->target2initiator_buffer, trans->target2initiato
+ 1210               		.loc 1 456 14 is_stmt 0 view .LVU348
+ 1211 0040 6D81      		ldd r22,Y+5
+ 456:drivers/avr/serial.c ****         if (!serial_recive_packet((uint8_t *)trans->target2initiator_buffer, trans->target2initiato
+ 1212               		.loc 1 456 8 view .LVU349
+ 1213 0042 6623      		tst r22
+ 1214 0044 01F0      		breq .L48
+ 457:drivers/avr/serial.c ****             serial_output();
+ 1215               		.loc 1 457 9 is_stmt 1 view .LVU350
+ 457:drivers/avr/serial.c ****             serial_output();
+ 1216               		.loc 1 457 14 is_stmt 0 view .LVU351
+ 1217 0046 8E81      		ldd r24,Y+6
+ 1218 0048 9F81      		ldd r25,Y+7
+ 1219 004a 0E94 0000 		call serial_recive_packet
+ 1220               	.LVL74:
+ 457:drivers/avr/serial.c ****             serial_output();
+ 1221               		.loc 1 457 12 view .LVU352
+ 1222 004e 8111      		cpse r24,__zero_reg__
+ 1223 0050 00C0      		rjmp .L48
+ 458:drivers/avr/serial.c ****             serial_high();
+ 1224               		.loc 1 458 13 is_stmt 1 view .LVU353
+ 1225               	.LBB279:
+ 1226               	.LBI279:
+ 186:drivers/avr/serial.c **** 
+ 1227               		.loc 1 186 20 view .LVU354
+ 1228               	.LBB280:
+ 186:drivers/avr/serial.c **** 
+ 1229               		.loc 1 186 42 view .LVU355
+ 1230 0052 509A      		sbi 0xa,0
+ 1231               	.LBE280:
+ 1232               	.LBE279:
+ 459:drivers/avr/serial.c ****             *trans->status = TRANSACTION_DATA_ERROR;
+ 1233               		.loc 1 459 13 view .LVU356
+ 1234               	.LBB281:
+ 1235               	.LBI281:
+ 199:drivers/avr/serial.c **** 
+ 1236               		.loc 1 199 20 view .LVU357
+ 1237               	.LBB282:
+ 199:drivers/avr/serial.c **** 
+ 1238               		.loc 1 199 40 view .LVU358
+ 1239 0054 589A      		sbi 0xb,0
+ 1240               	.LBE282:
+ 1241               	.LBE281:
+ 460:drivers/avr/serial.c ****             sei();
+ 1242               		.loc 1 460 13 view .LVU359
+ 460:drivers/avr/serial.c ****             sei();
+ 1243               		.loc 1 460 19 is_stmt 0 view .LVU360
+ 1244 0056 E881      		ld r30,Y
+ 1245 0058 F981      		ldd r31,Y+1
+ 460:drivers/avr/serial.c ****             sei();
+ 1246               		.loc 1 460 28 view .LVU361
+ 1247 005a 82E0      		ldi r24,lo8(2)
+ 1248 005c 8083      		st Z,r24
+ 461:drivers/avr/serial.c ****             return TRANSACTION_DATA_ERROR;
+ 1249               		.loc 1 461 13 is_stmt 1 view .LVU362
+ 1250               	/* #APP */
+ 1251               	 ;  461 "drivers/avr/serial.c" 1
+ 1252 005e 7894      		sei
+ 1253               	 ;  0 "" 2
+ 462:drivers/avr/serial.c ****         }
+ 1254               		.loc 1 462 13 view .LVU363
+ 462:drivers/avr/serial.c ****         }
+ 1255               		.loc 1 462 20 is_stmt 0 view .LVU364
+ 1256               	/* #NOAPP */
+ 1257 0060 82E0      		ldi r24,lo8(2)
+ 1258 0062 90E0      		ldi r25,0
+ 1259 0064 00C0      		rjmp .L45
+ 1260               	.L48:
+ 467:drivers/avr/serial.c **** 
+ 1261               		.loc 1 467 5 is_stmt 1 view .LVU365
+ 1262               	.LBB283:
+ 1263               	.LBI283:
+ 327:drivers/avr/serial.c ****     sync_recv();           // 0
+ 1264               		.loc 1 327 20 view .LVU366
+ 1265               	.LBB284:
+ 328:drivers/avr/serial.c ****     serial_delay();        // 1
+ 1266               		.loc 1 328 5 view .LVU367
+ 1267 0066 0E94 0000 		call sync_recv
+ 1268               	.LVL75:
+ 329:drivers/avr/serial.c ****     serial_low();          // 3
+ 1269               		.loc 1 329 5 view .LVU368
+ 1270               	.LBB285:
+ 1271               	.LBI285:
+ 177:drivers/avr/serial.c **** 
+ 1272               		.loc 1 177 20 view .LVU369
+ 1273               	.LBE285:
+ 1274               	.LBE284:
+ 1275               	.LBE283:
+ 177:drivers/avr/serial.c **** 
+ 1276               		.loc 1 177 41 view .LVU370
+ 1277               	.LBB299:
+ 1278               	.LBB297:
+ 1279               	.LBB288:
+ 1280               	.LBB286:
+ 1281               	.LBI286:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 1282               		.loc 2 255 1 view .LVU371
+ 1283               	.LBB287:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 1284               		.loc 2 257 2 view .LVU372
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 1285               		.loc 2 261 2 view .LVU373
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 1286               		.loc 2 262 2 view .LVU374
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 1287               		.loc 2 263 2 view .LVU375
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 1288               		.loc 2 273 3 view .LVU376
+ 1289               		.loc 2 276 2 view .LVU377
+ 1290 006a 80E2      		ldi r24,lo8(32)
+ 1291 006c 8A95      	1:	dec r24
+ 1292 006e 01F4      		brne 1b
+ 1293               	.LVL76:
+ 1294               		.loc 2 276 2 is_stmt 0 view .LVU378
+ 1295               	.LBE287:
+ 1296               	.LBE286:
+ 1297               	.LBE288:
+ 330:drivers/avr/serial.c ****     serial_output();       // 3
+ 1298               		.loc 1 330 5 is_stmt 1 view .LVU379
+ 1299               	.LBB289:
+ 1300               	.LBI289:
+ 196:drivers/avr/serial.c **** 
+ 1301               		.loc 1 196 20 view .LVU380
+ 1302               	.LBB290:
+ 196:drivers/avr/serial.c **** 
+ 1303               		.loc 1 196 39 view .LVU381
+ 1304 0070 5898      		cbi 0xb,0
+ 1305               	.LBE290:
+ 1306               	.LBE289:
+ 331:drivers/avr/serial.c ****     serial_delay_half1();  // 4
+ 1307               		.loc 1 331 5 view .LVU382
+ 1308               	.LBB291:
+ 1309               	.LBI291:
+ 186:drivers/avr/serial.c **** 
+ 1310               		.loc 1 186 20 view .LVU383
+ 1311               	.LBB292:
+ 186:drivers/avr/serial.c **** 
+ 1312               		.loc 1 186 42 view .LVU384
+ 1313 0072 509A      		sbi 0xa,0
+ 1314               	.LBE292:
+ 1315               	.LBE291:
+ 332:drivers/avr/serial.c **** }
+ 1316               		.loc 1 332 5 view .LVU385
+ 1317               	.LBB293:
+ 1318               	.LBI293:
+ 180:drivers/avr/serial.c **** 
+ 1319               		.loc 1 180 20 view .LVU386
+ 1320               	.LBE293:
+ 1321               	.LBE297:
+ 1322               	.LBE299:
+ 180:drivers/avr/serial.c **** 
+ 1323               		.loc 1 180 47 view .LVU387
+ 1324               	.LVL77:
+ 1325               	.LBB300:
+ 1326               	.LBB298:
+ 1327               	.LBB296:
+ 1328               	.LBB294:
+ 1329               	.LBI294:
+ 255:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** {
+ 1330               		.loc 2 255 1 view .LVU388
+ 1331               	.LBB295:
+ 257:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 1332               		.loc 2 257 2 view .LVU389
+ 261:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 1333               		.loc 2 261 2 view .LVU390
+ 262:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 1334               		.loc 2 262 2 view .LVU391
+ 263:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 
+ 1335               		.loc 2 263 2 view .LVU392
+ 273:/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/util/delay.h **** 	#endif
+ 1336               		.loc 2 273 3 view .LVU393
+ 1337               		.loc 2 276 2 view .LVU394
+ 1338 0074 80E1      		ldi r24,lo8(16)
+ 1339 0076 8A95      	1:	dec r24
+ 1340 0078 01F4      		brne 1b
+ 1341               	.LVL78:
+ 1342               		.loc 2 276 2 is_stmt 0 view .LVU395
+ 1343               	.LBE295:
+ 1344               	.LBE294:
+ 1345               	.LBE296:
+ 1346               	.LBE298:
+ 1347               	.LBE300:
+ 470:drivers/avr/serial.c ****         serial_send_packet((uint8_t *)trans->initiator2target_buffer, trans->initiator2target_buffe
+ 1348               		.loc 1 470 5 is_stmt 1 view .LVU396
+ 470:drivers/avr/serial.c ****         serial_send_packet((uint8_t *)trans->initiator2target_buffer, trans->initiator2target_buffe
+ 1349               		.loc 1 470 14 is_stmt 0 view .LVU397
+ 1350 007a 6A81      		ldd r22,Y+2
+ 470:drivers/avr/serial.c ****         serial_send_packet((uint8_t *)trans->initiator2target_buffer, trans->initiator2target_buffe
+ 1351               		.loc 1 470 8 view .LVU398
+ 1352 007c 6623      		tst r22
+ 1353 007e 01F0      		breq .L49
+ 471:drivers/avr/serial.c ****     }
+ 1354               		.loc 1 471 9 is_stmt 1 view .LVU399
+ 1355 0080 8B81      		ldd r24,Y+3
+ 1356 0082 9C81      		ldd r25,Y+4
+ 1357 0084 0E94 0000 		call serial_send_packet
+ 1358               	.LVL79:
+ 1359               	.L49:
+ 475:drivers/avr/serial.c **** 
+ 1360               		.loc 1 475 5 view .LVU400
+ 1361 0088 0E94 0000 		call sync_send
+ 1362               	.LVL80:
+ 477:drivers/avr/serial.c ****     sei();
+ 1363               		.loc 1 477 5 view .LVU401
+ 477:drivers/avr/serial.c ****     sei();
+ 1364               		.loc 1 477 11 is_stmt 0 view .LVU402
+ 1365 008c E881      		ld r30,Y
+ 1366 008e F981      		ldd r31,Y+1
+ 477:drivers/avr/serial.c ****     sei();
+ 1367               		.loc 1 477 20 view .LVU403
+ 1368 0090 1082      		st Z,__zero_reg__
+ 478:drivers/avr/serial.c ****     return TRANSACTION_END;
+ 1369               		.loc 1 478 5 is_stmt 1 view .LVU404
+ 1370               	/* #APP */
+ 1371               	 ;  478 "drivers/avr/serial.c" 1
+ 1372 0092 7894      		sei
+ 1373               	 ;  0 "" 2
+ 479:drivers/avr/serial.c **** }
+ 1374               		.loc 1 479 5 view .LVU405
+ 479:drivers/avr/serial.c **** }
+ 1375               		.loc 1 479 12 is_stmt 0 view .LVU406
+ 1376               	/* #NOAPP */
+ 1377 0094 90E0      		ldi r25,0
+ 1378 0096 80E0      		ldi r24,0
+ 1379 0098 00C0      		rjmp .L45
+ 1380               		.cfi_endproc
+ 1381               	.LFE26:
+ 1383               		.section	.bss.Transaction_table,"aw",@nobits
+ 1386               	Transaction_table:
+ 1387 0000 0000      		.zero	2
+ 1388               		.text
+ 1389               	.Letext0:
+ 1390               		.file 3 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 1391               		.file 4 "drivers/avr/serial.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 serial.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:12     .text.sync_recv:0000000000000000 sync_recv
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:74     .text.sync_send:0000000000000000 sync_send
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:135    .text.serial_read_chunk.constprop.0:0000000000000000 serial_read_chunk.constprop.0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:342    .text.serial_recive_packet:0000000000000000 serial_recive_packet
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:454    .text.soft_serial_initiator_init:0000000000000000 soft_serial_initiator_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:1386   .bss.Transaction_table:0000000000000000 Transaction_table
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:495    .text.soft_serial_target_init:0000000000000000 soft_serial_target_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:541    .text.serial_write_chunk:0000000000000000 serial_write_chunk
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:709    .text.serial_send_packet:0000000000000000 serial_send_packet
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:794    .text.__vector_1:0000000000000000 __vector_1
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccanyB3a.s:1059   .text.soft_serial_transaction:0000000000000000 soft_serial_transaction
+
+UNDEFINED SYMBOLS
+__do_clear_bss

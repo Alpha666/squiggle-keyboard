@@ -1,0 +1,357 @@
+   1               		.file	"i2c_slave.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.i2c_slave_init,"ax",@progbits
+  11               	.global	i2c_slave_init
+  13               	i2c_slave_init:
+  14               	.LVL0:
+  15               	.LFB0:
+  16               		.file 1 "drivers/avr/i2c_slave.c"
+   1:drivers/avr/i2c_slave.c **** /*  Copyright (C) 2019 Elia Ritterbusch
+   2:drivers/avr/i2c_slave.c ****  +
+   3:drivers/avr/i2c_slave.c ****  *  This program is free software: you can redistribute it and/or modify
+   4:drivers/avr/i2c_slave.c ****  *  it under the terms of the GNU General Public License as published by
+   5:drivers/avr/i2c_slave.c ****  *  the Free Software Foundation, either version 3 of the License, or
+   6:drivers/avr/i2c_slave.c ****  *  (at your option) any later version.
+   7:drivers/avr/i2c_slave.c ****  *
+   8:drivers/avr/i2c_slave.c ****  *  This program is distributed in the hope that it will be useful,
+   9:drivers/avr/i2c_slave.c ****  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  10:drivers/avr/i2c_slave.c ****  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  11:drivers/avr/i2c_slave.c ****  *  GNU General Public License for more details.
+  12:drivers/avr/i2c_slave.c ****  *
+  13:drivers/avr/i2c_slave.c ****  *  You should have received a copy of the GNU General Public License
+  14:drivers/avr/i2c_slave.c ****  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  15:drivers/avr/i2c_slave.c ****  */
+  16:drivers/avr/i2c_slave.c **** /* Library made by: g4lvanix
+  17:drivers/avr/i2c_slave.c ****  * GitHub repository: https://github.com/g4lvanix/I2C-slave-lib
+  18:drivers/avr/i2c_slave.c ****  */
+  19:drivers/avr/i2c_slave.c **** 
+  20:drivers/avr/i2c_slave.c **** #include <avr/io.h>
+  21:drivers/avr/i2c_slave.c **** #include <util/twi.h>
+  22:drivers/avr/i2c_slave.c **** #include <avr/interrupt.h>
+  23:drivers/avr/i2c_slave.c **** #include <stdbool.h>
+  24:drivers/avr/i2c_slave.c **** 
+  25:drivers/avr/i2c_slave.c **** #include "i2c_slave.h"
+  26:drivers/avr/i2c_slave.c **** 
+  27:drivers/avr/i2c_slave.c **** volatile uint8_t i2c_slave_reg[I2C_SLAVE_REG_COUNT];
+  28:drivers/avr/i2c_slave.c **** 
+  29:drivers/avr/i2c_slave.c **** static volatile uint8_t buffer_address;
+  30:drivers/avr/i2c_slave.c **** static volatile bool    slave_has_register_set = false;
+  31:drivers/avr/i2c_slave.c **** 
+  32:drivers/avr/i2c_slave.c **** void i2c_slave_init(uint8_t address) {
+  17               		.loc 1 32 38 view -0
+  18               		.cfi_startproc
+  19               	/* prologue: function */
+  20               	/* frame size = 0 */
+  21               	/* stack size = 0 */
+  22               	.L__stack_usage = 0
+  33:drivers/avr/i2c_slave.c ****     // load address into TWI address register
+  34:drivers/avr/i2c_slave.c ****     TWAR = address;
+  23               		.loc 1 34 5 view .LVU1
+  24               		.loc 1 34 10 is_stmt 0 view .LVU2
+  25 0000 8093 BA00 		sts 186,r24
+  35:drivers/avr/i2c_slave.c ****     // set the TWCR to enable address matching and enable TWI, clear TWINT, enable TWI interrupt
+  36:drivers/avr/i2c_slave.c ****     TWCR = (1 << TWIE) | (1 << TWEA) | (1 << TWINT) | (1 << TWEN);
+  26               		.loc 1 36 5 is_stmt 1 view .LVU3
+  27               		.loc 1 36 10 is_stmt 0 view .LVU4
+  28 0004 85EC      		ldi r24,lo8(-59)
+  29               	.LVL1:
+  30               		.loc 1 36 10 view .LVU5
+  31 0006 8093 BC00 		sts 188,r24
+  32               	.LVL2:
+  33               	/* epilogue start */
+  37:drivers/avr/i2c_slave.c **** }
+  34               		.loc 1 37 1 view .LVU6
+  35 000a 0895      		ret
+  36               		.cfi_endproc
+  37               	.LFE0:
+  39               		.section	.text.i2c_slave_stop,"ax",@progbits
+  40               	.global	i2c_slave_stop
+  42               	i2c_slave_stop:
+  43               	.LFB1:
+  38:drivers/avr/i2c_slave.c **** 
+  39:drivers/avr/i2c_slave.c **** void i2c_slave_stop(void) {
+  44               		.loc 1 39 27 is_stmt 1 view -0
+  45               		.cfi_startproc
+  46               	/* prologue: function */
+  47               	/* frame size = 0 */
+  48               	/* stack size = 0 */
+  49               	.L__stack_usage = 0
+  40:drivers/avr/i2c_slave.c ****     // clear acknowledge and enable bits
+  41:drivers/avr/i2c_slave.c ****     TWCR &= ~((1 << TWEA) | (1 << TWEN));
+  50               		.loc 1 41 5 view .LVU8
+  51               		.loc 1 41 10 is_stmt 0 view .LVU9
+  52 0000 ECEB      		ldi r30,lo8(-68)
+  53 0002 F0E0      		ldi r31,0
+  54 0004 8081      		ld r24,Z
+  55 0006 8B7B      		andi r24,lo8(-69)
+  56 0008 8083      		st Z,r24
+  57               	/* epilogue start */
+  42:drivers/avr/i2c_slave.c **** }
+  58               		.loc 1 42 1 view .LVU10
+  59 000a 0895      		ret
+  60               		.cfi_endproc
+  61               	.LFE1:
+  63               		.section	.text.__vector_36,"ax",@progbits
+  64               	.global	__vector_36
+  66               	__vector_36:
+  67               	.LFB2:
+  43:drivers/avr/i2c_slave.c **** 
+  44:drivers/avr/i2c_slave.c **** ISR(TWI_vect) {
+  68               		.loc 1 44 15 is_stmt 1 view -0
+  69               		.cfi_startproc
+  70 0000 1F92 1FB6 		__gcc_isr 1
+  70      1F92 1124 
+  70      8F93 
+  71 000a 9F93      		push r25
+  72               	.LCFI0:
+  73               		.cfi_def_cfa_offset 3
+  74               		.cfi_offset 25, -2
+  75 000c EF93      		push r30
+  76               	.LCFI1:
+  77               		.cfi_def_cfa_offset 4
+  78               		.cfi_offset 30, -3
+  79 000e FF93      		push r31
+  80               	.LCFI2:
+  81               		.cfi_def_cfa_offset 5
+  82               		.cfi_offset 31, -4
+  83               	/* prologue: Signal */
+  84               	/* frame size = 0 */
+  85               	/* stack size = 3...7 */
+  86               	.L__stack_usage = 3 + __gcc_isr.n_pushed
+  45:drivers/avr/i2c_slave.c ****     uint8_t ack = 1;
+  87               		.loc 1 45 5 view .LVU12
+  88               	.LVL3:
+  46:drivers/avr/i2c_slave.c **** 
+  47:drivers/avr/i2c_slave.c ****     switch (TW_STATUS) {
+  89               		.loc 1 47 5 view .LVU13
+  90               		.loc 1 47 13 is_stmt 0 view .LVU14
+  91 0010 8091 B900 		lds r24,185
+  92 0014 887F      		andi r24,lo8(-8)
+  93               		.loc 1 47 5 view .LVU15
+  94 0016 8038      		cpi r24,lo8(-128)
+  95 0018 01F0      		breq .L4
+  96 001a 00F4      		brsh .L5
+  97 001c 8823      		tst r24
+  98 001e 01F4      		brne .+2
+  99 0020 00C0      		rjmp .L6
+ 100 0022 8036      		cpi r24,lo8(96)
+ 101 0024 01F0      		breq .L7
+ 102               	.L19:
+  45:drivers/avr/i2c_slave.c ****     uint8_t ack = 1;
+ 103               		.loc 1 45 13 view .LVU16
+ 104 0026 81E0      		ldi r24,lo8(1)
+ 105 0028 00C0      		rjmp .L8
+ 106               	.L5:
+ 107               		.loc 1 47 5 view .LVU17
+ 108 002a 883A      		cpi r24,lo8(-88)
+ 109 002c 01F0      		breq .L9
+ 110 002e 883B      		cpi r24,lo8(-72)
+ 111 0030 01F4      		brne .L19
+ 112               	.L9:
+  48:drivers/avr/i2c_slave.c ****         case TW_SR_SLA_ACK:
+  49:drivers/avr/i2c_slave.c ****             // The device is now a slave receiver
+  50:drivers/avr/i2c_slave.c ****             slave_has_register_set = false;
+  51:drivers/avr/i2c_slave.c ****             break;
+  52:drivers/avr/i2c_slave.c **** 
+  53:drivers/avr/i2c_slave.c ****         case TW_SR_DATA_ACK:
+  54:drivers/avr/i2c_slave.c ****             // This device is a slave receiver and has received data
+  55:drivers/avr/i2c_slave.c ****             // First byte is the location then the bytes will be writen in buffer with auto-incrime
+  56:drivers/avr/i2c_slave.c ****             if (!slave_has_register_set) {
+  57:drivers/avr/i2c_slave.c ****                 buffer_address = TWDR;
+  58:drivers/avr/i2c_slave.c **** 
+  59:drivers/avr/i2c_slave.c ****                 if (buffer_address >= I2C_SLAVE_REG_COUNT) {  // address out of bounds dont ack
+  60:drivers/avr/i2c_slave.c ****                     ack            = 0;
+  61:drivers/avr/i2c_slave.c ****                     buffer_address = 0;
+  62:drivers/avr/i2c_slave.c ****                 }
+  63:drivers/avr/i2c_slave.c ****                 slave_has_register_set = true;  // address has been receaved now fill in buffer
+  64:drivers/avr/i2c_slave.c ****             } else {
+  65:drivers/avr/i2c_slave.c ****                 i2c_slave_reg[buffer_address] = TWDR;
+  66:drivers/avr/i2c_slave.c ****                 buffer_address++;
+  67:drivers/avr/i2c_slave.c ****             }
+  68:drivers/avr/i2c_slave.c ****             break;
+  69:drivers/avr/i2c_slave.c **** 
+  70:drivers/avr/i2c_slave.c ****         case TW_ST_SLA_ACK:
+  71:drivers/avr/i2c_slave.c ****         case TW_ST_DATA_ACK:
+  72:drivers/avr/i2c_slave.c ****             // This device is a slave transmitter and master has requested data
+  73:drivers/avr/i2c_slave.c ****             TWDR = i2c_slave_reg[buffer_address];
+ 113               		.loc 1 73 13 is_stmt 1 view .LVU18
+ 114               		.loc 1 73 33 is_stmt 0 view .LVU19
+ 115 0032 E091 0000 		lds r30,buffer_address
+ 116 0036 F0E0      		ldi r31,0
+ 117 0038 E050      		subi r30,lo8(-(i2c_slave_reg))
+ 118 003a F040      		sbci r31,hi8(-(i2c_slave_reg))
+ 119 003c 8081      		ld r24,Z
+ 120               		.loc 1 73 18 view .LVU20
+ 121 003e 8093 BB00 		sts 187,r24
+ 122 0042 00C0      		rjmp .L20
+ 123               	.L7:
+  50:drivers/avr/i2c_slave.c ****             break;
+ 124               		.loc 1 50 13 is_stmt 1 view .LVU21
+  50:drivers/avr/i2c_slave.c ****             break;
+ 125               		.loc 1 50 36 is_stmt 0 view .LVU22
+ 126 0044 1092 0000 		sts slave_has_register_set,__zero_reg__
+  51:drivers/avr/i2c_slave.c **** 
+ 127               		.loc 1 51 13 is_stmt 1 view .LVU23
+ 128 0048 00C0      		rjmp .L19
+ 129               	.L4:
+  56:drivers/avr/i2c_slave.c ****                 buffer_address = TWDR;
+ 130               		.loc 1 56 13 view .LVU24
+  56:drivers/avr/i2c_slave.c ****                 buffer_address = TWDR;
+ 131               		.loc 1 56 17 is_stmt 0 view .LVU25
+ 132 004a 8091 0000 		lds r24,slave_has_register_set
+  56:drivers/avr/i2c_slave.c ****                 buffer_address = TWDR;
+ 133               		.loc 1 56 16 view .LVU26
+ 134 004e 8111      		cpse r24,__zero_reg__
+ 135 0050 00C0      		rjmp .L10
+  57:drivers/avr/i2c_slave.c **** 
+ 136               		.loc 1 57 17 is_stmt 1 view .LVU27
+  57:drivers/avr/i2c_slave.c **** 
+ 137               		.loc 1 57 34 is_stmt 0 view .LVU28
+ 138 0052 8091 BB00 		lds r24,187
+  57:drivers/avr/i2c_slave.c **** 
+ 139               		.loc 1 57 32 view .LVU29
+ 140 0056 8093 0000 		sts buffer_address,r24
+  59:drivers/avr/i2c_slave.c ****                     ack            = 0;
+ 141               		.loc 1 59 17 is_stmt 1 view .LVU30
+  59:drivers/avr/i2c_slave.c ****                     ack            = 0;
+ 142               		.loc 1 59 36 is_stmt 0 view .LVU31
+ 143 005a 8091 0000 		lds r24,buffer_address
+  59:drivers/avr/i2c_slave.c ****                     ack            = 0;
+ 144               		.loc 1 59 20 view .LVU32
+ 145 005e 8E31      		cpi r24,lo8(30)
+ 146 0060 00F0      		brlo .L12
+  60:drivers/avr/i2c_slave.c ****                     buffer_address = 0;
+ 147               		.loc 1 60 21 is_stmt 1 view .LVU33
+ 148               	.LVL4:
+  61:drivers/avr/i2c_slave.c ****                 }
+ 149               		.loc 1 61 21 view .LVU34
+  61:drivers/avr/i2c_slave.c ****                 }
+ 150               		.loc 1 61 36 is_stmt 0 view .LVU35
+ 151 0062 1092 0000 		sts buffer_address,__zero_reg__
+  60:drivers/avr/i2c_slave.c ****                     buffer_address = 0;
+ 152               		.loc 1 60 36 view .LVU36
+ 153 0066 80E0      		ldi r24,0
+ 154               	.LVL5:
+ 155               	.L11:
+  63:drivers/avr/i2c_slave.c ****             } else {
+ 156               		.loc 1 63 17 is_stmt 1 view .LVU37
+  63:drivers/avr/i2c_slave.c ****             } else {
+ 157               		.loc 1 63 40 is_stmt 0 view .LVU38
+ 158 0068 91E0      		ldi r25,lo8(1)
+ 159 006a 9093 0000 		sts slave_has_register_set,r25
+ 160               	.LVL6:
+ 161               	.L8:
+  74:drivers/avr/i2c_slave.c ****             buffer_address++;
+  75:drivers/avr/i2c_slave.c ****             break;
+  76:drivers/avr/i2c_slave.c **** 
+  77:drivers/avr/i2c_slave.c ****         case TW_BUS_ERROR:
+  78:drivers/avr/i2c_slave.c ****             // We got an error, reset i2c
+  79:drivers/avr/i2c_slave.c ****             TWCR = 0;
+  80:drivers/avr/i2c_slave.c ****         default:
+  81:drivers/avr/i2c_slave.c ****             break;
+  82:drivers/avr/i2c_slave.c ****     }
+  83:drivers/avr/i2c_slave.c **** 
+  84:drivers/avr/i2c_slave.c ****     // Reset i2c state machine to be ready for next interrupt
+  85:drivers/avr/i2c_slave.c ****     TWCR |= (1 << TWIE) | (1 << TWINT) | (ack << TWEA) | (1 << TWEN);
+ 162               		.loc 1 85 5 is_stmt 1 view .LVU39
+ 163               		.loc 1 85 10 is_stmt 0 view .LVU40
+ 164 006e 9091 BC00 		lds r25,188
+ 165               		.loc 1 85 47 view .LVU41
+ 166 0072 8295      		swap r24
+ 167               	.LVL7:
+ 168               		.loc 1 85 47 view .LVU42
+ 169 0074 880F      		lsl r24
+ 170 0076 880F      		lsl r24
+ 171 0078 807C      		andi r24,lo8(-64)
+ 172               		.loc 1 85 10 view .LVU43
+ 173 007a 892B      		or r24,r25
+ 174 007c 8568      		ori r24,lo8(-123)
+ 175 007e 8093 BC00 		sts 188,r24
+ 176               	/* epilogue start */
+  86:drivers/avr/i2c_slave.c **** }
+ 177               		.loc 1 86 1 view .LVU44
+ 178 0082 FF91      		pop r31
+ 179 0084 EF91      		pop r30
+ 180 0086 9F91      		pop r25
+ 181 0088 8F91 1F90 		__gcc_isr 2
+ 181      1FBE 1F90 
+ 182 0090 1895      		reti
+ 183               	.LVL8:
+ 184               	.L12:
+  45:drivers/avr/i2c_slave.c **** 
+ 185               		.loc 1 45 13 view .LVU45
+ 186 0092 81E0      		ldi r24,lo8(1)
+ 187 0094 00C0      		rjmp .L11
+ 188               	.L10:
+  65:drivers/avr/i2c_slave.c ****                 buffer_address++;
+ 189               		.loc 1 65 17 is_stmt 1 view .LVU46
+  65:drivers/avr/i2c_slave.c ****                 buffer_address++;
+ 190               		.loc 1 65 30 is_stmt 0 view .LVU47
+ 191 0096 E091 0000 		lds r30,buffer_address
+ 192 009a F0E0      		ldi r31,0
+  65:drivers/avr/i2c_slave.c ****                 buffer_address++;
+ 193               		.loc 1 65 49 view .LVU48
+ 194 009c 8091 BB00 		lds r24,187
+  65:drivers/avr/i2c_slave.c ****                 buffer_address++;
+ 195               		.loc 1 65 47 view .LVU49
+ 196 00a0 E050      		subi r30,lo8(-(i2c_slave_reg))
+ 197 00a2 F040      		sbci r31,hi8(-(i2c_slave_reg))
+ 198 00a4 8083      		st Z,r24
+  66:drivers/avr/i2c_slave.c ****             }
+ 199               		.loc 1 66 17 is_stmt 1 view .LVU50
+ 200               	.L20:
+  74:drivers/avr/i2c_slave.c ****             break;
+ 201               		.loc 1 74 13 view .LVU51
+  74:drivers/avr/i2c_slave.c ****             break;
+ 202               		.loc 1 74 27 is_stmt 0 view .LVU52
+ 203 00a6 8091 0000 		lds r24,buffer_address
+ 204 00aa 8F5F      		subi r24,lo8(-(1))
+ 205 00ac 8093 0000 		sts buffer_address,r24
+  75:drivers/avr/i2c_slave.c **** 
+ 206               		.loc 1 75 13 is_stmt 1 view .LVU53
+ 207 00b0 00C0      		rjmp .L19
+ 208               	.L6:
+  79:drivers/avr/i2c_slave.c ****         default:
+ 209               		.loc 1 79 13 view .LVU54
+  79:drivers/avr/i2c_slave.c ****         default:
+ 210               		.loc 1 79 18 is_stmt 0 view .LVU55
+ 211 00b2 1092 BC00 		sts 188,__zero_reg__
+ 212 00b6 00C0      		rjmp .L19
+ 213               		__gcc_isr 0,r24
+ 214               		.cfi_endproc
+ 215               	.LFE2:
+ 217               		.section	.bss.slave_has_register_set,"aw",@nobits
+ 220               	slave_has_register_set:
+ 221 0000 00        		.zero	1
+ 222               		.section	.bss.buffer_address,"aw",@nobits
+ 225               	buffer_address:
+ 226 0000 00        		.zero	1
+ 227               		.comm	i2c_slave_reg,30,1
+ 228               		.text
+ 229               	.Letext0:
+ 230               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 231               		.file 3 "drivers/avr/i2c_slave.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 i2c_slave.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:13     .text.i2c_slave_init:0000000000000000 i2c_slave_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:42     .text.i2c_slave_stop:0000000000000000 i2c_slave_stop
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:66     .text.__vector_36:0000000000000000 __vector_36
+                            *ABS*:0000000000000003 __gcc_isr.n_pushed.001
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:225    .bss.buffer_address:0000000000000000 buffer_address
+                            *COM*:000000000000001e i2c_slave_reg
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccsZtq4N.s:220    .bss.slave_has_register_set:0000000000000000 slave_has_register_set
+
+UNDEFINED SYMBOLS
+__do_clear_bss

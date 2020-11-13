@@ -1,0 +1,1036 @@
+   1               		.file	"matrix.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.matrix_slave_scan_user,"ax",@progbits
+  11               		.weak	matrix_slave_scan_user
+  13               	matrix_slave_scan_user:
+  14               	.LFB20:
+  15               		.file 1 "quantum/split_common/matrix.c"
+   1:quantum/split_common/matrix.c **** /*
+   2:quantum/split_common/matrix.c **** Copyright 2012 Jun Wako <wakojun@gmail.com>
+   3:quantum/split_common/matrix.c **** 
+   4:quantum/split_common/matrix.c **** This program is free software: you can redistribute it and/or modify
+   5:quantum/split_common/matrix.c **** it under the terms of the GNU General Public License as published by
+   6:quantum/split_common/matrix.c **** the Free Software Foundation, either version 2 of the License, or
+   7:quantum/split_common/matrix.c **** (at your option) any later version.
+   8:quantum/split_common/matrix.c **** 
+   9:quantum/split_common/matrix.c **** This program is distributed in the hope that it will be useful,
+  10:quantum/split_common/matrix.c **** but WITHOUT ANY WARRANTY; without even the implied warranty of
+  11:quantum/split_common/matrix.c **** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  12:quantum/split_common/matrix.c **** GNU General Public License for more details.
+  13:quantum/split_common/matrix.c **** 
+  14:quantum/split_common/matrix.c **** You should have received a copy of the GNU General Public License
+  15:quantum/split_common/matrix.c **** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  16:quantum/split_common/matrix.c **** */
+  17:quantum/split_common/matrix.c **** #include <stdint.h>
+  18:quantum/split_common/matrix.c **** #include <stdbool.h>
+  19:quantum/split_common/matrix.c **** #include "util.h"
+  20:quantum/split_common/matrix.c **** #include "matrix.h"
+  21:quantum/split_common/matrix.c **** #include "debounce.h"
+  22:quantum/split_common/matrix.c **** #include "quantum.h"
+  23:quantum/split_common/matrix.c **** #include "split_util.h"
+  24:quantum/split_common/matrix.c **** #include "config.h"
+  25:quantum/split_common/matrix.c **** #include "transport.h"
+  26:quantum/split_common/matrix.c **** 
+  27:quantum/split_common/matrix.c **** #define ERROR_DISCONNECT_COUNT 5
+  28:quantum/split_common/matrix.c **** 
+  29:quantum/split_common/matrix.c **** #define ROWS_PER_HAND (MATRIX_ROWS / 2)
+  30:quantum/split_common/matrix.c **** 
+  31:quantum/split_common/matrix.c **** #ifdef DIRECT_PINS
+  32:quantum/split_common/matrix.c **** static pin_t direct_pins[MATRIX_ROWS][MATRIX_COLS] = DIRECT_PINS;
+  33:quantum/split_common/matrix.c **** #elif (DIODE_DIRECTION == ROW2COL) || (DIODE_DIRECTION == COL2ROW)
+  34:quantum/split_common/matrix.c **** static pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
+  35:quantum/split_common/matrix.c **** static pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
+  36:quantum/split_common/matrix.c **** #endif
+  37:quantum/split_common/matrix.c **** 
+  38:quantum/split_common/matrix.c **** /* matrix state(1:on, 0:off) */
+  39:quantum/split_common/matrix.c **** extern matrix_row_t raw_matrix[MATRIX_ROWS];  // raw values
+  40:quantum/split_common/matrix.c **** extern matrix_row_t matrix[MATRIX_ROWS];      // debounced values
+  41:quantum/split_common/matrix.c **** 
+  42:quantum/split_common/matrix.c **** // row offsets for each hand
+  43:quantum/split_common/matrix.c **** uint8_t thisHand, thatHand;
+  44:quantum/split_common/matrix.c **** 
+  45:quantum/split_common/matrix.c **** // user-defined overridable functions
+  46:quantum/split_common/matrix.c **** __attribute__((weak)) void matrix_slave_scan_user(void) {}
+  16               		.loc 1 46 57 view -0
+  17               		.cfi_startproc
+  18               	/* prologue: function */
+  19               	/* frame size = 0 */
+  20               	/* stack size = 0 */
+  21               	.L__stack_usage = 0
+  22               		.loc 1 46 58 view .LVU1
+  23               	/* epilogue start */
+  24               		.loc 1 46 1 is_stmt 0 view .LVU2
+  25 0000 0895      		ret
+  26               		.cfi_endproc
+  27               	.LFE20:
+  29               		.section	.text.matrix_init,"ax",@progbits
+  30               	.global	matrix_init
+  32               	matrix_init:
+  33               	.LFB26:
+  47:quantum/split_common/matrix.c **** 
+  48:quantum/split_common/matrix.c **** // matrix code
+  49:quantum/split_common/matrix.c **** 
+  50:quantum/split_common/matrix.c **** #ifdef DIRECT_PINS
+  51:quantum/split_common/matrix.c **** 
+  52:quantum/split_common/matrix.c **** static void init_pins(void) {
+  53:quantum/split_common/matrix.c ****     for (int row = 0; row < MATRIX_ROWS; row++) {
+  54:quantum/split_common/matrix.c ****         for (int col = 0; col < MATRIX_COLS; col++) {
+  55:quantum/split_common/matrix.c ****             pin_t pin = direct_pins[row][col];
+  56:quantum/split_common/matrix.c ****             if (pin != NO_PIN) {
+  57:quantum/split_common/matrix.c ****                 setPinInputHigh(pin);
+  58:quantum/split_common/matrix.c ****             }
+  59:quantum/split_common/matrix.c ****         }
+  60:quantum/split_common/matrix.c ****     }
+  61:quantum/split_common/matrix.c **** }
+  62:quantum/split_common/matrix.c **** 
+  63:quantum/split_common/matrix.c **** static bool read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row) {
+  64:quantum/split_common/matrix.c ****     // Start with a clear matrix row
+  65:quantum/split_common/matrix.c ****     matrix_row_t current_row_value = 0;
+  66:quantum/split_common/matrix.c **** 
+  67:quantum/split_common/matrix.c ****     for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
+  68:quantum/split_common/matrix.c ****         pin_t pin = direct_pins[current_row][col_index];
+  69:quantum/split_common/matrix.c ****         if (pin != NO_PIN) {
+  70:quantum/split_common/matrix.c ****             current_row_value |= readPin(pin) ? 0 : (MATRIX_ROW_SHIFTER << col_index);
+  71:quantum/split_common/matrix.c ****         }
+  72:quantum/split_common/matrix.c ****     }
+  73:quantum/split_common/matrix.c **** 
+  74:quantum/split_common/matrix.c ****     // If the row has changed, store the row and return the changed flag.
+  75:quantum/split_common/matrix.c ****     if (current_matrix[current_row] != current_row_value) {
+  76:quantum/split_common/matrix.c ****         current_matrix[current_row] = current_row_value;
+  77:quantum/split_common/matrix.c ****         return true;
+  78:quantum/split_common/matrix.c ****     }
+  79:quantum/split_common/matrix.c ****     return false;
+  80:quantum/split_common/matrix.c **** }
+  81:quantum/split_common/matrix.c **** 
+  82:quantum/split_common/matrix.c **** #elif defined(DIODE_DIRECTION)
+  83:quantum/split_common/matrix.c **** #    if (DIODE_DIRECTION == COL2ROW)
+  84:quantum/split_common/matrix.c **** 
+  85:quantum/split_common/matrix.c **** static void select_row(uint8_t row) {
+  86:quantum/split_common/matrix.c ****     setPinOutput(row_pins[row]);
+  87:quantum/split_common/matrix.c ****     writePinLow(row_pins[row]);
+  88:quantum/split_common/matrix.c **** }
+  89:quantum/split_common/matrix.c **** 
+  90:quantum/split_common/matrix.c **** static void unselect_row(uint8_t row) { setPinInputHigh(row_pins[row]); }
+  91:quantum/split_common/matrix.c **** 
+  92:quantum/split_common/matrix.c **** static void unselect_rows(void) {
+  93:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
+  94:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+  95:quantum/split_common/matrix.c ****     }
+  96:quantum/split_common/matrix.c **** }
+  97:quantum/split_common/matrix.c **** 
+  98:quantum/split_common/matrix.c **** static void init_pins(void) {
+  99:quantum/split_common/matrix.c ****     unselect_rows();
+ 100:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < MATRIX_COLS; x++) {
+ 101:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 102:quantum/split_common/matrix.c ****     }
+ 103:quantum/split_common/matrix.c **** }
+ 104:quantum/split_common/matrix.c **** 
+ 105:quantum/split_common/matrix.c **** static bool read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row) {
+ 106:quantum/split_common/matrix.c ****     // Start with a clear matrix row
+ 107:quantum/split_common/matrix.c ****     matrix_row_t current_row_value = 0;
+ 108:quantum/split_common/matrix.c **** 
+ 109:quantum/split_common/matrix.c ****     // Select row and wait for row selecton to stabilize
+ 110:quantum/split_common/matrix.c ****     select_row(current_row);
+ 111:quantum/split_common/matrix.c ****     matrix_io_delay();
+ 112:quantum/split_common/matrix.c **** 
+ 113:quantum/split_common/matrix.c ****     // For each col...
+ 114:quantum/split_common/matrix.c ****     for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
+ 115:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 116:quantum/split_common/matrix.c ****         uint8_t pin_state = readPin(col_pins[col_index]);
+ 117:quantum/split_common/matrix.c **** 
+ 118:quantum/split_common/matrix.c ****         // Populate the matrix row with the state of the col pin
+ 119:quantum/split_common/matrix.c ****         current_row_value |= pin_state ? 0 : (MATRIX_ROW_SHIFTER << col_index);
+ 120:quantum/split_common/matrix.c ****     }
+ 121:quantum/split_common/matrix.c **** 
+ 122:quantum/split_common/matrix.c ****     // Unselect row
+ 123:quantum/split_common/matrix.c ****     unselect_row(current_row);
+ 124:quantum/split_common/matrix.c **** 
+ 125:quantum/split_common/matrix.c ****     // If the row has changed, store the row and return the changed flag.
+ 126:quantum/split_common/matrix.c ****     if (current_matrix[current_row] != current_row_value) {
+ 127:quantum/split_common/matrix.c ****         current_matrix[current_row] = current_row_value;
+ 128:quantum/split_common/matrix.c ****         return true;
+ 129:quantum/split_common/matrix.c ****     }
+ 130:quantum/split_common/matrix.c ****     return false;
+ 131:quantum/split_common/matrix.c **** }
+ 132:quantum/split_common/matrix.c **** 
+ 133:quantum/split_common/matrix.c **** #    elif (DIODE_DIRECTION == ROW2COL)
+ 134:quantum/split_common/matrix.c **** 
+ 135:quantum/split_common/matrix.c **** static void select_col(uint8_t col) {
+ 136:quantum/split_common/matrix.c ****     setPinOutput(col_pins[col]);
+ 137:quantum/split_common/matrix.c ****     writePinLow(col_pins[col]);
+ 138:quantum/split_common/matrix.c **** }
+ 139:quantum/split_common/matrix.c **** 
+ 140:quantum/split_common/matrix.c **** static void unselect_col(uint8_t col) { setPinInputHigh(col_pins[col]); }
+ 141:quantum/split_common/matrix.c **** 
+ 142:quantum/split_common/matrix.c **** static void unselect_cols(void) {
+ 143:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < MATRIX_COLS; x++) {
+ 144:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 145:quantum/split_common/matrix.c ****     }
+ 146:quantum/split_common/matrix.c **** }
+ 147:quantum/split_common/matrix.c **** 
+ 148:quantum/split_common/matrix.c **** static void init_pins(void) {
+ 149:quantum/split_common/matrix.c ****     unselect_cols();
+ 150:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
+ 151:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+ 152:quantum/split_common/matrix.c ****     }
+ 153:quantum/split_common/matrix.c **** }
+ 154:quantum/split_common/matrix.c **** 
+ 155:quantum/split_common/matrix.c **** static bool read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
+ 156:quantum/split_common/matrix.c ****     bool matrix_changed = false;
+ 157:quantum/split_common/matrix.c **** 
+ 158:quantum/split_common/matrix.c ****     // Select col and wait for col selecton to stabilize
+ 159:quantum/split_common/matrix.c ****     select_col(current_col);
+ 160:quantum/split_common/matrix.c ****     matrix_io_delay();
+ 161:quantum/split_common/matrix.c **** 
+ 162:quantum/split_common/matrix.c ****     // For each row...
+ 163:quantum/split_common/matrix.c ****     for (uint8_t row_index = 0; row_index < ROWS_PER_HAND; row_index++) {
+ 164:quantum/split_common/matrix.c ****         // Store last value of row prior to reading
+ 165:quantum/split_common/matrix.c ****         matrix_row_t last_row_value    = current_matrix[row_index];
+ 166:quantum/split_common/matrix.c ****         matrix_row_t current_row_value = last_row_value;
+ 167:quantum/split_common/matrix.c **** 
+ 168:quantum/split_common/matrix.c ****         // Check row pin state
+ 169:quantum/split_common/matrix.c ****         if (readPin(row_pins[row_index]) == 0) {
+ 170:quantum/split_common/matrix.c ****             // Pin LO, set col bit
+ 171:quantum/split_common/matrix.c ****             current_row_value |= (MATRIX_ROW_SHIFTER << current_col);
+ 172:quantum/split_common/matrix.c ****         } else {
+ 173:quantum/split_common/matrix.c ****             // Pin HI, clear col bit
+ 174:quantum/split_common/matrix.c ****             current_row_value &= ~(MATRIX_ROW_SHIFTER << current_col);
+ 175:quantum/split_common/matrix.c ****         }
+ 176:quantum/split_common/matrix.c **** 
+ 177:quantum/split_common/matrix.c ****         // Determine if the matrix changed state
+ 178:quantum/split_common/matrix.c ****         if ((last_row_value != current_row_value)) {
+ 179:quantum/split_common/matrix.c ****             matrix_changed |= true;
+ 180:quantum/split_common/matrix.c ****             current_matrix[row_index] = current_row_value;
+ 181:quantum/split_common/matrix.c ****         }
+ 182:quantum/split_common/matrix.c ****     }
+ 183:quantum/split_common/matrix.c **** 
+ 184:quantum/split_common/matrix.c ****     // Unselect col
+ 185:quantum/split_common/matrix.c ****     unselect_col(current_col);
+ 186:quantum/split_common/matrix.c **** 
+ 187:quantum/split_common/matrix.c ****     return matrix_changed;
+ 188:quantum/split_common/matrix.c **** }
+ 189:quantum/split_common/matrix.c **** 
+ 190:quantum/split_common/matrix.c **** #    else
+ 191:quantum/split_common/matrix.c **** #        error DIODE_DIRECTION must be one of COL2ROW or ROW2COL!
+ 192:quantum/split_common/matrix.c **** #    endif
+ 193:quantum/split_common/matrix.c **** #else
+ 194:quantum/split_common/matrix.c **** #    error DIODE_DIRECTION is not defined!
+ 195:quantum/split_common/matrix.c **** #endif
+ 196:quantum/split_common/matrix.c **** 
+ 197:quantum/split_common/matrix.c **** void matrix_init(void) {
+  34               		.loc 1 197 24 is_stmt 1 view -0
+  35               		.cfi_startproc
+  36               	/* prologue: function */
+  37               	/* frame size = 0 */
+  38               	/* stack size = 0 */
+  39               	.L__stack_usage = 0
+ 198:quantum/split_common/matrix.c ****     split_pre_init();
+  40               		.loc 1 198 5 view .LVU4
+  41 0000 0E94 0000 		call split_pre_init
+  42               	.LVL0:
+ 199:quantum/split_common/matrix.c **** 
+ 200:quantum/split_common/matrix.c ****     // Set pinout for right half if pinout for that half is defined
+ 201:quantum/split_common/matrix.c ****     if (!isLeftHand) {
+  43               		.loc 1 201 5 view .LVU5
+  44               		.loc 1 201 9 is_stmt 0 view .LVU6
+  45 0004 8091 0000 		lds r24,isLeftHand
+ 202:quantum/split_common/matrix.c **** #ifdef DIRECT_PINS_RIGHT
+ 203:quantum/split_common/matrix.c ****         const pin_t direct_pins_right[MATRIX_ROWS][MATRIX_COLS] = DIRECT_PINS_RIGHT;
+ 204:quantum/split_common/matrix.c ****         for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+ 205:quantum/split_common/matrix.c ****             for (uint8_t j = 0; j < MATRIX_COLS; j++) {
+ 206:quantum/split_common/matrix.c ****                 direct_pins[i][j] = direct_pins_right[i][j];
+ 207:quantum/split_common/matrix.c ****             }
+ 208:quantum/split_common/matrix.c ****         }
+ 209:quantum/split_common/matrix.c **** #endif
+ 210:quantum/split_common/matrix.c **** #ifdef MATRIX_ROW_PINS_RIGHT
+ 211:quantum/split_common/matrix.c ****         const pin_t row_pins_right[MATRIX_ROWS] = MATRIX_ROW_PINS_RIGHT;
+ 212:quantum/split_common/matrix.c ****         for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+ 213:quantum/split_common/matrix.c ****             row_pins[i] = row_pins_right[i];
+ 214:quantum/split_common/matrix.c ****         }
+ 215:quantum/split_common/matrix.c **** #endif
+ 216:quantum/split_common/matrix.c **** #ifdef MATRIX_COL_PINS_RIGHT
+ 217:quantum/split_common/matrix.c ****         const pin_t col_pins_right[MATRIX_COLS] = MATRIX_COL_PINS_RIGHT;
+ 218:quantum/split_common/matrix.c ****         for (uint8_t i = 0; i < MATRIX_COLS; i++) {
+ 219:quantum/split_common/matrix.c ****             col_pins[i] = col_pins_right[i];
+ 220:quantum/split_common/matrix.c ****         }
+ 221:quantum/split_common/matrix.c **** #endif
+ 222:quantum/split_common/matrix.c ****     }
+  46               		.loc 1 222 5 is_stmt 1 view .LVU7
+ 223:quantum/split_common/matrix.c **** 
+ 224:quantum/split_common/matrix.c ****     thisHand = isLeftHand ? 0 : (ROWS_PER_HAND);
+  47               		.loc 1 224 5 view .LVU8
+  48               		.loc 1 224 27 is_stmt 0 view .LVU9
+  49 0008 8091 0000 		lds r24,isLeftHand
+  50               		.loc 1 224 14 view .LVU10
+  51 000c 94E0      		ldi r25,lo8(4)
+  52 000e 8111      		cpse r24,__zero_reg__
+  53 0010 90E0      		ldi r25,0
+  54               	.L3:
+  55               		.loc 1 224 14 discriminator 4 view .LVU11
+  56 0012 9093 0000 		sts thisHand,r25
+ 225:quantum/split_common/matrix.c ****     thatHand = ROWS_PER_HAND - thisHand;
+  57               		.loc 1 225 5 is_stmt 1 discriminator 4 view .LVU12
+  58               		.loc 1 225 30 is_stmt 0 discriminator 4 view .LVU13
+  59 0016 84E0      		ldi r24,lo8(4)
+  60 0018 891B      		sub r24,r25
+  61               		.loc 1 225 14 discriminator 4 view .LVU14
+  62 001a 8093 0000 		sts thatHand,r24
+ 226:quantum/split_common/matrix.c **** 
+ 227:quantum/split_common/matrix.c ****     // initialize key pins
+ 228:quantum/split_common/matrix.c ****     init_pins();
+  63               		.loc 1 228 5 is_stmt 1 discriminator 4 view .LVU15
+  64               	.LBB11:
+  65               	.LBI11:
+  98:quantum/split_common/matrix.c ****     unselect_rows();
+  66               		.loc 1 98 13 discriminator 4 view .LVU16
+  67               	.LBE11:
+  99:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < MATRIX_COLS; x++) {
+  68               		.loc 1 99 5 discriminator 4 view .LVU17
+  69               	.LBB15:
+  70               	.LBB12:
+  71               	.LBI12:
+  92:quantum/split_common/matrix.c ****     for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
+  72               		.loc 1 92 13 discriminator 4 view .LVU18
+  73               	.LVL1:
+  74               	.LBB13:
+  93:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+  75               		.loc 1 93 25 discriminator 4 view .LVU19
+  76 001e A0E0      		ldi r26,lo8(row_pins)
+  77 0020 B0E0      		ldi r27,hi8(row_pins)
+  94:quantum/split_common/matrix.c ****     }
+  78               		.loc 1 94 9 is_stmt 0 discriminator 4 view .LVU20
+  79 0022 61E0      		ldi r22,lo8(1)
+  80 0024 70E0      		ldi r23,0
+  81               	.LVL2:
+  82               	.L4:
+  94:quantum/split_common/matrix.c ****     }
+  83               		.loc 1 94 9 is_stmt 1 view .LVU21
+  84 0026 8D91      		ld r24,X+
+  85               	.LVL3:
+  94:quantum/split_common/matrix.c ****     }
+  86               		.loc 1 94 9 is_stmt 0 view .LVU22
+  87 0028 E82F      		mov r30,r24
+  88 002a E295      		swap r30
+  89 002c EF70      		andi r30,lo8(15)
+  90 002e F0E0      		ldi r31,0
+  91 0030 41A1      		ldd r20,Z+33
+  92 0032 8F70      		andi r24,lo8(15)
+  93 0034 9B01      		movw r18,r22
+  94 0036 00C0      		rjmp 2f
+  95               		1:
+  96 0038 220F      		lsl r18
+  97               		2:
+  98 003a 8A95      		dec r24
+  99 003c 02F4      		brpl 1b
+ 100 003e 922F      		mov r25,r18
+ 101 0040 9095      		com r25
+ 102 0042 9423      		and r25,r20
+ 103 0044 91A3      		std Z+33,r25
+ 104 0046 82A1      		ldd r24,Z+34
+ 105 0048 822B      		or r24,r18
+ 106 004a 82A3      		std Z+34,r24
+  93:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+ 107               		.loc 1 93 44 is_stmt 1 view .LVU23
+ 108               	.LVL4:
+  93:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+ 109               		.loc 1 93 25 view .LVU24
+  93:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+ 110               		.loc 1 93 5 is_stmt 0 view .LVU25
+ 111 004c 80E0      		ldi r24,hi8(row_pins+4)
+ 112 004e A030      		cpi r26,lo8(row_pins+4)
+ 113 0050 B807      		cpc r27,r24
+ 114 0052 01F4      		brne .L4
+ 115 0054 A0E0      		ldi r26,lo8(col_pins)
+ 116 0056 B0E0      		ldi r27,hi8(col_pins)
+ 117               	.LVL5:
+  93:quantum/split_common/matrix.c ****         setPinInputHigh(row_pins[x]);
+ 118               		.loc 1 93 5 view .LVU26
+ 119               	.LBE13:
+ 120               	.LBE12:
+ 121               	.LBB14:
+ 101:quantum/split_common/matrix.c ****     }
+ 122               		.loc 1 101 9 view .LVU27
+ 123 0058 61E0      		ldi r22,lo8(1)
+ 124 005a 70E0      		ldi r23,0
+ 125               	.L5:
+ 126               	.LVL6:
+ 101:quantum/split_common/matrix.c ****     }
+ 127               		.loc 1 101 9 is_stmt 1 view .LVU28
+ 128 005c 8D91      		ld r24,X+
+ 129               	.LVL7:
+ 101:quantum/split_common/matrix.c ****     }
+ 130               		.loc 1 101 9 is_stmt 0 view .LVU29
+ 131 005e E82F      		mov r30,r24
+ 132 0060 E295      		swap r30
+ 133 0062 EF70      		andi r30,lo8(15)
+ 134 0064 F0E0      		ldi r31,0
+ 135 0066 41A1      		ldd r20,Z+33
+ 136 0068 8F70      		andi r24,lo8(15)
+ 137 006a 9B01      		movw r18,r22
+ 138 006c 00C0      		rjmp 2f
+ 139               		1:
+ 140 006e 220F      		lsl r18
+ 141               		2:
+ 142 0070 8A95      		dec r24
+ 143 0072 02F4      		brpl 1b
+ 144 0074 922F      		mov r25,r18
+ 145 0076 9095      		com r25
+ 146 0078 9423      		and r25,r20
+ 147 007a 91A3      		std Z+33,r25
+ 148 007c 82A1      		ldd r24,Z+34
+ 149 007e 822B      		or r24,r18
+ 150 0080 82A3      		std Z+34,r24
+ 100:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 151               		.loc 1 100 42 is_stmt 1 view .LVU30
+ 152               	.LVL8:
+ 100:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 153               		.loc 1 100 25 view .LVU31
+ 100:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 154               		.loc 1 100 5 is_stmt 0 view .LVU32
+ 155 0082 80E0      		ldi r24,hi8(col_pins+5)
+ 156 0084 A030      		cpi r26,lo8(col_pins+5)
+ 157 0086 B807      		cpc r27,r24
+ 158 0088 01F4      		brne .L5
+ 159 008a E0E0      		ldi r30,lo8(raw_matrix)
+ 160 008c F0E0      		ldi r31,hi8(raw_matrix)
+ 161 008e A0E0      		ldi r26,lo8(matrix)
+ 162 0090 B0E0      		ldi r27,hi8(matrix)
+ 163               	.LVL9:
+ 100:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 164               		.loc 1 100 5 view .LVU33
+ 165 0092 80E0      		ldi r24,lo8(raw_matrix+8)
+ 166 0094 90E0      		ldi r25,hi8(raw_matrix+8)
+ 167               	.L6:
+ 168               	.LVL10:
+ 100:quantum/split_common/matrix.c ****         setPinInputHigh(col_pins[x]);
+ 169               		.loc 1 100 5 view .LVU34
+ 170               	.LBE14:
+ 171               	.LBE15:
+ 172               	.LBB16:
+ 229:quantum/split_common/matrix.c **** 
+ 230:quantum/split_common/matrix.c ****     // initialize matrix state: all keys off
+ 231:quantum/split_common/matrix.c ****     for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+ 232:quantum/split_common/matrix.c ****         raw_matrix[i] = 0;
+ 173               		.loc 1 232 9 is_stmt 1 discriminator 3 view .LVU35
+ 174               		.loc 1 232 23 is_stmt 0 discriminator 3 view .LVU36
+ 175 0096 1192      		st Z+,__zero_reg__
+ 176               	.LVL11:
+ 233:quantum/split_common/matrix.c ****         matrix[i]     = 0;
+ 177               		.loc 1 233 9 is_stmt 1 discriminator 3 view .LVU37
+ 178               		.loc 1 233 23 is_stmt 0 discriminator 3 view .LVU38
+ 179 0098 1D92      		st X+,__zero_reg__
+ 231:quantum/split_common/matrix.c ****         raw_matrix[i] = 0;
+ 180               		.loc 1 231 42 is_stmt 1 discriminator 3 view .LVU39
+ 181               	.LVL12:
+ 231:quantum/split_common/matrix.c ****         raw_matrix[i] = 0;
+ 182               		.loc 1 231 25 discriminator 3 view .LVU40
+ 231:quantum/split_common/matrix.c ****         raw_matrix[i] = 0;
+ 183               		.loc 1 231 5 is_stmt 0 discriminator 3 view .LVU41
+ 184 009a 8E17      		cp r24,r30
+ 185 009c 9F07      		cpc r25,r31
+ 186 009e 01F4      		brne .L6
+ 187               	.LBE16:
+ 234:quantum/split_common/matrix.c ****     }
+ 235:quantum/split_common/matrix.c **** 
+ 236:quantum/split_common/matrix.c ****     debounce_init(ROWS_PER_HAND);
+ 188               		.loc 1 236 5 is_stmt 1 view .LVU42
+ 189 00a0 84E0      		ldi r24,lo8(4)
+ 190 00a2 0E94 0000 		call debounce_init
+ 191               	.LVL13:
+ 237:quantum/split_common/matrix.c **** 
+ 238:quantum/split_common/matrix.c ****     matrix_init_quantum();
+ 192               		.loc 1 238 5 view .LVU43
+ 193 00a6 0E94 0000 		call matrix_init_quantum
+ 194               	.LVL14:
+ 239:quantum/split_common/matrix.c **** 
+ 240:quantum/split_common/matrix.c ****     split_post_init();
+ 195               		.loc 1 240 5 view .LVU44
+ 196 00aa 0C94 0000 		jmp split_post_init
+ 197               	.LVL15:
+ 198               		.cfi_endproc
+ 199               	.LFE26:
+ 201               		.section	.text.matrix_post_scan,"ax",@progbits
+ 202               	.global	matrix_post_scan
+ 204               	matrix_post_scan:
+ 205               	.LFB27:
+ 241:quantum/split_common/matrix.c **** }
+ 242:quantum/split_common/matrix.c **** 
+ 243:quantum/split_common/matrix.c **** void matrix_post_scan(void) {
+ 206               		.loc 1 243 29 view -0
+ 207               		.cfi_startproc
+ 208               	/* prologue: function */
+ 209               	/* frame size = 0 */
+ 210               	/* stack size = 0 */
+ 211               	.L__stack_usage = 0
+ 244:quantum/split_common/matrix.c ****     if (is_keyboard_master()) {
+ 212               		.loc 1 244 5 view .LVU46
+ 213               		.loc 1 244 9 is_stmt 0 view .LVU47
+ 214 0000 0E94 0000 		call is_keyboard_master
+ 215               	.LVL16:
+ 216               		.loc 1 244 8 view .LVU48
+ 217 0004 8823      		tst r24
+ 218 0006 01F0      		breq .L12
+ 219               	.LBB17:
+ 245:quantum/split_common/matrix.c ****         static uint8_t error_count;
+ 220               		.loc 1 245 9 is_stmt 1 view .LVU49
+ 246:quantum/split_common/matrix.c **** 
+ 247:quantum/split_common/matrix.c ****         if (!transport_master(matrix + thatHand)) {
+ 221               		.loc 1 247 9 view .LVU50
+ 222               		.loc 1 247 14 is_stmt 0 view .LVU51
+ 223 0008 8091 0000 		lds r24,thatHand
+ 224 000c 90E0      		ldi r25,0
+ 225 000e 8050      		subi r24,lo8(-(matrix))
+ 226 0010 9040      		sbci r25,hi8(-(matrix))
+ 227 0012 0E94 0000 		call transport_master
+ 228               	.LVL17:
+ 229               		.loc 1 247 12 view .LVU52
+ 230 0016 8111      		cpse r24,__zero_reg__
+ 231 0018 00C0      		rjmp .L13
+ 248:quantum/split_common/matrix.c ****             error_count++;
+ 232               		.loc 1 248 13 is_stmt 1 view .LVU53
+ 233               		.loc 1 248 24 is_stmt 0 view .LVU54
+ 234 001a 8091 0000 		lds r24,error_count.3766
+ 235 001e 8F5F      		subi r24,lo8(-(1))
+ 236 0020 8093 0000 		sts error_count.3766,r24
+ 249:quantum/split_common/matrix.c **** 
+ 250:quantum/split_common/matrix.c ****             if (error_count > ERROR_DISCONNECT_COUNT) {
+ 237               		.loc 1 250 13 is_stmt 1 view .LVU55
+ 238               		.loc 1 250 16 is_stmt 0 view .LVU56
+ 239 0024 8630      		cpi r24,lo8(6)
+ 240 0026 00F0      		brlo .L15
+ 241               	.LBB18:
+ 251:quantum/split_common/matrix.c ****                 // reset other half if disconnected
+ 252:quantum/split_common/matrix.c ****                 for (int i = 0; i < ROWS_PER_HAND; ++i) {
+ 253:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 242               		.loc 1 253 37 view .LVU57
+ 243 0028 E091 0000 		lds r30,thatHand
+ 244 002c F0E0      		ldi r31,0
+ 245               	.LVL18:
+ 246               		.loc 1 253 21 is_stmt 1 view .LVU58
+ 247               		.loc 1 253 42 is_stmt 0 view .LVU59
+ 248 002e E050      		subi r30,lo8(-(matrix))
+ 249 0030 F040      		sbci r31,hi8(-(matrix))
+ 250 0032 1082      		st Z,__zero_reg__
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 251               		.loc 1 252 52 is_stmt 1 view .LVU60
+ 252               	.LVL19:
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 253               		.loc 1 252 33 view .LVU61
+ 254               		.loc 1 253 21 view .LVU62
+ 255               		.loc 1 253 42 is_stmt 0 view .LVU63
+ 256 0034 1182      		std Z+1,__zero_reg__
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 257               		.loc 1 252 52 is_stmt 1 view .LVU64
+ 258               	.LVL20:
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 259               		.loc 1 252 33 view .LVU65
+ 260               		.loc 1 253 21 view .LVU66
+ 261               		.loc 1 253 42 is_stmt 0 view .LVU67
+ 262 0036 1282      		std Z+2,__zero_reg__
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 263               		.loc 1 252 52 is_stmt 1 view .LVU68
+ 264               	.LVL21:
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 265               		.loc 1 252 33 view .LVU69
+ 266               		.loc 1 253 21 view .LVU70
+ 267               		.loc 1 253 42 is_stmt 0 view .LVU71
+ 268 0038 1382      		std Z+3,__zero_reg__
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 269               		.loc 1 252 52 is_stmt 1 view .LVU72
+ 270               	.LVL22:
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 271               		.loc 1 252 33 view .LVU73
+ 272               	.L15:
+ 252:quantum/split_common/matrix.c ****                     matrix[thatHand + i] = 0;
+ 273               		.loc 1 252 33 is_stmt 0 view .LVU74
+ 274               	.LBE18:
+ 254:quantum/split_common/matrix.c ****                 }
+ 255:quantum/split_common/matrix.c ****             }
+ 256:quantum/split_common/matrix.c ****         } else {
+ 257:quantum/split_common/matrix.c ****             error_count = 0;
+ 258:quantum/split_common/matrix.c ****         }
+ 259:quantum/split_common/matrix.c **** 
+ 260:quantum/split_common/matrix.c ****         matrix_scan_quantum();
+ 275               		.loc 1 260 9 is_stmt 1 view .LVU75
+ 276 003a 0C94 0000 		jmp matrix_scan_quantum
+ 277               	.LVL23:
+ 278               	.L13:
+ 257:quantum/split_common/matrix.c ****         }
+ 279               		.loc 1 257 13 view .LVU76
+ 257:quantum/split_common/matrix.c ****         }
+ 280               		.loc 1 257 25 is_stmt 0 view .LVU77
+ 281 003e 1092 0000 		sts error_count.3766,__zero_reg__
+ 282 0042 00C0      		rjmp .L15
+ 283               	.L12:
+ 284               	.LBE17:
+ 261:quantum/split_common/matrix.c ****     } else {
+ 262:quantum/split_common/matrix.c ****         transport_slave(matrix + thisHand);
+ 285               		.loc 1 262 9 is_stmt 1 view .LVU78
+ 286 0044 8091 0000 		lds r24,thisHand
+ 287 0048 90E0      		ldi r25,0
+ 288 004a 8050      		subi r24,lo8(-(matrix))
+ 289 004c 9040      		sbci r25,hi8(-(matrix))
+ 290 004e 0E94 0000 		call transport_slave
+ 291               	.LVL24:
+ 263:quantum/split_common/matrix.c **** 
+ 264:quantum/split_common/matrix.c ****         matrix_slave_scan_user();
+ 292               		.loc 1 264 9 view .LVU79
+ 293 0052 0C94 0000 		jmp matrix_slave_scan_user
+ 294               	.LVL25:
+ 295               		.cfi_endproc
+ 296               	.LFE27:
+ 298               		.section	.text.matrix_scan,"ax",@progbits
+ 299               	.global	matrix_scan
+ 301               	matrix_scan:
+ 302               	.LFB28:
+ 265:quantum/split_common/matrix.c ****     }
+ 266:quantum/split_common/matrix.c **** }
+ 267:quantum/split_common/matrix.c **** 
+ 268:quantum/split_common/matrix.c **** uint8_t matrix_scan(void) {
+ 303               		.loc 1 268 27 view -0
+ 304               		.cfi_startproc
+ 305 0000 8F92      		push r8
+ 306               	.LCFI0:
+ 307               		.cfi_def_cfa_offset 3
+ 308               		.cfi_offset 8, -2
+ 309 0002 9F92      		push r9
+ 310               	.LCFI1:
+ 311               		.cfi_def_cfa_offset 4
+ 312               		.cfi_offset 9, -3
+ 313 0004 AF92      		push r10
+ 314               	.LCFI2:
+ 315               		.cfi_def_cfa_offset 5
+ 316               		.cfi_offset 10, -4
+ 317 0006 BF92      		push r11
+ 318               	.LCFI3:
+ 319               		.cfi_def_cfa_offset 6
+ 320               		.cfi_offset 11, -5
+ 321 0008 CF92      		push r12
+ 322               	.LCFI4:
+ 323               		.cfi_def_cfa_offset 7
+ 324               		.cfi_offset 12, -6
+ 325 000a DF92      		push r13
+ 326               	.LCFI5:
+ 327               		.cfi_def_cfa_offset 8
+ 328               		.cfi_offset 13, -7
+ 329 000c EF92      		push r14
+ 330               	.LCFI6:
+ 331               		.cfi_def_cfa_offset 9
+ 332               		.cfi_offset 14, -8
+ 333 000e FF92      		push r15
+ 334               	.LCFI7:
+ 335               		.cfi_def_cfa_offset 10
+ 336               		.cfi_offset 15, -9
+ 337 0010 0F93      		push r16
+ 338               	.LCFI8:
+ 339               		.cfi_def_cfa_offset 11
+ 340               		.cfi_offset 16, -10
+ 341 0012 1F93      		push r17
+ 342               	.LCFI9:
+ 343               		.cfi_def_cfa_offset 12
+ 344               		.cfi_offset 17, -11
+ 345 0014 CF93      		push r28
+ 346               	.LCFI10:
+ 347               		.cfi_def_cfa_offset 13
+ 348               		.cfi_offset 28, -12
+ 349 0016 DF93      		push r29
+ 350               	.LCFI11:
+ 351               		.cfi_def_cfa_offset 14
+ 352               		.cfi_offset 29, -13
+ 353               	/* prologue: function */
+ 354               	/* frame size = 0 */
+ 355               	/* stack size = 12 */
+ 356               	.L__stack_usage = 12
+ 269:quantum/split_common/matrix.c ****     bool changed = false;
+ 357               		.loc 1 269 5 view .LVU81
+ 358               	.LVL26:
+ 270:quantum/split_common/matrix.c **** 
+ 271:quantum/split_common/matrix.c **** #if defined(DIRECT_PINS) || (DIODE_DIRECTION == COL2ROW)
+ 272:quantum/split_common/matrix.c ****     // Set row, read cols
+ 273:quantum/split_common/matrix.c ****     for (uint8_t current_row = 0; current_row < ROWS_PER_HAND; current_row++) {
+ 359               		.loc 1 273 5 view .LVU82
+ 360               	.LBB28:
+ 361               		.loc 1 273 10 view .LVU83
+ 362               		.loc 1 273 35 view .LVU84
+ 363 0018 80E0      		ldi r24,lo8(row_pins)
+ 364 001a A82E      		mov r10,r24
+ 365 001c 80E0      		ldi r24,hi8(row_pins)
+ 366 001e B82E      		mov r11,r24
+ 367 0020 00E0      		ldi r16,lo8(raw_matrix)
+ 368 0022 10E0      		ldi r17,hi8(raw_matrix)
+ 369               	.LBE28:
+ 269:quantum/split_common/matrix.c ****     bool changed = false;
+ 370               		.loc 1 269 10 is_stmt 0 view .LVU85
+ 371 0024 912C      		mov r9,__zero_reg__
+ 372               	.LBB46:
+ 373               	.LBB29:
+ 374               	.LBB30:
+ 375               	.LBB31:
+ 376               	.LBB32:
+  86:quantum/split_common/matrix.c ****     writePinLow(row_pins[row]);
+ 377               		.loc 1 86 5 view .LVU86
+ 378 0026 CC24      		clr r12
+ 379 0028 C394      		inc r12
+ 380 002a D12C      		mov r13,__zero_reg__
+ 381               	.LVL27:
+ 382               	.L21:
+  86:quantum/split_common/matrix.c ****     writePinLow(row_pins[row]);
+ 383               		.loc 1 86 5 view .LVU87
+ 384               	.LBE32:
+ 385               	.LBE31:
+ 386               	.LBE30:
+ 387               	.LBE29:
+ 274:quantum/split_common/matrix.c ****         changed |= read_cols_on_row(raw_matrix, current_row);
+ 388               		.loc 1 274 9 is_stmt 1 view .LVU88
+ 389               	.LBB44:
+ 390               	.LBI29:
+ 105:quantum/split_common/matrix.c ****     // Start with a clear matrix row
+ 391               		.loc 1 105 13 view .LVU89
+ 392               	.LBB42:
+ 107:quantum/split_common/matrix.c **** 
+ 393               		.loc 1 107 5 view .LVU90
+ 110:quantum/split_common/matrix.c ****     matrix_io_delay();
+ 394               		.loc 1 110 5 view .LVU91
+ 395               	.LBB34:
+ 396               	.LBI31:
+  85:quantum/split_common/matrix.c ****     setPinOutput(row_pins[row]);
+ 397               		.loc 1 85 13 view .LVU92
+ 398               	.LBB33:
+  86:quantum/split_common/matrix.c ****     writePinLow(row_pins[row]);
+ 399               		.loc 1 86 5 view .LVU93
+ 400 002c F501      		movw r30,r10
+ 401 002e 8191      		ld r24,Z+
+ 402 0030 5F01      		movw r10,r30
+ 403               	.LVL28:
+  86:quantum/split_common/matrix.c ****     writePinLow(row_pins[row]);
+ 404               		.loc 1 86 5 is_stmt 0 view .LVU94
+ 405 0032 C82F      		mov r28,r24
+ 406 0034 C295      		swap r28
+ 407 0036 CF70      		andi r28,lo8(15)
+ 408 0038 D0E0      		ldi r29,0
+ 409 003a 99A1      		ldd r25,Y+33
+ 410 003c 8F70      		andi r24,lo8(15)
+ 411 003e 7601      		movw r14,r12
+ 412 0040 00C0      		rjmp 2f
+ 413               		1:
+ 414 0042 EE0C      		lsl r14
+ 415               		2:
+ 416 0044 8A95      		dec r24
+ 417 0046 02F4      		brpl 1b
+ 418 0048 892F      		mov r24,r25
+ 419 004a 8E29      		or r24,r14
+ 420 004c 89A3      		std Y+33,r24
+  87:quantum/split_common/matrix.c **** }
+ 421               		.loc 1 87 5 is_stmt 1 view .LVU95
+ 422 004e 8AA1      		ldd r24,Y+34
+ 423 0050 8E2C      		mov r8,r14
+ 424 0052 8094      		com r8
+ 425 0054 8821      		and r24,r8
+ 426 0056 8AA3      		std Y+34,r24
+ 427               	.LVL29:
+  87:quantum/split_common/matrix.c **** }
+ 428               		.loc 1 87 5 is_stmt 0 view .LVU96
+ 429               	.LBE33:
+ 430               	.LBE34:
+ 111:quantum/split_common/matrix.c **** 
+ 431               		.loc 1 111 5 is_stmt 1 view .LVU97
+ 432 0058 0E94 0000 		call matrix_io_delay
+ 433               	.LVL30:
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 434               		.loc 1 114 5 view .LVU98
+ 435               	.LBB35:
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 436               		.loc 1 114 10 view .LVU99
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 437               		.loc 1 114 33 view .LVU100
+ 438 005c E0E0      		ldi r30,lo8(col_pins)
+ 439 005e F0E0      		ldi r31,hi8(col_pins)
+ 440               	.LBE35:
+ 111:quantum/split_common/matrix.c **** 
+ 441               		.loc 1 111 5 is_stmt 0 view .LVU101
+ 442 0060 50E0      		ldi r21,0
+ 443 0062 40E0      		ldi r20,0
+ 107:quantum/split_common/matrix.c **** 
+ 444               		.loc 1 107 18 view .LVU102
+ 445 0064 20E0      		ldi r18,0
+ 446               	.LVL31:
+ 447               	.L19:
+ 448               	.LBB38:
+ 449               	.LBB36:
+ 116:quantum/split_common/matrix.c **** 
+ 450               		.loc 1 116 9 is_stmt 1 view .LVU103
+ 116:quantum/split_common/matrix.c **** 
+ 451               		.loc 1 116 29 is_stmt 0 view .LVU104
+ 452 0066 3191      		ld r19,Z+
+ 453 0068 A32F      		mov r26,r19
+ 454 006a A295      		swap r26
+ 455 006c AF70      		andi r26,lo8(15)
+ 456 006e B0E0      		ldi r27,0
+ 457 0070 9096      		adiw r26,32
+ 458 0072 8C91      		ld r24,X
+ 459               	.LVL32:
+ 119:quantum/split_common/matrix.c ****     }
+ 460               		.loc 1 119 9 is_stmt 1 view .LVU105
+ 116:quantum/split_common/matrix.c **** 
+ 461               		.loc 1 116 29 is_stmt 0 view .LVU106
+ 462 0074 90E0      		ldi r25,0
+ 463 0076 3F70      		andi r19,lo8(15)
+ 464               	.LVL33:
+ 116:quantum/split_common/matrix.c **** 
+ 465               		.loc 1 116 29 view .LVU107
+ 466 0078 00C0      		rjmp 2f
+ 467               		1:
+ 468 007a 9595      		asr r25
+ 469 007c 8795      		ror r24
+ 470               		2:
+ 471 007e 3A95      		dec r19
+ 472 0080 02F4      		brpl 1b
+ 473               	.LVL34:
+ 119:quantum/split_common/matrix.c ****     }
+ 474               		.loc 1 119 27 view .LVU108
+ 475 0082 80FD      		sbrc r24,0
+ 476 0084 00C0      		rjmp .L22
+ 477 0086 8C2D      		mov r24,r12
+ 478 0088 042E      		mov r0,r20
+ 479 008a 00C0      		rjmp 2f
+ 480               		1:
+ 481 008c 880F      		lsl r24
+ 482               		2:
+ 483 008e 0A94      		dec r0
+ 484 0090 02F4      		brpl 1b
+ 485               	.L18:
+ 486 0092 282B      		or r18,r24
+ 487               	.LVL35:
+ 119:quantum/split_common/matrix.c ****     }
+ 488               		.loc 1 119 27 view .LVU109
+ 489               	.LBE36:
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 490               		.loc 1 114 58 is_stmt 1 view .LVU110
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 491               		.loc 1 114 33 view .LVU111
+ 492 0094 4F5F      		subi r20,-1
+ 493 0096 5F4F      		sbci r21,-1
+ 494               	.LVL36:
+ 114:quantum/split_common/matrix.c ****         // Select the col pin to read (active low)
+ 495               		.loc 1 114 5 is_stmt 0 view .LVU112
+ 496 0098 4530      		cpi r20,5
+ 497 009a 5105      		cpc r21,__zero_reg__
+ 498 009c 01F4      		brne .L19
+ 499               	.LBE38:
+ 123:quantum/split_common/matrix.c **** 
+ 500               		.loc 1 123 5 is_stmt 1 view .LVU113
+ 501               	.LVL37:
+ 502               	.LBB39:
+ 503               	.LBI39:
+  90:quantum/split_common/matrix.c **** 
+ 504               		.loc 1 90 13 view .LVU114
+ 505               	.LBB40:
+  90:quantum/split_common/matrix.c **** 
+ 506               		.loc 1 90 41 view .LVU115
+ 507 009e 89A1      		ldd r24,Y+33
+ 508 00a0 8822      		and r8,r24
+ 509 00a2 89A2      		std Y+33,r8
+ 510 00a4 8AA1      		ldd r24,Y+34
+ 511 00a6 E82A      		or r14,r24
+ 512 00a8 EAA2      		std Y+34,r14
+ 513               	.LVL38:
+  90:quantum/split_common/matrix.c **** 
+ 514               		.loc 1 90 41 is_stmt 0 view .LVU116
+ 515               	.LBE40:
+ 516               	.LBE39:
+ 126:quantum/split_common/matrix.c ****         current_matrix[current_row] = current_row_value;
+ 517               		.loc 1 126 5 is_stmt 1 view .LVU117
+ 126:quantum/split_common/matrix.c ****         current_matrix[current_row] = current_row_value;
+ 518               		.loc 1 126 8 is_stmt 0 view .LVU118
+ 519 00aa F801      		movw r30,r16
+ 520 00ac 8081      		ld r24,Z
+ 521 00ae 2817      		cp r18,r24
+ 522 00b0 01F0      		breq .L23
+ 127:quantum/split_common/matrix.c ****         return true;
+ 523               		.loc 1 127 9 is_stmt 1 view .LVU119
+ 127:quantum/split_common/matrix.c ****         return true;
+ 524               		.loc 1 127 37 is_stmt 0 view .LVU120
+ 525 00b2 2083      		st Z,r18
+ 128:quantum/split_common/matrix.c ****     }
+ 526               		.loc 1 128 9 is_stmt 1 view .LVU121
+ 128:quantum/split_common/matrix.c ****     }
+ 527               		.loc 1 128 16 is_stmt 0 view .LVU122
+ 528 00b4 81E0      		ldi r24,lo8(1)
+ 529               	.L20:
+ 530               	.LVL39:
+ 128:quantum/split_common/matrix.c ****     }
+ 531               		.loc 1 128 16 view .LVU123
+ 532               	.LBE42:
+ 533               	.LBE44:
+ 534               		.loc 1 274 17 view .LVU124
+ 535 00b6 982A      		or r9,r24
+ 536               	.LVL40:
+ 273:quantum/split_common/matrix.c ****         changed |= read_cols_on_row(raw_matrix, current_row);
+ 537               		.loc 1 273 64 is_stmt 1 view .LVU125
+ 273:quantum/split_common/matrix.c ****         changed |= read_cols_on_row(raw_matrix, current_row);
+ 538               		.loc 1 273 35 view .LVU126
+ 539 00b8 0F5F      		subi r16,-1
+ 540 00ba 1F4F      		sbci r17,-1
+ 273:quantum/split_common/matrix.c ****         changed |= read_cols_on_row(raw_matrix, current_row);
+ 541               		.loc 1 273 5 is_stmt 0 view .LVU127
+ 542 00bc F0E0      		ldi r31,lo8(row_pins+4)
+ 543 00be AF16      		cp r10,r31
+ 544 00c0 F0E0      		ldi r31,hi8(row_pins+4)
+ 545 00c2 BF06      		cpc r11,r31
+ 546 00c4 01F0      		breq .+2
+ 547 00c6 00C0      		rjmp .L21
+ 548               	.LBE46:
+ 275:quantum/split_common/matrix.c ****     }
+ 276:quantum/split_common/matrix.c **** #elif (DIODE_DIRECTION == ROW2COL)
+ 277:quantum/split_common/matrix.c ****     // Set col, read rows
+ 278:quantum/split_common/matrix.c ****     for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++) {
+ 279:quantum/split_common/matrix.c ****         changed |= read_rows_on_col(raw_matrix, current_col);
+ 280:quantum/split_common/matrix.c ****     }
+ 281:quantum/split_common/matrix.c **** #endif
+ 282:quantum/split_common/matrix.c **** 
+ 283:quantum/split_common/matrix.c ****     debounce(raw_matrix, matrix + thisHand, ROWS_PER_HAND, changed);
+ 549               		.loc 1 283 5 is_stmt 1 view .LVU128
+ 550 00c8 6091 0000 		lds r22,thisHand
+ 551 00cc 70E0      		ldi r23,0
+ 552 00ce 6050      		subi r22,lo8(-(matrix))
+ 553 00d0 7040      		sbci r23,hi8(-(matrix))
+ 554 00d2 292D      		mov r18,r9
+ 555 00d4 44E0      		ldi r20,lo8(4)
+ 556 00d6 80E0      		ldi r24,lo8(raw_matrix)
+ 557 00d8 90E0      		ldi r25,hi8(raw_matrix)
+ 558 00da 0E94 0000 		call debounce
+ 559               	.LVL41:
+ 284:quantum/split_common/matrix.c **** 
+ 285:quantum/split_common/matrix.c ****     matrix_post_scan();
+ 560               		.loc 1 285 5 view .LVU129
+ 561 00de 0E94 0000 		call matrix_post_scan
+ 562               	.LVL42:
+ 286:quantum/split_common/matrix.c ****     return (uint8_t)changed;
+ 563               		.loc 1 286 5 view .LVU130
+ 287:quantum/split_common/matrix.c **** }
+ 564               		.loc 1 287 1 is_stmt 0 view .LVU131
+ 565 00e2 892D      		mov r24,r9
+ 566               	/* epilogue start */
+ 567 00e4 DF91      		pop r29
+ 568 00e6 CF91      		pop r28
+ 569 00e8 1F91      		pop r17
+ 570 00ea 0F91      		pop r16
+ 571 00ec FF90      		pop r15
+ 572 00ee EF90      		pop r14
+ 573 00f0 DF90      		pop r13
+ 574 00f2 CF90      		pop r12
+ 575 00f4 BF90      		pop r11
+ 576 00f6 AF90      		pop r10
+ 577               	.LVL43:
+ 578               		.loc 1 287 1 view .LVU132
+ 579 00f8 9F90      		pop r9
+ 580               	.LVL44:
+ 581               		.loc 1 287 1 view .LVU133
+ 582 00fa 8F90      		pop r8
+ 583 00fc 0895      		ret
+ 584               	.LVL45:
+ 585               	.L22:
+ 586               	.LBB47:
+ 587               	.LBB45:
+ 588               	.LBB43:
+ 589               	.LBB41:
+ 590               	.LBB37:
+ 119:quantum/split_common/matrix.c ****     }
+ 591               		.loc 1 119 27 view .LVU134
+ 592 00fe 80E0      		ldi r24,0
+ 593 0100 00C0      		rjmp .L18
+ 594               	.L23:
+ 119:quantum/split_common/matrix.c ****     }
+ 595               		.loc 1 119 27 view .LVU135
+ 596               	.LBE37:
+ 597               	.LBE41:
+ 130:quantum/split_common/matrix.c **** }
+ 598               		.loc 1 130 12 view .LVU136
+ 599 0102 80E0      		ldi r24,0
+ 600 0104 00C0      		rjmp .L20
+ 601               	.LBE43:
+ 602               	.LBE45:
+ 603               	.LBE47:
+ 604               		.cfi_endproc
+ 605               	.LFE28:
+ 607               		.section	.bss.error_count.3766,"aw",@nobits
+ 610               	error_count.3766:
+ 611 0000 00        		.zero	1
+ 612               		.comm	thatHand,1,1
+ 613               		.comm	thisHand,1,1
+ 614               		.section	.rodata.col_pins,"a"
+ 617               	col_pins:
+ 618 0000 66        		.byte	102
+ 619 0001 97        		.byte	-105
+ 620 0002 C6        		.byte	-58
+ 621 0003 34        		.byte	52
+ 622 0004 35        		.byte	53
+ 623               		.section	.rodata.row_pins,"a"
+ 626               	row_pins:
+ 627 0000 31        		.byte	49
+ 628 0001 33        		.byte	51
+ 629 0002 32        		.byte	50
+ 630 0003 36        		.byte	54
+ 631 0004 0000 0000 		.zero	4
+ 632               		.text
+ 633               	.Letext0:
+ 634               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 635               		.file 3 "tmk_core/common/matrix.h"
+ 636               		.file 4 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
+ 637               		.file 5 "tmk_core/common/report.h"
+ 638               		.file 6 "tmk_core/common/action.h"
+ 639               		.file 7 "tmk_core/common/host.h"
+ 640               		.file 8 "tmk_core/common/avr/xprintf.h"
+ 641               		.file 9 "tmk_core/common/debug.h"
+ 642               		.file 10 "quantum/keycode_config.h"
+ 643               		.file 11 "quantum/keymap.h"
+ 644               		.file 12 "tmk_core/common/action_layer.h"
+ 645               		.file 13 "tmk_core/common/timer.h"
+ 646               		.file 14 "tmk_core/common/action_util.h"
+ 647               		.file 15 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdlib.h"
+ 648               		.file 16 "quantum/quantum.h"
+ 649               		.file 17 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdio.h"
+ 650               		.file 18 "quantum/split_common/split_util.h"
+ 651               		.file 19 "quantum/debounce.h"
+ 652               		.file 20 "quantum/split_common/transport.h"
+ 653               		.file 21 "tmk_core/common/keyboard.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 matrix.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:13     .text.matrix_slave_scan_user:0000000000000000 matrix_slave_scan_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:32     .text.matrix_init:0000000000000000 matrix_init
+                            *COM*:0000000000000001 thisHand
+                            *COM*:0000000000000001 thatHand
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:626    .rodata.row_pins:0000000000000000 row_pins
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:617    .rodata.col_pins:0000000000000000 col_pins
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:204    .text.matrix_post_scan:0000000000000000 matrix_post_scan
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:610    .bss.error_count.3766:0000000000000000 error_count.3766
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc8aY9TA.s:301    .text.matrix_scan:0000000000000000 matrix_scan
+
+UNDEFINED SYMBOLS
+split_pre_init
+isLeftHand
+raw_matrix
+matrix
+debounce_init
+matrix_init_quantum
+split_post_init
+is_keyboard_master
+transport_master
+matrix_scan_quantum
+transport_slave
+matrix_io_delay
+debounce
+__do_copy_data
+__do_clear_bss

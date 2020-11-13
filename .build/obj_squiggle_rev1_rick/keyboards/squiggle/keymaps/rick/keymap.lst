@@ -1,0 +1,413 @@
+   1               		.file	"keymap.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               	.global	keymaps
+  11               		.section	.progmem.data.keymaps,"a"
+  14               	keymaps:
+  15 0000 3300      		.word	51
+  16 0002 3600      		.word	54
+  17 0004 3700      		.word	55
+  18 0006 1300      		.word	19
+  19 0008 1C00      		.word	28
+  20 000a 0462      		.word	25092
+  21 000c 1261      		.word	24850
+  22 000e 0864      		.word	25608
+  23 0010 1800      		.word	24
+  24 0012 0C68      		.word	26636
+  25 0014 3400      		.word	52
+  26 0016 1400      		.word	20
+  27 0018 0D00      		.word	13
+  28 001a 0E00      		.word	14
+  29 001c 1B00      		.word	27
+  30 001e 0000      		.word	0
+  31 0020 0000      		.word	0
+  32 0022 0000      		.word	0
+  33 0024 2A41      		.word	16682
+  34 0026 2962      		.word	25129
+  35 0028 0F00      		.word	15
+  36 002a 1500      		.word	21
+  37 002c 0600      		.word	6
+  38 002e 0A00      		.word	10
+  39 0030 0900      		.word	9
+  40 0032 1672      		.word	29206
+  41 0034 1171      		.word	28945
+  42 0036 1774      		.word	29719
+  43 0038 0B00      		.word	11
+  44 003a 0778      		.word	30727
+  45 003c 1D00      		.word	29
+  46 003e 1900      		.word	25
+  47 0040 1A00      		.word	26
+  48 0042 1000      		.word	16
+  49 0044 0500      		.word	5
+  50 0046 0000      		.word	0
+  51 0048 0000      		.word	0
+  52 004a 0000      		.word	0
+  53 004c 2C42      		.word	16940
+  54 004e 2864      		.word	25640
+  55 0050 2900      		.word	41
+  56 0052 3802      		.word	568
+  57 0054 2D02      		.word	557
+  58 0056 3A00      		.word	58
+  59 0058 3B00      		.word	59
+  60 005a E100      		.word	225
+  61 005c 2B00      		.word	43
+  62 005e 4B00      		.word	75
+  63 0060 3E00      		.word	62
+  64 0062 3F00      		.word	63
+  65 0064 3900      		.word	57
+  66 0066 4700      		.word	71
+  67 0068 4E00      		.word	78
+  68 006a 4200      		.word	66
+  69 006c 4300      		.word	67
+  70 006e 0000      		.word	0
+  71 0070 0000      		.word	0
+  72 0072 0000      		.word	0
+  73 0074 0100      		.word	1
+  74 0076 0100      		.word	1
+  75 0078 2A00      		.word	42
+  76 007a 3800      		.word	56
+  77 007c 2D00      		.word	45
+  78 007e 3D00      		.word	61
+  79 0080 3C00      		.word	60
+  80 0082 2800      		.word	40
+  81 0084 E200      		.word	226
+  82 0086 4A00      		.word	74
+  83 0088 4100      		.word	65
+  84 008a 4000      		.word	64
+  85 008c 3800      		.word	56
+  86 008e 4900      		.word	73
+  87 0090 4D00      		.word	77
+  88 0092 4500      		.word	69
+  89 0094 4400      		.word	68
+  90 0096 0000      		.word	0
+  91 0098 0000      		.word	0
+  92 009a 0000      		.word	0
+  93 009c 0351      		.word	20739
+  94 009e 0100      		.word	1
+  95 00a0 1E02      		.word	542
+  96 00a2 1F02      		.word	543
+  97 00a4 5200      		.word	82
+  98 00a6 2F02      		.word	559
+  99 00a8 3002      		.word	560
+ 100 00aa 2002      		.word	544
+ 101 00ac 5000      		.word	80
+ 102 00ae 5100      		.word	81
+ 103 00b0 4F00      		.word	79
+ 104 00b2 2102      		.word	545
+ 105 00b4 2F00      		.word	47
+ 106 00b6 3000      		.word	48
+ 107 00b8 2602      		.word	550
+ 108 00ba 2702      		.word	551
+ 109 00bc 2402      		.word	548
+ 110 00be 0000      		.word	0
+ 111 00c0 0000      		.word	0
+ 112 00c2 0000      		.word	0
+ 113 00c4 0351      		.word	20739
+ 114 00c6 0100      		.word	1
+ 115 00c8 2502      		.word	549
+ 116 00ca 2600      		.word	38
+ 117 00cc 2500      		.word	37
+ 118 00ce 2400      		.word	36
+ 119 00d0 3100      		.word	49
+ 120 00d2 2700      		.word	39
+ 121 00d4 2300      		.word	35
+ 122 00d6 2200      		.word	34
+ 123 00d8 2100      		.word	33
+ 124 00da 2E00      		.word	46
+ 125 00dc 2E02      		.word	558
+ 126 00de 2000      		.word	32
+ 127 00e0 1F00      		.word	31
+ 128 00e2 1E00      		.word	30
+ 129 00e4 3500      		.word	53
+ 130 00e6 0000      		.word	0
+ 131 00e8 0000      		.word	0
+ 132 00ea 0000      		.word	0
+ 133 00ec 0100      		.word	1
+ 134 00ee 0100      		.word	1
+ 135 00f0 0100      		.word	1
+ 136 00f2 0808      		.word	2056
+ 137 00f4 5200      		.word	82
+ 138 00f6 4B01      		.word	331
+ 139 00f8 2B06      		.word	1579
+ 140 00fa 2903      		.word	809
+ 141 00fc 5000      		.word	80
+ 142 00fe 5100      		.word	81
+ 143 0100 4F00      		.word	79
+ 144 0102 4B03      		.word	843
+ 145 0104 0100      		.word	1
+ 146 0106 3D04      		.word	1085
+ 147 0108 0100      		.word	1
+ 148 010a 4902      		.word	585
+ 149 010c 005C      		.word	23552
+ 150 010e 0000      		.word	0
+ 151 0110 0000      		.word	0
+ 152 0112 0000      		.word	0
+ 153 0114 0100      		.word	1
+ 154 0116 0100      		.word	1
+ 155 0118 0F08      		.word	2063
+ 156 011a 0100      		.word	1
+ 157 011c 0100      		.word	1
+ 158 011e 4E01      		.word	334
+ 159 0120 2B04      		.word	1067
+ 160 0122 4C05      		.word	1356
+ 161 0124 0100      		.word	1
+ 162 0126 E300      		.word	227
+ 163 0128 2800      		.word	40
+ 164 012a 4E03      		.word	846
+ 165 012c 0100      		.word	1
+ 166 012e 0100      		.word	1
+ 167 0130 0100      		.word	1
+ 168 0132 0100      		.word	1
+ 169 0134 0100      		.word	1
+ 170 0136 0000      		.word	0
+ 171 0138 0000      		.word	0
+ 172 013a 0000      		.word	0
+ 173 013c 0100      		.word	1
+ 174 013e 0100      		.word	1
+ 175               	.global	key_combos
+ 176               		.section	.data.key_combos,"aw"
+ 179               	key_combos:
+ 180 0000 0000      		.word	colon_comma_combo
+ 181 0002 2B00      		.word	43
+ 182 0004 00        		.zero	1
+ 183 0005 0000      		.word	comma_dot_combo
+ 184 0007 3802      		.word	568
+ 185 0009 00        		.zero	1
+ 186 000a 0000      		.word	dot_p_combo
+ 187 000c 2D02      		.word	557
+ 188 000e 00        		.zero	1
+ 189 000f 0000      		.word	p_y_combo
+ 190 0011 3102      		.word	561
+ 191 0013 00        		.zero	1
+ 192 0014 0000      		.word	comma_p_combo
+ 193 0016 4B01      		.word	331
+ 194 0018 00        		.zero	1
+ 195 0019 0000      		.word	quot_q_combo
+ 196 001b 2800      		.word	40
+ 197 001d 00        		.zero	1
+ 198 001e 0000      		.word	q_j_combo
+ 199 0020 1A01      		.word	282
+ 200 0022 00        		.zero	1
+ 201 0023 0000      		.word	j_k_combo
+ 202 0025 4C00      		.word	76
+ 203 0027 00        		.zero	1
+ 204 0028 0000      		.word	q_k_combo
+ 205 002a 2B00      		.word	43
+ 206 002c 00        		.zero	1
+ 207 002d 0000      		.word	k_x_combo
+ 208 002f 3502      		.word	565
+ 209 0031 00        		.zero	1
+ 210 0032 0000      		.word	l_r_combo
+ 211 0034 2A00      		.word	42
+ 212 0036 00        		.zero	1
+ 213 0037 0000      		.word	r_c_combo
+ 214 0039 3800      		.word	56
+ 215 003b 00        		.zero	1
+ 216 003c 0000      		.word	c_g_combo
+ 217 003e 2D00      		.word	45
+ 218 0040 00        		.zero	1
+ 219 0041 0000      		.word	r_g_combo
+ 220 0043 4E01      		.word	334
+ 221 0045 00        		.zero	1
+ 222 0046 0000      		.word	g_f_combo
+ 223 0048 3100      		.word	49
+ 224 004a 00        		.zero	1
+ 225 004b 0000      		.word	v_w_combo
+ 226 004d 6500      		.word	101
+ 227 004f 00        		.zero	1
+ 228 0050 0000      		.word	w_m_combo
+ 229 0052 4C00      		.word	76
+ 230 0054 00        		.zero	1
+ 231 0055 0000      		.word	v_m_combo
+ 232 0057 2B02      		.word	555
+ 233 0059 00        		.zero	1
+ 234 005a 0000      		.word	m_b_combo
+ 235 005c 3500      		.word	53
+ 236 005e 00        		.zero	1
+ 237 005f 0000      		.word	j_w_combo
+ 238 0061 2800      		.word	40
+ 239 0063 00        		.zero	1
+ 240 0064 0000 0000 		.zero	90
+ 240      0000 0000 
+ 240      0000 0000 
+ 240      0000 0000 
+ 240      0000 0000 
+ 241               	.global	j_w_combo
+ 242               		.section	.progmem.data.j_w_combo,"a"
+ 245               	j_w_combo:
+ 246 0000 0D00      		.word	13
+ 247 0002 1A00      		.word	26
+ 248 0004 0000      		.word	0
+ 249               	.global	m_b_combo
+ 250               		.section	.progmem.data.m_b_combo,"a"
+ 253               	m_b_combo:
+ 254 0000 1000      		.word	16
+ 255 0002 0500      		.word	5
+ 256 0004 0000      		.word	0
+ 257               	.global	v_m_combo
+ 258               		.section	.progmem.data.v_m_combo,"a"
+ 261               	v_m_combo:
+ 262 0000 1900      		.word	25
+ 263 0002 1000      		.word	16
+ 264 0004 0000      		.word	0
+ 265               	.global	w_m_combo
+ 266               		.section	.progmem.data.w_m_combo,"a"
+ 269               	w_m_combo:
+ 270 0000 1A00      		.word	26
+ 271 0002 1000      		.word	16
+ 272 0004 0000      		.word	0
+ 273               	.global	v_w_combo
+ 274               		.section	.progmem.data.v_w_combo,"a"
+ 277               	v_w_combo:
+ 278 0000 1900      		.word	25
+ 279 0002 1A00      		.word	26
+ 280 0004 0000      		.word	0
+ 281               	.global	g_f_combo
+ 282               		.section	.progmem.data.g_f_combo,"a"
+ 285               	g_f_combo:
+ 286 0000 0A00      		.word	10
+ 287 0002 0900      		.word	9
+ 288 0004 0000      		.word	0
+ 289               	.global	r_g_combo
+ 290               		.section	.progmem.data.r_g_combo,"a"
+ 293               	r_g_combo:
+ 294 0000 1500      		.word	21
+ 295 0002 0A00      		.word	10
+ 296 0004 0000      		.word	0
+ 297               	.global	c_g_combo
+ 298               		.section	.progmem.data.c_g_combo,"a"
+ 301               	c_g_combo:
+ 302 0000 0600      		.word	6
+ 303 0002 0A00      		.word	10
+ 304 0004 0000      		.word	0
+ 305               	.global	r_c_combo
+ 306               		.section	.progmem.data.r_c_combo,"a"
+ 309               	r_c_combo:
+ 310 0000 1500      		.word	21
+ 311 0002 0600      		.word	6
+ 312 0004 0000      		.word	0
+ 313               	.global	l_r_combo
+ 314               		.section	.progmem.data.l_r_combo,"a"
+ 317               	l_r_combo:
+ 318 0000 0F00      		.word	15
+ 319 0002 1500      		.word	21
+ 320 0004 0000      		.word	0
+ 321               	.global	k_x_combo
+ 322               		.section	.progmem.data.k_x_combo,"a"
+ 325               	k_x_combo:
+ 326 0000 0E00      		.word	14
+ 327 0002 1B00      		.word	27
+ 328 0004 0000      		.word	0
+ 329               	.global	q_k_combo
+ 330               		.section	.progmem.data.q_k_combo,"a"
+ 333               	q_k_combo:
+ 334 0000 1400      		.word	20
+ 335 0002 0E00      		.word	14
+ 336 0004 0000      		.word	0
+ 337               	.global	j_k_combo
+ 338               		.section	.progmem.data.j_k_combo,"a"
+ 341               	j_k_combo:
+ 342 0000 0D00      		.word	13
+ 343 0002 0E00      		.word	14
+ 344 0004 0000      		.word	0
+ 345               	.global	q_j_combo
+ 346               		.section	.progmem.data.q_j_combo,"a"
+ 349               	q_j_combo:
+ 350 0000 1400      		.word	20
+ 351 0002 0D00      		.word	13
+ 352 0004 0000      		.word	0
+ 353               	.global	quot_q_combo
+ 354               		.section	.progmem.data.quot_q_combo,"a"
+ 357               	quot_q_combo:
+ 358 0000 3400      		.word	52
+ 359 0002 1400      		.word	20
+ 360 0004 0000      		.word	0
+ 361               	.global	comma_p_combo
+ 362               		.section	.progmem.data.comma_p_combo,"a"
+ 365               	comma_p_combo:
+ 366 0000 3600      		.word	54
+ 367 0002 1300      		.word	19
+ 368 0004 0000      		.word	0
+ 369               	.global	p_y_combo
+ 370               		.section	.progmem.data.p_y_combo,"a"
+ 373               	p_y_combo:
+ 374 0000 1300      		.word	19
+ 375 0002 1C00      		.word	28
+ 376 0004 0000      		.word	0
+ 377               	.global	dot_p_combo
+ 378               		.section	.progmem.data.dot_p_combo,"a"
+ 381               	dot_p_combo:
+ 382 0000 3700      		.word	55
+ 383 0002 1300      		.word	19
+ 384 0004 0000      		.word	0
+ 385               	.global	comma_dot_combo
+ 386               		.section	.progmem.data.comma_dot_combo,"a"
+ 389               	comma_dot_combo:
+ 390 0000 3600      		.word	54
+ 391 0002 3700      		.word	55
+ 392 0004 0000      		.word	0
+ 393               	.global	colon_comma_combo
+ 394               		.section	.progmem.data.colon_comma_combo,"a"
+ 397               	colon_comma_combo:
+ 398 0000 3300      		.word	51
+ 399 0002 3600      		.word	54
+ 400 0004 0000      		.word	0
+ 401               		.text
+ 402               	.Letext0:
+ 403               		.file 1 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 404               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
+ 405               		.file 3 "tmk_core/common/keycode.h"
+ 406               		.file 4 "tmk_core/common/action_code.h"
+ 407               		.file 5 "tmk_core/common/report.h"
+ 408               		.file 6 "tmk_core/common/action.h"
+ 409               		.file 7 "tmk_core/common/host.h"
+ 410               		.file 8 "tmk_core/common/avr/xprintf.h"
+ 411               		.file 9 "tmk_core/common/debug.h"
+ 412               		.file 10 "quantum/keycode_config.h"
+ 413               		.file 11 "quantum/quantum_keycodes.h"
+ 414               		.file 12 "quantum/keymap.h"
+ 415               		.file 13 "tmk_core/common/action_layer.h"
+ 416               		.file 14 "tmk_core/common/timer.h"
+ 417               		.file 15 "tmk_core/common/action_util.h"
+ 418               		.file 16 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdlib.h"
+ 419               		.file 17 "quantum/process_keycode/process_combo.h"
+ 420               		.file 18 "quantum/quantum.h"
+ 421               		.file 19 "keyboards/squiggle/keymaps/rick/keymap.c"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 keymap.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:14     .progmem.data.keymaps:0000000000000000 keymaps
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:179    .data.key_combos:0000000000000000 key_combos
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:397    .progmem.data.colon_comma_combo:0000000000000000 colon_comma_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:389    .progmem.data.comma_dot_combo:0000000000000000 comma_dot_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:381    .progmem.data.dot_p_combo:0000000000000000 dot_p_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:373    .progmem.data.p_y_combo:0000000000000000 p_y_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:365    .progmem.data.comma_p_combo:0000000000000000 comma_p_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:357    .progmem.data.quot_q_combo:0000000000000000 quot_q_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:349    .progmem.data.q_j_combo:0000000000000000 q_j_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:341    .progmem.data.j_k_combo:0000000000000000 j_k_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:333    .progmem.data.q_k_combo:0000000000000000 q_k_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:325    .progmem.data.k_x_combo:0000000000000000 k_x_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:317    .progmem.data.l_r_combo:0000000000000000 l_r_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:309    .progmem.data.r_c_combo:0000000000000000 r_c_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:301    .progmem.data.c_g_combo:0000000000000000 c_g_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:293    .progmem.data.r_g_combo:0000000000000000 r_g_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:285    .progmem.data.g_f_combo:0000000000000000 g_f_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:277    .progmem.data.v_w_combo:0000000000000000 v_w_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:269    .progmem.data.w_m_combo:0000000000000000 w_m_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:261    .progmem.data.v_m_combo:0000000000000000 v_m_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:253    .progmem.data.m_b_combo:0000000000000000 m_b_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccuPk01G.s:245    .progmem.data.j_w_combo:0000000000000000 j_w_combo
+
+UNDEFINED SYMBOLS
+__do_copy_data

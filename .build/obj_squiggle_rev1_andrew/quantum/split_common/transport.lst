@@ -1,0 +1,500 @@
+   1               		.file	"transport.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.transport_master_init,"ax",@progbits
+  11               	.global	transport_master_init
+  13               	transport_master_init:
+  14               	.LFB19:
+  15               		.file 1 "quantum/split_common/transport.c"
+   1:quantum/split_common/transport.c **** #include <string.h>
+   2:quantum/split_common/transport.c **** #include <stddef.h>
+   3:quantum/split_common/transport.c **** 
+   4:quantum/split_common/transport.c **** #include "config.h"
+   5:quantum/split_common/transport.c **** #include "matrix.h"
+   6:quantum/split_common/transport.c **** #include "quantum.h"
+   7:quantum/split_common/transport.c **** 
+   8:quantum/split_common/transport.c **** #define ROWS_PER_HAND (MATRIX_ROWS / 2)
+   9:quantum/split_common/transport.c **** 
+  10:quantum/split_common/transport.c **** #ifdef RGBLIGHT_ENABLE
+  11:quantum/split_common/transport.c **** #    include "rgblight.h"
+  12:quantum/split_common/transport.c **** #endif
+  13:quantum/split_common/transport.c **** 
+  14:quantum/split_common/transport.c **** #ifdef BACKLIGHT_ENABLE
+  15:quantum/split_common/transport.c **** #    include "backlight.h"
+  16:quantum/split_common/transport.c **** #endif
+  17:quantum/split_common/transport.c **** 
+  18:quantum/split_common/transport.c **** #ifdef ENCODER_ENABLE
+  19:quantum/split_common/transport.c **** #    include "encoder.h"
+  20:quantum/split_common/transport.c **** static pin_t encoders_pad[] = ENCODERS_PAD_A;
+  21:quantum/split_common/transport.c **** #    define NUMBER_OF_ENCODERS (sizeof(encoders_pad) / sizeof(pin_t))
+  22:quantum/split_common/transport.c **** #endif
+  23:quantum/split_common/transport.c **** 
+  24:quantum/split_common/transport.c **** #if defined(USE_I2C)
+  25:quantum/split_common/transport.c **** 
+  26:quantum/split_common/transport.c **** #    include "i2c_master.h"
+  27:quantum/split_common/transport.c **** #    include "i2c_slave.h"
+  28:quantum/split_common/transport.c **** 
+  29:quantum/split_common/transport.c **** typedef struct _I2C_slave_buffer_t {
+  30:quantum/split_common/transport.c ****     matrix_row_t smatrix[ROWS_PER_HAND];
+  31:quantum/split_common/transport.c ****     uint8_t      backlight_level;
+  32:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+  33:quantum/split_common/transport.c ****     rgblight_syncinfo_t rgblight_sync;
+  34:quantum/split_common/transport.c **** #    endif
+  35:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+  36:quantum/split_common/transport.c ****     uint8_t encoder_state[NUMBER_OF_ENCODERS];
+  37:quantum/split_common/transport.c **** #    endif
+  38:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+  39:quantum/split_common/transport.c ****     uint8_t current_wpm;
+  40:quantum/split_common/transport.c **** #    endif
+  41:quantum/split_common/transport.c **** } I2C_slave_buffer_t;
+  42:quantum/split_common/transport.c **** 
+  43:quantum/split_common/transport.c **** static I2C_slave_buffer_t *const i2c_buffer = (I2C_slave_buffer_t *)i2c_slave_reg;
+  44:quantum/split_common/transport.c **** 
+  45:quantum/split_common/transport.c **** #    define I2C_BACKLIGHT_START offsetof(I2C_slave_buffer_t, backlight_level)
+  46:quantum/split_common/transport.c **** #    define I2C_RGB_START offsetof(I2C_slave_buffer_t, rgblight_sync)
+  47:quantum/split_common/transport.c **** #    define I2C_KEYMAP_START offsetof(I2C_slave_buffer_t, smatrix)
+  48:quantum/split_common/transport.c **** #    define I2C_ENCODER_START offsetof(I2C_slave_buffer_t, encoder_state)
+  49:quantum/split_common/transport.c **** #    define I2C_WPM_START offsetof(I2C_slave_buffer_t, current_wpm)
+  50:quantum/split_common/transport.c **** 
+  51:quantum/split_common/transport.c **** #    define TIMEOUT 100
+  52:quantum/split_common/transport.c **** 
+  53:quantum/split_common/transport.c **** #    ifndef SLAVE_I2C_ADDRESS
+  54:quantum/split_common/transport.c **** #        define SLAVE_I2C_ADDRESS 0x32
+  55:quantum/split_common/transport.c **** #    endif
+  56:quantum/split_common/transport.c **** 
+  57:quantum/split_common/transport.c **** // Get rows from other half over i2c
+  58:quantum/split_common/transport.c **** bool transport_master(matrix_row_t matrix[]) {
+  59:quantum/split_common/transport.c ****     i2c_readReg(SLAVE_I2C_ADDRESS, I2C_KEYMAP_START, (void *)matrix, sizeof(i2c_buffer->smatrix), T
+  60:quantum/split_common/transport.c **** 
+  61:quantum/split_common/transport.c ****     // write backlight info
+  62:quantum/split_common/transport.c **** #    ifdef BACKLIGHT_ENABLE
+  63:quantum/split_common/transport.c ****     uint8_t level = is_backlight_enabled() ? get_backlight_level() : 0;
+  64:quantum/split_common/transport.c ****     if (level != i2c_buffer->backlight_level) {
+  65:quantum/split_common/transport.c ****         if (i2c_writeReg(SLAVE_I2C_ADDRESS, I2C_BACKLIGHT_START, (void *)&level, sizeof(level), TIM
+  66:quantum/split_common/transport.c ****             i2c_buffer->backlight_level = level;
+  67:quantum/split_common/transport.c ****         }
+  68:quantum/split_common/transport.c ****     }
+  69:quantum/split_common/transport.c **** #    endif
+  70:quantum/split_common/transport.c **** 
+  71:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+  72:quantum/split_common/transport.c ****     if (rgblight_get_change_flags()) {
+  73:quantum/split_common/transport.c ****         rgblight_syncinfo_t rgblight_sync;
+  74:quantum/split_common/transport.c ****         rgblight_get_syncinfo(&rgblight_sync);
+  75:quantum/split_common/transport.c ****         if (i2c_writeReg(SLAVE_I2C_ADDRESS, I2C_RGB_START, (void *)&rgblight_sync, sizeof(rgblight_
+  76:quantum/split_common/transport.c ****             rgblight_clear_change_flags();
+  77:quantum/split_common/transport.c ****         }
+  78:quantum/split_common/transport.c ****     }
+  79:quantum/split_common/transport.c **** #    endif
+  80:quantum/split_common/transport.c **** 
+  81:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+  82:quantum/split_common/transport.c ****     i2c_readReg(SLAVE_I2C_ADDRESS, I2C_ENCODER_START, (void *)i2c_buffer->encoder_state, sizeof(i2c
+  83:quantum/split_common/transport.c ****     encoder_update_raw(i2c_buffer->encoder_state);
+  84:quantum/split_common/transport.c **** #    endif
+  85:quantum/split_common/transport.c **** 
+  86:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+  87:quantum/split_common/transport.c ****     uint8_t current_wpm = get_current_wpm();
+  88:quantum/split_common/transport.c ****     if (current_wpm != i2c_buffer->current_wpm) {
+  89:quantum/split_common/transport.c ****         if (i2c_writeReg(SLAVE_I2C_ADDRESS, I2C_WPM_START, (void *)&current_wpm, sizeof(current_wpm
+  90:quantum/split_common/transport.c ****             i2c_buffer->current_wpm = current_wpm;
+  91:quantum/split_common/transport.c ****         }
+  92:quantum/split_common/transport.c ****     }
+  93:quantum/split_common/transport.c **** #    endif
+  94:quantum/split_common/transport.c ****     return true;
+  95:quantum/split_common/transport.c **** }
+  96:quantum/split_common/transport.c **** 
+  97:quantum/split_common/transport.c **** void transport_slave(matrix_row_t matrix[]) {
+  98:quantum/split_common/transport.c ****     // Copy matrix to I2C buffer
+  99:quantum/split_common/transport.c ****     memcpy((void *)i2c_buffer->smatrix, (void *)matrix, sizeof(i2c_buffer->smatrix));
+ 100:quantum/split_common/transport.c **** 
+ 101:quantum/split_common/transport.c **** // Read Backlight Info
+ 102:quantum/split_common/transport.c **** #    ifdef BACKLIGHT_ENABLE
+ 103:quantum/split_common/transport.c ****     backlight_set(i2c_buffer->backlight_level);
+ 104:quantum/split_common/transport.c **** #    endif
+ 105:quantum/split_common/transport.c **** 
+ 106:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+ 107:quantum/split_common/transport.c ****     // Update the RGB with the new data
+ 108:quantum/split_common/transport.c ****     if (i2c_buffer->rgblight_sync.status.change_flags != 0) {
+ 109:quantum/split_common/transport.c ****         rgblight_update_sync(&i2c_buffer->rgblight_sync, false);
+ 110:quantum/split_common/transport.c ****         i2c_buffer->rgblight_sync.status.change_flags = 0;
+ 111:quantum/split_common/transport.c ****     }
+ 112:quantum/split_common/transport.c **** #    endif
+ 113:quantum/split_common/transport.c **** 
+ 114:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+ 115:quantum/split_common/transport.c ****     encoder_state_raw(i2c_buffer->encoder_state);
+ 116:quantum/split_common/transport.c **** #    endif
+ 117:quantum/split_common/transport.c **** 
+ 118:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+ 119:quantum/split_common/transport.c ****     set_current_wpm(i2c_buffer->current_wpm);
+ 120:quantum/split_common/transport.c **** #    endif
+ 121:quantum/split_common/transport.c **** }
+ 122:quantum/split_common/transport.c **** 
+ 123:quantum/split_common/transport.c **** void transport_master_init(void) { i2c_init(); }
+ 124:quantum/split_common/transport.c **** 
+ 125:quantum/split_common/transport.c **** void transport_slave_init(void) { i2c_slave_init(SLAVE_I2C_ADDRESS); }
+ 126:quantum/split_common/transport.c **** 
+ 127:quantum/split_common/transport.c **** #else  // USE_SERIAL
+ 128:quantum/split_common/transport.c **** 
+ 129:quantum/split_common/transport.c **** #    include "serial.h"
+ 130:quantum/split_common/transport.c **** 
+ 131:quantum/split_common/transport.c **** typedef struct _Serial_s2m_buffer_t {
+ 132:quantum/split_common/transport.c ****     // TODO: if MATRIX_COLS > 8 change to uint8_t packed_matrix[] for pack/unpack
+ 133:quantum/split_common/transport.c ****     matrix_row_t smatrix[ROWS_PER_HAND];
+ 134:quantum/split_common/transport.c **** 
+ 135:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+ 136:quantum/split_common/transport.c ****     uint8_t      encoder_state[NUMBER_OF_ENCODERS];
+ 137:quantum/split_common/transport.c **** #    endif
+ 138:quantum/split_common/transport.c **** 
+ 139:quantum/split_common/transport.c **** } Serial_s2m_buffer_t;
+ 140:quantum/split_common/transport.c **** 
+ 141:quantum/split_common/transport.c **** typedef struct _Serial_m2s_buffer_t {
+ 142:quantum/split_common/transport.c **** #    ifdef BACKLIGHT_ENABLE
+ 143:quantum/split_common/transport.c ****     uint8_t backlight_level;
+ 144:quantum/split_common/transport.c **** #    endif
+ 145:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+ 146:quantum/split_common/transport.c ****     uint8_t current_wpm;
+ 147:quantum/split_common/transport.c **** #    endif
+ 148:quantum/split_common/transport.c **** } Serial_m2s_buffer_t;
+ 149:quantum/split_common/transport.c **** 
+ 150:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+ 151:quantum/split_common/transport.c **** // When MCUs on both sides drive their respective RGB LED chains,
+ 152:quantum/split_common/transport.c **** // it is necessary to synchronize, so it is necessary to communicate RGB
+ 153:quantum/split_common/transport.c **** // information. In that case, define RGBLIGHT_SPLIT with info on the number
+ 154:quantum/split_common/transport.c **** // of LEDs on each half.
+ 155:quantum/split_common/transport.c **** //
+ 156:quantum/split_common/transport.c **** // Otherwise, if the master side MCU drives both sides RGB LED chains,
+ 157:quantum/split_common/transport.c **** // there is no need to communicate.
+ 158:quantum/split_common/transport.c **** 
+ 159:quantum/split_common/transport.c **** typedef struct _Serial_rgblight_t {
+ 160:quantum/split_common/transport.c ****     rgblight_syncinfo_t rgblight_sync;
+ 161:quantum/split_common/transport.c **** } Serial_rgblight_t;
+ 162:quantum/split_common/transport.c **** 
+ 163:quantum/split_common/transport.c **** volatile Serial_rgblight_t serial_rgblight = {};
+ 164:quantum/split_common/transport.c **** uint8_t volatile status_rgblight           = 0;
+ 165:quantum/split_common/transport.c **** #    endif
+ 166:quantum/split_common/transport.c **** 
+ 167:quantum/split_common/transport.c **** volatile Serial_s2m_buffer_t serial_s2m_buffer = {};
+ 168:quantum/split_common/transport.c **** volatile Serial_m2s_buffer_t serial_m2s_buffer = {};
+ 169:quantum/split_common/transport.c **** uint8_t volatile status0                       = 0;
+ 170:quantum/split_common/transport.c **** 
+ 171:quantum/split_common/transport.c **** enum serial_transaction_id {
+ 172:quantum/split_common/transport.c ****     GET_SLAVE_MATRIX = 0,
+ 173:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+ 174:quantum/split_common/transport.c ****     PUT_RGBLIGHT,
+ 175:quantum/split_common/transport.c **** #    endif
+ 176:quantum/split_common/transport.c **** };
+ 177:quantum/split_common/transport.c **** 
+ 178:quantum/split_common/transport.c **** SSTD_t transactions[] = {
+ 179:quantum/split_common/transport.c ****     [GET_SLAVE_MATRIX] =
+ 180:quantum/split_common/transport.c ****         {
+ 181:quantum/split_common/transport.c ****             (uint8_t *)&status0,
+ 182:quantum/split_common/transport.c ****             sizeof(serial_m2s_buffer),
+ 183:quantum/split_common/transport.c ****             (uint8_t *)&serial_m2s_buffer,
+ 184:quantum/split_common/transport.c ****             sizeof(serial_s2m_buffer),
+ 185:quantum/split_common/transport.c ****             (uint8_t *)&serial_s2m_buffer,
+ 186:quantum/split_common/transport.c ****         },
+ 187:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+ 188:quantum/split_common/transport.c ****     [PUT_RGBLIGHT] =
+ 189:quantum/split_common/transport.c ****         {
+ 190:quantum/split_common/transport.c ****             (uint8_t *)&status_rgblight, sizeof(serial_rgblight), (uint8_t *)&serial_rgblight, 0, N
+ 191:quantum/split_common/transport.c ****         },
+ 192:quantum/split_common/transport.c **** #    endif
+ 193:quantum/split_common/transport.c **** };
+ 194:quantum/split_common/transport.c **** 
+ 195:quantum/split_common/transport.c **** void transport_master_init(void) { soft_serial_initiator_init(transactions, TID_LIMIT(transactions)
+  16               		.loc 1 195 34 view -0
+  17               		.cfi_startproc
+  18               	/* prologue: function */
+  19               	/* frame size = 0 */
+  20               	/* stack size = 0 */
+  21               	.L__stack_usage = 0
+  22               		.loc 1 195 36 view .LVU1
+  23 0000 61E0      		ldi r22,lo8(1)
+  24 0002 70E0      		ldi r23,0
+  25 0004 80E0      		ldi r24,lo8(transactions)
+  26 0006 90E0      		ldi r25,hi8(transactions)
+  27 0008 0C94 0000 		jmp soft_serial_initiator_init
+  28               	.LVL0:
+  29               		.cfi_endproc
+  30               	.LFE19:
+  32               		.section	.text.transport_slave_init,"ax",@progbits
+  33               	.global	transport_slave_init
+  35               	transport_slave_init:
+  36               	.LFB20:
+ 196:quantum/split_common/transport.c **** 
+ 197:quantum/split_common/transport.c **** void transport_slave_init(void) { soft_serial_target_init(transactions, TID_LIMIT(transactions)); }
+  37               		.loc 1 197 33 view -0
+  38               		.cfi_startproc
+  39               	/* prologue: function */
+  40               	/* frame size = 0 */
+  41               	/* stack size = 0 */
+  42               	.L__stack_usage = 0
+  43               		.loc 1 197 35 view .LVU3
+  44 0000 61E0      		ldi r22,lo8(1)
+  45 0002 70E0      		ldi r23,0
+  46 0004 80E0      		ldi r24,lo8(transactions)
+  47 0006 90E0      		ldi r25,hi8(transactions)
+  48 0008 0C94 0000 		jmp soft_serial_target_init
+  49               	.LVL1:
+  50               		.cfi_endproc
+  51               	.LFE20:
+  53               		.section	.text.transport_master,"ax",@progbits
+  54               	.global	transport_master
+  56               	transport_master:
+  57               	.LVL2:
+  58               	.LFB21:
+ 198:quantum/split_common/transport.c **** 
+ 199:quantum/split_common/transport.c **** #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+ 200:quantum/split_common/transport.c **** 
+ 201:quantum/split_common/transport.c **** // rgblight synchronization information communication.
+ 202:quantum/split_common/transport.c **** 
+ 203:quantum/split_common/transport.c **** void transport_rgblight_master(void) {
+ 204:quantum/split_common/transport.c ****     if (rgblight_get_change_flags()) {
+ 205:quantum/split_common/transport.c ****         rgblight_get_syncinfo((rgblight_syncinfo_t *)&serial_rgblight.rgblight_sync);
+ 206:quantum/split_common/transport.c ****         if (soft_serial_transaction(PUT_RGBLIGHT) == TRANSACTION_END) {
+ 207:quantum/split_common/transport.c ****             rgblight_clear_change_flags();
+ 208:quantum/split_common/transport.c ****         }
+ 209:quantum/split_common/transport.c ****     }
+ 210:quantum/split_common/transport.c **** }
+ 211:quantum/split_common/transport.c **** 
+ 212:quantum/split_common/transport.c **** void transport_rgblight_slave(void) {
+ 213:quantum/split_common/transport.c ****     if (status_rgblight == TRANSACTION_ACCEPTED) {
+ 214:quantum/split_common/transport.c ****         rgblight_update_sync((rgblight_syncinfo_t *)&serial_rgblight.rgblight_sync, false);
+ 215:quantum/split_common/transport.c ****         status_rgblight = TRANSACTION_END;
+ 216:quantum/split_common/transport.c ****     }
+ 217:quantum/split_common/transport.c **** }
+ 218:quantum/split_common/transport.c **** 
+ 219:quantum/split_common/transport.c **** #    else
+ 220:quantum/split_common/transport.c **** #        define transport_rgblight_master()
+ 221:quantum/split_common/transport.c **** #        define transport_rgblight_slave()
+ 222:quantum/split_common/transport.c **** #    endif
+ 223:quantum/split_common/transport.c **** 
+ 224:quantum/split_common/transport.c **** bool transport_master(matrix_row_t matrix[]) {
+  59               		.loc 1 224 46 view -0
+  60               		.cfi_startproc
+  61               		.loc 1 224 46 is_stmt 0 view .LVU5
+  62 0000 CF93      		push r28
+  63               	.LCFI0:
+  64               		.cfi_def_cfa_offset 3
+  65               		.cfi_offset 28, -2
+  66 0002 DF93      		push r29
+  67               	.LCFI1:
+  68               		.cfi_def_cfa_offset 4
+  69               		.cfi_offset 29, -3
+  70               	/* prologue: function */
+  71               	/* frame size = 0 */
+  72               	/* stack size = 2 */
+  73               	.L__stack_usage = 2
+  74 0004 D82F      		mov r29,r24
+  75 0006 C92F      		mov r28,r25
+ 225:quantum/split_common/transport.c **** #    ifndef SERIAL_USE_MULTI_TRANSACTION
+ 226:quantum/split_common/transport.c ****     if (soft_serial_transaction() != TRANSACTION_END) {
+  76               		.loc 1 226 5 is_stmt 1 view .LVU6
+  77               		.loc 1 226 9 is_stmt 0 view .LVU7
+  78 0008 0E94 0000 		call soft_serial_transaction
+  79               	.LVL3:
+  80               		.loc 1 226 8 view .LVU8
+  81 000c 0097      		sbiw r24,0
+  82 000e 01F4      		brne .L6
+  83 0010 ED2F      		mov r30,r29
+  84 0012 FC2F      		mov r31,r28
+  85               	.L5:
+  86               	.LVL4:
+  87               	.LBB2:
+ 227:quantum/split_common/transport.c ****         return false;
+ 228:quantum/split_common/transport.c ****     }
+ 229:quantum/split_common/transport.c **** #    else
+ 230:quantum/split_common/transport.c ****     transport_rgblight_master();
+ 231:quantum/split_common/transport.c ****     if (soft_serial_transaction(GET_SLAVE_MATRIX) != TRANSACTION_END) {
+ 232:quantum/split_common/transport.c ****         return false;
+ 233:quantum/split_common/transport.c ****     }
+ 234:quantum/split_common/transport.c **** #    endif
+ 235:quantum/split_common/transport.c **** 
+ 236:quantum/split_common/transport.c ****     // TODO:  if MATRIX_COLS > 8 change to unpack()
+ 237:quantum/split_common/transport.c ****     for (int i = 0; i < ROWS_PER_HAND; ++i) {
+ 238:quantum/split_common/transport.c ****         matrix[i] = serial_s2m_buffer.smatrix[i];
+  88               		.loc 1 238 9 is_stmt 1 discriminator 3 view .LVU9
+  89               		.loc 1 238 46 is_stmt 0 discriminator 3 view .LVU10
+  90 0014 DC01      		movw r26,r24
+  91 0016 A050      		subi r26,lo8(-(serial_s2m_buffer))
+  92 0018 B040      		sbci r27,hi8(-(serial_s2m_buffer))
+  93 001a 2C91      		ld r18,X
+  94               		.loc 1 238 19 discriminator 3 view .LVU11
+  95 001c 2193      		st Z+,r18
+ 237:quantum/split_common/transport.c ****         matrix[i] = serial_s2m_buffer.smatrix[i];
+  96               		.loc 1 237 40 is_stmt 1 discriminator 3 view .LVU12
+  97 001e 0196      		adiw r24,1
+  98               	.LVL5:
+ 237:quantum/split_common/transport.c ****         matrix[i] = serial_s2m_buffer.smatrix[i];
+  99               		.loc 1 237 21 discriminator 3 view .LVU13
+ 237:quantum/split_common/transport.c ****         matrix[i] = serial_s2m_buffer.smatrix[i];
+ 100               		.loc 1 237 5 is_stmt 0 discriminator 3 view .LVU14
+ 101 0020 8430      		cpi r24,4
+ 102 0022 9105      		cpc r25,__zero_reg__
+ 103 0024 01F4      		brne .L5
+ 104               	.LBE2:
+ 239:quantum/split_common/transport.c ****     }
+ 240:quantum/split_common/transport.c **** 
+ 241:quantum/split_common/transport.c **** #    ifdef BACKLIGHT_ENABLE
+ 242:quantum/split_common/transport.c ****     // Write backlight level for slave to read
+ 243:quantum/split_common/transport.c ****     serial_m2s_buffer.backlight_level = is_backlight_enabled() ? get_backlight_level() : 0;
+ 244:quantum/split_common/transport.c **** #    endif
+ 245:quantum/split_common/transport.c **** 
+ 246:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+ 247:quantum/split_common/transport.c ****     encoder_update_raw((uint8_t *)serial_s2m_buffer.encoder_state);
+ 248:quantum/split_common/transport.c **** #    endif
+ 249:quantum/split_common/transport.c **** 
+ 250:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+ 251:quantum/split_common/transport.c ****     // Write wpm to slave
+ 252:quantum/split_common/transport.c ****     serial_m2s_buffer.current_wpm = get_current_wpm();
+ 253:quantum/split_common/transport.c **** #    endif
+ 254:quantum/split_common/transport.c ****     return true;
+ 105               		.loc 1 254 12 view .LVU15
+ 106 0026 81E0      		ldi r24,lo8(1)
+ 107               	.LVL6:
+ 108               	.L3:
+ 109               	/* epilogue start */
+ 255:quantum/split_common/transport.c **** }
+ 110               		.loc 1 255 1 view .LVU16
+ 111 0028 DF91      		pop r29
+ 112 002a CF91      		pop r28
+ 113 002c 0895      		ret
+ 114               	.L6:
+ 227:quantum/split_common/transport.c ****     }
+ 115               		.loc 1 227 16 view .LVU17
+ 116 002e 80E0      		ldi r24,0
+ 117 0030 00C0      		rjmp .L3
+ 118               		.cfi_endproc
+ 119               	.LFE21:
+ 121               		.section	.text.transport_slave,"ax",@progbits
+ 122               	.global	transport_slave
+ 124               	transport_slave:
+ 125               	.LVL7:
+ 126               	.LFB22:
+ 256:quantum/split_common/transport.c **** 
+ 257:quantum/split_common/transport.c **** void transport_slave(matrix_row_t matrix[]) {
+ 127               		.loc 1 257 45 is_stmt 1 view -0
+ 128               		.cfi_startproc
+ 129               	/* prologue: function */
+ 130               	/* frame size = 0 */
+ 131               	/* stack size = 0 */
+ 132               	.L__stack_usage = 0
+ 258:quantum/split_common/transport.c ****     transport_rgblight_slave();
+ 133               		.loc 1 258 31 view .LVU19
+ 259:quantum/split_common/transport.c ****     // TODO: if MATRIX_COLS > 8 change to pack()
+ 260:quantum/split_common/transport.c ****     for (int i = 0; i < ROWS_PER_HAND; ++i) {
+ 134               		.loc 1 260 5 view .LVU20
+ 135               	.LBB3:
+ 136               		.loc 1 260 10 view .LVU21
+ 137               		.loc 1 260 21 view .LVU22
+ 138               		.loc 1 260 14 is_stmt 0 view .LVU23
+ 139 0000 30E0      		ldi r19,0
+ 140 0002 20E0      		ldi r18,0
+ 141               	.LVL8:
+ 142               	.L9:
+ 261:quantum/split_common/transport.c ****         serial_s2m_buffer.smatrix[i] = matrix[i];
+ 143               		.loc 1 261 9 is_stmt 1 discriminator 3 view .LVU24
+ 144               		.loc 1 261 46 is_stmt 0 discriminator 3 view .LVU25
+ 145 0004 FC01      		movw r30,r24
+ 146 0006 4191      		ld r20,Z+
+ 147 0008 CF01      		movw r24,r30
+ 148               		.loc 1 261 38 discriminator 3 view .LVU26
+ 149 000a F901      		movw r30,r18
+ 150 000c E050      		subi r30,lo8(-(serial_s2m_buffer))
+ 151 000e F040      		sbci r31,hi8(-(serial_s2m_buffer))
+ 152 0010 4083      		st Z,r20
+ 260:quantum/split_common/transport.c ****         serial_s2m_buffer.smatrix[i] = matrix[i];
+ 153               		.loc 1 260 40 is_stmt 1 discriminator 3 view .LVU27
+ 154 0012 2F5F      		subi r18,-1
+ 155 0014 3F4F      		sbci r19,-1
+ 156               	.LVL9:
+ 260:quantum/split_common/transport.c ****         serial_s2m_buffer.smatrix[i] = matrix[i];
+ 157               		.loc 1 260 21 discriminator 3 view .LVU28
+ 260:quantum/split_common/transport.c ****         serial_s2m_buffer.smatrix[i] = matrix[i];
+ 158               		.loc 1 260 5 is_stmt 0 discriminator 3 view .LVU29
+ 159 0016 2430      		cpi r18,4
+ 160 0018 3105      		cpc r19,__zero_reg__
+ 161 001a 01F4      		brne .L9
+ 162               	/* epilogue start */
+ 163               	.LBE3:
+ 262:quantum/split_common/transport.c ****     }
+ 263:quantum/split_common/transport.c **** #    ifdef BACKLIGHT_ENABLE
+ 264:quantum/split_common/transport.c ****     backlight_set(serial_m2s_buffer.backlight_level);
+ 265:quantum/split_common/transport.c **** #    endif
+ 266:quantum/split_common/transport.c **** 
+ 267:quantum/split_common/transport.c **** #    ifdef ENCODER_ENABLE
+ 268:quantum/split_common/transport.c ****     encoder_state_raw((uint8_t *)serial_s2m_buffer.encoder_state);
+ 269:quantum/split_common/transport.c **** #    endif
+ 270:quantum/split_common/transport.c **** 
+ 271:quantum/split_common/transport.c **** #    ifdef WPM_ENABLE
+ 272:quantum/split_common/transport.c ****     set_current_wpm(serial_m2s_buffer.current_wpm);
+ 273:quantum/split_common/transport.c **** #    endif
+ 274:quantum/split_common/transport.c **** }
+ 164               		.loc 1 274 1 view .LVU30
+ 165 001c 0895      		ret
+ 166               		.cfi_endproc
+ 167               	.LFE22:
+ 169               	.global	transactions
+ 170               		.section	.data.transactions,"aw"
+ 173               	transactions:
+ 174 0000 0000      		.word	status0
+ 175 0002 00        		.byte	0
+ 176 0003 0000      		.word	serial_m2s_buffer
+ 177 0005 04        		.byte	4
+ 178 0006 0000      		.word	serial_s2m_buffer
+ 179               	.global	status0
+ 180               		.section	.bss.status0,"aw",@nobits
+ 183               	status0:
+ 184 0000 00        		.zero	1
+ 185               	.global	serial_m2s_buffer
+ 186               		.section	.bss.serial_m2s_buffer,"aw",@nobits
+ 189               	serial_m2s_buffer:
+ 190               	.global	serial_s2m_buffer
+ 191               		.section	.bss.serial_s2m_buffer,"aw",@nobits
+ 194               	serial_s2m_buffer:
+ 195 0000 0000 0000 		.zero	4
+ 196               		.text
+ 197               	.Letext0:
+ 198               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 199               		.file 3 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
+ 200               		.file 4 "tmk_core/common/matrix.h"
+ 201               		.file 5 "tmk_core/common/report.h"
+ 202               		.file 6 "tmk_core/common/action.h"
+ 203               		.file 7 "tmk_core/common/host.h"
+ 204               		.file 8 "tmk_core/common/avr/xprintf.h"
+ 205               		.file 9 "tmk_core/common/debug.h"
+ 206               		.file 10 "quantum/keycode_config.h"
+ 207               		.file 11 "quantum/keymap.h"
+ 208               		.file 12 "tmk_core/common/action_layer.h"
+ 209               		.file 13 "tmk_core/common/timer.h"
+ 210               		.file 14 "tmk_core/common/action_util.h"
+ 211               		.file 15 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdlib.h"
+ 212               		.file 16 "quantum/quantum.h"
+ 213               		.file 17 "drivers/avr/serial.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 transport.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:13     .text.transport_master_init:0000000000000000 transport_master_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:173    .data.transactions:0000000000000000 transactions
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:35     .text.transport_slave_init:0000000000000000 transport_slave_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:56     .text.transport_master:0000000000000000 transport_master
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:194    .bss.serial_s2m_buffer:0000000000000000 serial_s2m_buffer
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:124    .text.transport_slave:0000000000000000 transport_slave
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:183    .bss.status0:0000000000000000 status0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9Y4q9P.s:189    .bss.serial_m2s_buffer:0000000000000000 serial_m2s_buffer
+
+UNDEFINED SYMBOLS
+soft_serial_initiator_init
+soft_serial_target_init
+soft_serial_transaction
+__do_copy_data
+__do_clear_bss
