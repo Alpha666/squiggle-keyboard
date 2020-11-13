@@ -15,47 +15,59 @@
  */
 #include QMK_KEYBOARD_H
 
+enum tap_dance {
+    // left dance
+    TD_QQ,
+    TD_WW,
+    TD_EE,
+    TD_RR,
+    //
+    TD_TT,
+    TD_GG,
+    TD_BB,
+    // right dance
+    TD_UU,
+    TD_II,
+    TD_OO,
+    //
+    TD_YY,
+    TD_HH,
+    TD_NN,
+};
+
 // enum for combos.
 enum combos {
     // left hand combinations.
-    COLON_COMMA,
-    COMMA_DOT,
-    DOT_P,
-    P_Y,
-    COMMA_P,
-    QUOT_Q,
-    Q_J,
-    J_K,
-    Q_K,
-    K_X,
+    Q_W,
+    W_E,
+    W_R,
+    E_R,
+    Z_X,
+    C_X,
+    C_V,
 
     // right hand combinations.
-    L_R,
-    R_C,
-    C_G,
-    R_G,
-    G_F,
-    V_W,
-    W_M,
-    V_M,
-    M_B,
+    P_O,
+    O_U,
+    I_O,
+    U_I,
+    SLASH_DOT,
+    DOT_COMMA,
+    COMMA_M,
 
     // both hands combinations.
-    J_W,
+    SLASH_Z,
+    COMMA_X,
+    J_F,
+    G_H
 };
 
 enum {
     _BASE,
     _LOWER,
     _RAISE,
+    _SYMBOL,
     _ADJUST,
-};
-
-enum custom_keycodes {
-  BASE = SAFE_RANGE,
-  LOWER,
-  RAISE,
-  ADJUST,
 };
 
 // thumb keys.
@@ -63,23 +75,24 @@ enum custom_keycodes {
 #define SFT_ESC   SFT_T(KC_ESC)
 
 // home row mods.
-#define CT_O LCTL_T(KC_O)
-#define CT_N RCTL_T(KC_N)
-#define SH_A LSFT_T(KC_A)
-#define SH_S RSFT_T(KC_S)
-#define AL_E LALT_T(KC_E)
-#define AL_T RALT_T(KC_T)
-#define GU_I LGUI_T(KC_I)
-#define GU_D RGUI_T(KC_D)
+#define CT_S    RCTL_T(KC_S)
+#define CT_L    RCTL_T(KC_L)
+#define SH_A    RSFT_T(KC_A)
+#define SH_SCLN RSFT_T(KC_SCLN)
+#define AL_D    RALT_T(KC_D)
+#define AL_K    RALT_T(KC_K)
+#define GU_G    RGUI_T(KC_G)
+#define GU_H    RGUI_T(KC_H)
 
 // layer toggle.
-#define LW_BSPC  LT(_LOWER, KC_BSPC)
-#define RS_SPC   LT(_RAISE, KC_SPC)
-#define RS_D     LT(_RAISE, KC_D)
-#define LW_I     LT(_LOWER, KC_I)
+#define LW_BSPC  LT(_SYMBOL, KC_BSPC)
+#define RS_SPC   LT(_LOWER, KC_SPC)
+#define ADDDD    LT(_ADJUST, KC_BSPC)
 
 // idk, man. not used, i guess.
-#define ADDDD    MO(_ADJUST)
+#define RAISE    MO(_RAISE)
+#define LOWER    MO(_LOWER)
+#define MUIS     MO(_MUIS)
 
 // common shortcuts for windows and linux that i use.
 #define NXTTAB LCTL(KC_PGDN)
@@ -96,100 +109,117 @@ enum custom_keycodes {
 #define CLSGUI LALT(KC_F4)
 
 // left hand combinations.
-const uint16_t PROGMEM colon_comma_combo[] = {KC_SCLN, KC_COMM, COMBO_END};
-const uint16_t PROGMEM comma_dot_combo[]   = {KC_COMM, KC_DOT, COMBO_END};
-const uint16_t PROGMEM dot_p_combo[]       = {KC_DOT, KC_P, COMBO_END};
-const uint16_t PROGMEM p_y_combo[]         = {KC_P, KC_Y, COMBO_END};
-const uint16_t PROGMEM comma_p_combo[]     = {KC_COMM, KC_P, COMBO_END};
-const uint16_t PROGMEM quot_q_combo[]      = {KC_QUOT, KC_Q, COMBO_END};
-const uint16_t PROGMEM q_j_combo[]         = {KC_Q, KC_J, COMBO_END};
-const uint16_t PROGMEM j_k_combo[]         = {KC_J, KC_K, COMBO_END};
-const uint16_t PROGMEM q_k_combo[]         = {KC_Q, KC_K, COMBO_END};
-const uint16_t PROGMEM k_x_combo[]         = {KC_K, KC_X, COMBO_END};
+const uint16_t PROGMEM q_w_combo[]          = {KC_Q, KC_W, COMBO_END};
+const uint16_t PROGMEM w_e_combo[]          = {KC_W, KC_E, COMBO_END};
+const uint16_t PROGMEM w_r_combo[]          = {KC_W, KC_R, COMBO_END};
+const uint16_t PROGMEM e_r_combo[]          = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM z_x_combo[]          = {KC_Z, KC_X, COMBO_END};
+const uint16_t PROGMEM x_c_combo[]          = {KC_X, KC_C, COMBO_END};
+const uint16_t PROGMEM c_v_combo[]          = {KC_C, KC_V, COMBO_END};
 
 // right hand combinations.
-const uint16_t PROGMEM l_r_combo[]         = {KC_L, KC_R, COMBO_END};
-const uint16_t PROGMEM r_c_combo[]         = {KC_R, KC_C, COMBO_END};
-const uint16_t PROGMEM c_g_combo[]         = {KC_C, KC_G, COMBO_END};
-const uint16_t PROGMEM r_g_combo[]         = {KC_R, KC_G, COMBO_END};
-const uint16_t PROGMEM g_f_combo[]         = {KC_G, KC_F, COMBO_END};
-const uint16_t PROGMEM v_w_combo[]         = {KC_V, KC_W, COMBO_END};
-const uint16_t PROGMEM w_m_combo[]         = {KC_W, KC_M, COMBO_END};
-const uint16_t PROGMEM v_m_combo[]         = {KC_V, KC_M, COMBO_END};
-const uint16_t PROGMEM m_b_combo[]         = {KC_M, KC_B, COMBO_END};
+const uint16_t PROGMEM p_o_combo[]          = {KC_P,    KC_O,   COMBO_END};
+const uint16_t PROGMEM o_u_combo[]          = {KC_O,    KC_U,   COMBO_END};
+const uint16_t PROGMEM i_o_combo[]          = {KC_O,    KC_I,   COMBO_END};
+const uint16_t PROGMEM u_i_combo[]          = {KC_U,    KC_I,   COMBO_END};
+const uint16_t PROGMEM slash_dot_combo[]    = {KC_SLSH, KC_DOT, COMBO_END};
+const uint16_t PROGMEM dot_comma_combo[]    = {KC_DOT,  KC_COMM,COMBO_END};
+const uint16_t PROGMEM comma_m_combo[]      = {KC_COMM, KC_M,   COMBO_END};
 
 // both hand combinations.
-const uint16_t PROGMEM j_w_combo[]         = {KC_J, KC_W, COMBO_END};
+const uint16_t PROGMEM z_slash_combo[]       = {KC_Z, KC_SLSH, COMBO_END};
+const uint16_t PROGMEM x_comma_combo[]       = {KC_X, KC_COMM, COMBO_END};
+const uint16_t PROGMEM j_f_combo[]           = {KC_F, KC_J,    COMBO_END};
+const uint16_t PROGMEM g_h_combo[]           = {KC_G, KC_H,    COMBO_END};
 
 combo_t key_combos[COMBO_COUNT] = {
     // left hand combinations.
-    [COLON_COMMA]   = COMBO(colon_comma_combo,  KC_TAB),
-    [COMMA_DOT]     = COMBO(comma_dot_combo,    KC_QUES),
-    [DOT_P]         = COMBO(dot_p_combo,        KC_UNDS),
-    [P_Y]           = COMBO(p_y_combo,          KC_PIPE),
-    [COMMA_P]       = COMBO(comma_p_combo,      PRVTAB),
-    [QUOT_Q]        = COMBO(quot_q_combo,       KC_ENT),
-    [Q_J]           = COMBO(q_j_combo,          LCTL(KC_W)),
-    [J_K]           = COMBO(j_k_combo,          KC_DELT),
-    [Q_K]           = COMBO(q_k_combo,          KC_TAB),
-    [K_X]           = COMBO(k_x_combo,          KC_TILD),
+    [Q_W]           = COMBO(q_w_combo, KC_TILDE),
+    [W_E]           = COMBO(w_e_combo, KC_DQT),
+    [E_R]           = COMBO(e_r_combo, KC_UNDS),
+    [W_R]           = COMBO(w_r_combo, KC_EQL),
+    [Z_X]           = COMBO(z_x_combo, KC_ENT),
+    [C_X]           = COMBO(x_c_combo, LCTL(KC_W)),
+    [C_V]           = COMBO(c_v_combo, KC_DELT),
 
     // right hand combinations.
-    [L_R]           = COMBO(l_r_combo,          KC_BSPC),
-    [R_C]           = COMBO(r_c_combo,          KC_SLSH),
-    [C_G]           = COMBO(c_g_combo,          KC_MINS),
-    [R_G]           = COMBO(r_g_combo,          NXTTAB),
-    [G_F]           = COMBO(g_f_combo,          KC_BSLS),
-    [V_W]           = COMBO(v_w_combo,          KC_APP),
-    [W_M]           = COMBO(w_m_combo,          KC_DELT),
-    [V_M]           = COMBO(v_m_combo,          LSFT(KC_TAB)),
-    [M_B]           = COMBO(m_b_combo,          KC_GRV),
+    [P_O]           = COMBO(p_o_combo,       KC_BSPC),
+    [O_U]           = COMBO(o_u_combo,       KC_EQL),
+    [U_I]           = COMBO(u_i_combo,       KC_MINS),
+    [I_O]           = COMBO(i_o_combo,       KC_QUOT),
+    [SLASH_DOT]     = COMBO(slash_dot_combo, KC_PIPE),
+    [DOT_COMMA]     = COMBO(dot_comma_combo, KC_APP),
+    [COMMA_M]       = COMBO(comma_m_combo,   KC_DELT),
 
     // both hand combinations.
-    [J_W]           = COMBO(j_w_combo,          KC_ENT),
+    [SLASH_Z]       = COMBO(z_slash_combo, KC_HOME),
+    [COMMA_X]       = COMBO(x_comma_combo, KC_END),
+    [J_F]           = COMBO(j_f_combo,     KC_ENT),
+    [G_H]           = COMBO(g_h_combo,     KC_EQL)
 };
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    // left
+    [TD_QQ] = ACTION_TAP_DANCE_DOUBLE(KC_Q, KC_TILDE),
+    [TD_WW] = ACTION_TAP_DANCE_DOUBLE(KC_W, KC_AT),
+    [TD_EE] = ACTION_TAP_DANCE_DOUBLE(KC_E, KC_QUOT),
+    [TD_RR] = ACTION_TAP_DANCE_DOUBLE(KC_R, KC_MINS),
+    //
+    [TD_TT] = ACTION_TAP_DANCE_DOUBLE(KC_T, KC_LBRC),
+    [TD_GG] = ACTION_TAP_DANCE_DOUBLE(KC_G, KC_LPRN),
+    [TD_BB] = ACTION_TAP_DANCE_DOUBLE(KC_B, KC_LCBR),
+    // right
+    [TD_UU] = ACTION_TAP_DANCE_DOUBLE(KC_U, KC_UNDS),
+    [TD_II] = ACTION_TAP_DANCE_DOUBLE(KC_I, KC_DQT),
+    [TD_OO] = ACTION_TAP_DANCE_DOUBLE(KC_O, KC_EQL),
+    //
+    [TD_YY] = ACTION_TAP_DANCE_DOUBLE(KC_Y, KC_RBRC),
+    [TD_HH] = ACTION_TAP_DANCE_DOUBLE(KC_H, KC_RPRN),
+    [TD_NN] = ACTION_TAP_DANCE_DOUBLE(KC_N, KC_RCBR),
+    };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_BASE] = LAYOUT_complicated(
-    KC_SCLN,KC_COMM,KC_DOT, KC_P,   KC_Y,       KC_F,   KC_G,   KC_C,   KC_R,   KC_L,
-    SH_A,   CT_O,   AL_E,   KC_U,   GU_I,       GU_D,   KC_H,   AL_T,   CT_N,   SH_S,
-    KC_QUOT,KC_Q,   KC_J,   KC_K,   KC_X,       KC_B,   KC_M,   KC_W,   KC_V,   KC_Z,
-                            LW_BSPC,KC_LEAD,    ALT_ENT,RS_SPC,
-                            LW_BSPC,SFT_ESC,    ALT_ENT,RS_SPC
+    KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
+    SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),   KC_G,       KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_SCLN,
+    KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
+                            KC_TAB,KC_HOME,                KC_CLCK, RS_SPC,
+                            LW_BSPC,LT(_SYMBOL, KC_ESC),    ALT_ENT,RS_SPC
 ),
-
 [_RAISE] = LAYOUT_complicated(
-    KC_EXLM,KC_AT,  KC_UP,  KC_LCBR,KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
-    KC_HASH,KC_LEFT,KC_DOWN,KC_RGHT,KC_DLR,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+    KC_EXLM,    KC_AT,  KC_MS_U,    KC_LCBR,KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
+    KC_BTN2,  KC_MS_L,    KC_MS_D,KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
     KC_LBRC,KC_RBRC,KC_LPRN,KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
-                            ADDDD  ,_______,    _______,_______,
-                            ADDDD  ,_______,    _______,_______
+                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
+),
+[_SYMBOL] = LAYOUT_complicated(
+    KC_EXLM,    KC_AT,  KC_HASH,    KC_DOLLAR,KC_PERCENT,    KC_CIRC,KC_7,   KC_8,   KC_9,   KC_ASTR ,
+    KC_LT,  KC_LBRC,    KC_LPRN,KC_LCBR,  KC_AMPR,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+    KC_GT,KC_RBRC,KC_RPRN,KC_RCBR,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
+                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_LOWER] = LAYOUT_complicated(
-    _______,_______,_______,KC_F1,  KC_F2,      KC_F3,  KC_F4,  _______,_______,_______ ,
-    KC_LSFT,KC_TAB, KC_PGUP,KC_F5,  KC_F6,      KC_F7,  KC_F8,  KC_HOME,KC_LALT,KC_ENT  ,
-    KC_CLCK,KC_SLCK,KC_PGDN,KC_F9,  KC_F10,     KC_F11, KC_F12, KC_END, KC_INS, _______ ,
-                            _______,_______,    _______,ADDDD,
-                            _______,_______,    _______,ADDDD
+    LGUI(KC_GRAVE), KC_QUES,KC_WH_U,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_WH_U,    KC_UP,  KC_PGDN,    KC_BSPC,
+    LCTL_T(KC_ESC),  LSFT_T(KC_TAB), KC_LALT,LGUI_T(KC_BTN1),  LCTL_T(KC_BTN2),    KC_LEFT,     KC_DOWN,    KC_UP,KC_RIGHT,   KC_CLCK,
+    KC_CLCK,         G(KC_X),G(KC_C),G(KC_V),G(KC_Z),        KC_MS_L,  KC_MS_D,    KC_MS_U,    KC_MS_R, _______,
+                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_ADJUST] = LAYOUT_complicated(
     _______,EXPLR,  KC_UP,  PRVTAB, PRVWIN,     NXTWIN, NXTTAB, _______,_______,LCKGUI,
     TSKMGR, KC_LEFT,KC_DOWN,KC_RGHT,UPTAB,      DNTAB,  KC_ENT, KC_LGUI,_______,CALDL,
     _______,CLSGUI, _______,CONPST, RESET,      _______,_______,_______,_______,_______,
-                            _______,_______,    _______,_______,
+                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
                             _______,_______,    _______,_______
 ),
 };
 
-LEADER_EXTERNS();
 
-void matrix_scan_user() {
-  LEADER_DICTIONARY() {
-    leading = false;
-    leader_end();
-
-    SEQ_ONE_KEY(KC_U) {
-      SEND_STRING(":luvu:\n");
-    }
-  }
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+#ifdef CONSOLE_ENABLE
+      uprintf("KL: kc: %u, col: %u, row: %u, pressed: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed);
+#endif
+    return true;
 }

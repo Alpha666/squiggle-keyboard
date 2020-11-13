@@ -1,0 +1,921 @@
+   1               		.file	"keymap.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.process_record_user,"ax",@progbits
+  11               	.global	process_record_user
+  13               	process_record_user:
+  14               	.LVL0:
+  15               	.LFB19:
+  16               		.file 1 "keyboards/squiggle/keymaps/andrew-complicated/keymap.c"
+   1:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** /* Copyright 2020 Ibnu D. Aji
+   2:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  *
+   3:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * This program is free software: you can redistribute it and/or modify
+   4:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * it under the terms of the GNU General Public License as published by
+   5:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * the Free Software Foundation, either version 2 of the License, or
+   6:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * (at your option) any later version.
+   7:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  *
+   8:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * This program is distributed in the hope that it will be useful,
+   9:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  10:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  11:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * GNU General Public License for more details.
+  12:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  *
+  13:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * You should have received a copy of the GNU General Public License
+  14:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  15:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****  */
+  16:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #include QMK_KEYBOARD_H
+  17:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  18:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** enum tap_dance {
+  19:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // left dance
+  20:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_QQ,
+  21:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_WW,
+  22:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_EE,
+  23:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_RR,
+  24:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     //
+  25:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_TT,
+  26:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_GG,
+  27:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_BB,
+  28:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // right dance
+  29:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_UU,
+  30:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_II,
+  31:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_OO,
+  32:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     //
+  33:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_YY,
+  34:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_HH,
+  35:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TD_NN,
+  36:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
+  37:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  38:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // enum for combos.
+  39:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** enum combos {
+  40:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // left hand combinations.
+  41:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     Q_W,
+  42:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     W_E,
+  43:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     W_R,
+  44:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     E_R,
+  45:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     Z_X,
+  46:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     C_X,
+  47:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     C_V,
+  48:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  49:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // right hand combinations.
+  50:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     P_O,
+  51:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     O_U,
+  52:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     I_O,
+  53:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     U_I,
+  54:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     SLASH_DOT,
+  55:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     DOT_COMMA,
+  56:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     COMMA_M,
+  57:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  58:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // both hands combinations.
+  59:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     SLASH_Z,
+  60:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     COMMA_X,
+  61:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     J_F,
+  62:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     G_H
+  63:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
+  64:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  65:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** enum {
+  66:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _BASE,
+  67:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _LOWER,
+  68:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _RAISE,
+  69:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _SYMBOL,
+  70:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _ADJUST,
+  71:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
+  72:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  73:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // thumb keys.
+  74:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define ALT_ENT   ALT_T(KC_ENT)
+  75:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define SFT_ESC   SFT_T(KC_ESC)
+  76:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  77:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // home row mods.
+  78:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define CT_S    RCTL_T(KC_S)
+  79:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define CT_L    RCTL_T(KC_L)
+  80:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define SH_A    RSFT_T(KC_A)
+  81:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define SH_SCLN RSFT_T(KC_SCLN)
+  82:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define AL_D    RALT_T(KC_D)
+  83:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define AL_K    RALT_T(KC_K)
+  84:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define GU_G    RGUI_T(KC_G)
+  85:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define GU_H    RGUI_T(KC_H)
+  86:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  87:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // layer toggle.
+  88:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define LW_BSPC  LT(_SYMBOL, KC_BSPC)
+  89:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define RS_SPC   LT(_LOWER, KC_SPC)
+  90:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define ADDDD    LT(_ADJUST, KC_BSPC)
+  91:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  92:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // idk, man. not used, i guess.
+  93:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define RAISE    MO(_RAISE)
+  94:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define LOWER    MO(_LOWER)
+  95:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define MUIS     MO(_MUIS)
+  96:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+  97:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // common shortcuts for windows and linux that i use.
+  98:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define NXTTAB LCTL(KC_PGDN)
+  99:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define PRVTAB LCTL(KC_PGUP)
+ 100:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define UPTAB  LCTL(LSFT(KC_PGUP))
+ 101:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define DNTAB  LCTL(LSFT(KC_PGDN))
+ 102:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define NXTWIN LALT(KC_TAB)
+ 103:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define PRVWIN LALT(LSFT(KC_TAB))
+ 104:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define CALDL  LCTL(LALT(KC_DELT))
+ 105:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define TSKMGR LCTL(LSFT(KC_ESC))
+ 106:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define EXPLR  LGUI(KC_E)
+ 107:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define LCKGUI LGUI(KC_L)
+ 108:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define CONPST LSFT(KC_INS)
+ 109:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define CLSGUI LALT(KC_F4)
+ 110:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 111:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // left hand combinations.
+ 112:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM q_w_combo[]          = {KC_Q, KC_W, COMBO_END};
+ 113:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM w_e_combo[]          = {KC_W, KC_E, COMBO_END};
+ 114:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM w_r_combo[]          = {KC_W, KC_R, COMBO_END};
+ 115:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM e_r_combo[]          = {KC_E, KC_R, COMBO_END};
+ 116:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM z_x_combo[]          = {KC_Z, KC_X, COMBO_END};
+ 117:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM x_c_combo[]          = {KC_X, KC_C, COMBO_END};
+ 118:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM c_v_combo[]          = {KC_C, KC_V, COMBO_END};
+ 119:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 120:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // right hand combinations.
+ 121:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM p_o_combo[]          = {KC_P,    KC_O,   COMBO_END};
+ 122:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM o_u_combo[]          = {KC_O,    KC_U,   COMBO_END};
+ 123:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM i_o_combo[]          = {KC_O,    KC_I,   COMBO_END};
+ 124:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM u_i_combo[]          = {KC_U,    KC_I,   COMBO_END};
+ 125:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM slash_dot_combo[]    = {KC_SLSH, KC_DOT, COMBO_END};
+ 126:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM dot_comma_combo[]    = {KC_DOT,  KC_COMM,COMBO_END};
+ 127:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM comma_m_combo[]      = {KC_COMM, KC_M,   COMBO_END};
+ 128:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 129:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // both hand combinations.
+ 130:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM z_slash_combo[]       = {KC_Z, KC_SLSH, COMBO_END};
+ 131:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM x_comma_combo[]       = {KC_X, KC_COMM, COMBO_END};
+ 132:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM j_f_combo[]           = {KC_F, KC_J,    COMBO_END};
+ 133:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM g_h_combo[]           = {KC_G, KC_H,    COMBO_END};
+ 134:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 135:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** combo_t key_combos[COMBO_COUNT] = {
+ 136:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // left hand combinations.
+ 137:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [Q_W]           = COMBO(q_w_combo, KC_TILDE),
+ 138:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [W_E]           = COMBO(w_e_combo, KC_DQT),
+ 139:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [E_R]           = COMBO(e_r_combo, KC_UNDS),
+ 140:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [W_R]           = COMBO(w_r_combo, KC_EQL),
+ 141:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [Z_X]           = COMBO(z_x_combo, KC_ENT),
+ 142:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [C_X]           = COMBO(x_c_combo, LCTL(KC_W)),
+ 143:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [C_V]           = COMBO(c_v_combo, KC_DELT),
+ 144:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 145:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // right hand combinations.
+ 146:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [P_O]           = COMBO(p_o_combo,       KC_BSPC),
+ 147:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [O_U]           = COMBO(o_u_combo,       KC_EQL),
+ 148:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [U_I]           = COMBO(u_i_combo,       KC_MINS),
+ 149:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [I_O]           = COMBO(i_o_combo,       KC_QUOT),
+ 150:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [SLASH_DOT]     = COMBO(slash_dot_combo, KC_PIPE),
+ 151:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [DOT_COMMA]     = COMBO(dot_comma_combo, KC_APP),
+ 152:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [COMMA_M]       = COMBO(comma_m_combo,   KC_DELT),
+ 153:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 154:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // both hand combinations.
+ 155:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [SLASH_Z]       = COMBO(z_slash_combo, KC_HOME),
+ 156:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [COMMA_X]       = COMBO(x_comma_combo, KC_END),
+ 157:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [J_F]           = COMBO(j_f_combo,     KC_ENT),
+ 158:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [G_H]           = COMBO(g_h_combo,     KC_EQL)
+ 159:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
+ 160:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 161:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** qk_tap_dance_action_t tap_dance_actions[] = {
+ 162:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // left
+ 163:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_QQ] = ACTION_TAP_DANCE_DOUBLE(KC_Q, KC_TILDE),
+ 164:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_WW] = ACTION_TAP_DANCE_DOUBLE(KC_W, KC_AT),
+ 165:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_EE] = ACTION_TAP_DANCE_DOUBLE(KC_E, KC_QUOT),
+ 166:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_RR] = ACTION_TAP_DANCE_DOUBLE(KC_R, KC_MINS),
+ 167:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     //
+ 168:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_TT] = ACTION_TAP_DANCE_DOUBLE(KC_T, KC_LBRC),
+ 169:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_GG] = ACTION_TAP_DANCE_DOUBLE(KC_G, KC_LPRN),
+ 170:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_BB] = ACTION_TAP_DANCE_DOUBLE(KC_B, KC_LCBR),
+ 171:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     // right
+ 172:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_UU] = ACTION_TAP_DANCE_DOUBLE(KC_U, KC_UNDS),
+ 173:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_II] = ACTION_TAP_DANCE_DOUBLE(KC_I, KC_DQT),
+ 174:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_OO] = ACTION_TAP_DANCE_DOUBLE(KC_O, KC_EQL),
+ 175:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     //
+ 176:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_YY] = ACTION_TAP_DANCE_DOUBLE(KC_Y, KC_RBRC),
+ 177:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_HH] = ACTION_TAP_DANCE_DOUBLE(KC_H, KC_RPRN),
+ 178:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     [TD_NN] = ACTION_TAP_DANCE_DOUBLE(KC_N, KC_RCBR),
+ 179:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     };
+ 180:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 181:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+ 182:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_BASE] = LAYOUT_complicated(
+ 183:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
+ 184:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),   KC_G,       KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_
+ 185:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
+ 186:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             KC_TAB,KC_HOME,                KC_CLCK, RS_SPC,
+ 187:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,LT(_SYMBOL, KC_ESC),    ALT_ENT,RS_SPC
+ 188:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
+ 189:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_RAISE] = LAYOUT_complicated(
+ 190:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_EXLM,    KC_AT,  KC_MS_U,    KC_LCBR,KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
+ 191:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_BTN2,  KC_MS_L,    KC_MS_D,KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+ 192:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_LBRC,KC_RBRC,KC_LPRN,KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
+ 193:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 194:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
+ 195:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
+ 196:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_SYMBOL] = LAYOUT_complicated(
+ 197:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_EXLM,    KC_AT,  KC_HASH,    KC_DOLLAR,KC_PERCENT,    KC_CIRC,KC_7,   KC_8,   KC_9,   KC_AST
+ 198:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_LT,  KC_LBRC,    KC_LPRN,KC_LCBR,  KC_AMPR,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+ 199:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_GT,KC_RBRC,KC_RPRN,KC_RCBR,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
+ 200:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 201:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
+ 202:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
+ 203:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_LOWER] = LAYOUT_complicated(
+ 204:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LGUI(KC_GRAVE), KC_QUES,KC_WH_U,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_WH_U,   
+ 205:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LCTL_T(KC_ESC),  LSFT_T(KC_TAB), KC_LALT,LGUI_T(KC_BTN1),  LCTL_T(KC_BTN2),    KC_LEFT,     KC_
+ 206:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_CLCK,         G(KC_X),G(KC_C),G(KC_V),G(KC_Z),        KC_MS_L,  KC_MS_D,    KC_MS_U,    KC_M
+ 207:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 208:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
+ 209:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
+ 210:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_ADJUST] = LAYOUT_complicated(
+ 211:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _______,EXPLR,  KC_UP,  PRVTAB, PRVWIN,     NXTWIN, NXTTAB, _______,_______,LCKGUI,
+ 212:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TSKMGR, KC_LEFT,KC_DOWN,KC_RGHT,UPTAB,      DNTAB,  KC_ENT, KC_LGUI,_______,CALDL,
+ 213:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _______,CLSGUI, _______,CONPST, RESET,      _______,_______,_______,_______,_______,
+ 214:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 215:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             _______,_______,    _______,_______
+ 216:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
+ 217:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
+ 218:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 219:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
+ 220:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  17               		.loc 1 220 65 view -0
+  18               		.cfi_startproc
+  19               	/* prologue: function */
+  20               	/* frame size = 0 */
+  21               	/* stack size = 0 */
+  22               	.L__stack_usage = 0
+  23               		.loc 1 220 65 is_stmt 0 view .LVU1
+  24 0000 FB01      		movw r30,r22
+ 221:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #ifdef CONSOLE_ENABLE
+ 222:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****       uprintf("KL: kc: %u, col: %u, row: %u, pressed: %u\n", keycode, record->event.key.col, record
+  25               		.loc 1 222 7 is_stmt 1 view .LVU2
+  26               	.LBB2:
+  27               		.loc 1 222 7 view .LVU3
+  28               		.loc 1 222 7 view .LVU4
+  29               	.LBE2:
+  30 0002 2281      		ldd r18,Z+2
+  31 0004 1F92      		push __zero_reg__
+  32               	.LCFI0:
+  33               		.cfi_def_cfa_offset 3
+  34 0006 2F93      		push r18
+  35               	.LCFI1:
+  36               		.cfi_def_cfa_offset 4
+  37 0008 2181      		ldd r18,Z+1
+  38 000a 1F92      		push __zero_reg__
+  39               	.LCFI2:
+  40               		.cfi_def_cfa_offset 5
+  41 000c 2F93      		push r18
+  42               	.LCFI3:
+  43               		.cfi_def_cfa_offset 6
+  44 000e 2081      		ld r18,Z
+  45 0010 1F92      		push __zero_reg__
+  46               	.LCFI4:
+  47               		.cfi_def_cfa_offset 7
+  48 0012 2F93      		push r18
+  49               	.LCFI5:
+  50               		.cfi_def_cfa_offset 8
+  51 0014 9F93      		push r25
+  52               	.LCFI6:
+  53               		.cfi_def_cfa_offset 9
+  54 0016 8F93      		push r24
+  55               	.LCFI7:
+  56               		.cfi_def_cfa_offset 10
+  57 0018 80E0      		ldi r24,lo8(__c.3632)
+  58 001a 90E0      		ldi r25,hi8(__c.3632)
+  59               	.LVL1:
+  60               		.loc 1 222 7 is_stmt 0 view .LVU5
+  61 001c 9F93      		push r25
+  62               	.LCFI8:
+  63               		.cfi_def_cfa_offset 11
+  64 001e 8F93      		push r24
+  65               	.LCFI9:
+  66               		.cfi_def_cfa_offset 12
+  67 0020 0E94 0000 		call __xprintf
+  68               	.LVL2:
+ 223:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #endif
+ 224:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     return true;
+  69               		.loc 1 224 5 is_stmt 1 view .LVU6
+  70               		.loc 1 224 12 is_stmt 0 view .LVU7
+  71 0024 8DB7      		in r24,__SP_L__
+  72 0026 9EB7      		in r25,__SP_H__
+  73 0028 0A96      		adiw r24,10
+  74 002a 0FB6      		in __tmp_reg__,__SREG__
+  75 002c F894      		cli
+  76 002e 9EBF      		out __SP_H__,r25
+  77 0030 0FBE      		out __SREG__,__tmp_reg__
+  78 0032 8DBF      		out __SP_L__,r24
+  79               	.LCFI10:
+  80               		.cfi_def_cfa_offset 2
+ 225:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** }
+  81               		.loc 1 225 1 view .LVU8
+  82 0034 81E0      		ldi r24,lo8(1)
+  83               	/* epilogue start */
+  84 0036 0895      		ret
+  85               		.cfi_endproc
+  86               	.LFE19:
+  88               		.section	.progmem.data.__c.3632,"a"
+  91               	__c.3632:
+  92 0000 4B4C 3A20 		.string	"KL: kc: %u, col: %u, row: %u, pressed: %u\n"
+  92      6B63 3A20 
+  92      2575 2C20 
+  92      636F 6C3A 
+  92      2025 752C 
+  93               	.global	keymaps
+  94               		.section	.progmem.data.keymaps,"a"
+  97               	keymaps:
+  98 0000 1400      		.word	20
+  99 0002 1A00      		.word	26
+ 100 0004 0800      		.word	8
+ 101 0006 1500      		.word	21
+ 102 0008 1700      		.word	23
+ 103 000a 0472      		.word	29188
+ 104 000c 1671      		.word	28950
+ 105 000e 0774      		.word	29703
+ 106 0010 0968      		.word	26633
+ 107 0012 0A00      		.word	10
+ 108 0014 1D00      		.word	29
+ 109 0016 1B00      		.word	27
+ 110 0018 0600      		.word	6
+ 111 001a 1900      		.word	25
+ 112 001c 0500      		.word	5
+ 113 001e 0000      		.word	0
+ 114 0020 2A43      		.word	17194
+ 115 0022 2943      		.word	17193
+ 116 0024 2B00      		.word	43
+ 117 0026 4A00      		.word	74
+ 118 0028 1300      		.word	19
+ 119 002a 1200      		.word	18
+ 120 002c 0C00      		.word	12
+ 121 002e 1800      		.word	24
+ 122 0030 1C00      		.word	28
+ 123 0032 3372      		.word	29235
+ 124 0034 0F71      		.word	28943
+ 125 0036 0E74      		.word	29710
+ 126 0038 0D68      		.word	26637
+ 127 003a 0B00      		.word	11
+ 128 003c 3800      		.word	56
+ 129 003e 3700      		.word	55
+ 130 0040 3600      		.word	54
+ 131 0042 1000      		.word	16
+ 132 0044 1100      		.word	17
+ 133 0046 0000      		.word	0
+ 134 0048 2C41      		.word	16684
+ 135 004a 2864      		.word	25640
+ 136 004c 2C41      		.word	16684
+ 137 004e 3900      		.word	57
+ 138 0050 3508      		.word	2101
+ 139 0052 3802      		.word	568
+ 140 0054 F900      		.word	249
+ 141 0056 FA00      		.word	250
+ 142 0058 3900      		.word	57
+ 143 005a 2961      		.word	24873
+ 144 005c 2B62      		.word	25131
+ 145 005e E200      		.word	226
+ 146 0060 F468      		.word	26868
+ 147 0062 F561      		.word	25077
+ 148 0064 3900      		.word	57
+ 149 0066 1B08      		.word	2075
+ 150 0068 0608      		.word	2054
+ 151 006a 1908      		.word	2073
+ 152 006c 1D08      		.word	2077
+ 153 006e 0000      		.word	0
+ 154 0070 2A44      		.word	17450
+ 155 0072 0100      		.word	1
+ 156 0074 2A43      		.word	17194
+ 157 0076 4A00      		.word	74
+ 158 0078 2A00      		.word	42
+ 159 007a 4E00      		.word	78
+ 160 007c 5200      		.word	82
+ 161 007e F900      		.word	249
+ 162 0080 2A00      		.word	42
+ 163 0082 3900      		.word	57
+ 164 0084 4F00      		.word	79
+ 165 0086 5200      		.word	82
+ 166 0088 5100      		.word	81
+ 167 008a 5000      		.word	80
+ 168 008c 0100      		.word	1
+ 169 008e F300      		.word	243
+ 170 0090 F000      		.word	240
+ 171 0092 F100      		.word	241
+ 172 0094 F200      		.word	242
+ 173 0096 0000      		.word	0
+ 174 0098 2C44      		.word	17452
+ 175 009a 2864      		.word	25640
+ 176 009c 2C41      		.word	16684
+ 177 009e 4D00      		.word	77
+ 178 00a0 1E02      		.word	542
+ 179 00a2 1F02      		.word	543
+ 180 00a4 F000      		.word	240
+ 181 00a6 2F02      		.word	559
+ 182 00a8 3002      		.word	560
+ 183 00aa F500      		.word	245
+ 184 00ac F200      		.word	242
+ 185 00ae F100      		.word	241
+ 186 00b0 F300      		.word	243
+ 187 00b2 F400      		.word	244
+ 188 00b4 2F00      		.word	47
+ 189 00b6 3000      		.word	48
+ 190 00b8 2602      		.word	550
+ 191 00ba 2702      		.word	551
+ 192 00bc 2402      		.word	548
+ 193 00be 0000      		.word	0
+ 194 00c0 2A44      		.word	17450
+ 195 00c2 0100      		.word	1
+ 196 00c4 2A43      		.word	17194
+ 197 00c6 4A00      		.word	74
+ 198 00c8 2502      		.word	549
+ 199 00ca 2600      		.word	38
+ 200 00cc 2500      		.word	37
+ 201 00ce 2400      		.word	36
+ 202 00d0 3100      		.word	49
+ 203 00d2 2700      		.word	39
+ 204 00d4 2300      		.word	35
+ 205 00d6 2200      		.word	34
+ 206 00d8 2100      		.word	33
+ 207 00da 2E00      		.word	46
+ 208 00dc 2E02      		.word	558
+ 209 00de 2000      		.word	32
+ 210 00e0 1F00      		.word	31
+ 211 00e2 1E00      		.word	30
+ 212 00e4 3500      		.word	53
+ 213 00e6 0000      		.word	0
+ 214 00e8 2C44      		.word	17452
+ 215 00ea 2864      		.word	25640
+ 216 00ec 2C41      		.word	16684
+ 217 00ee 4D00      		.word	77
+ 218 00f0 1E02      		.word	542
+ 219 00f2 1F02      		.word	543
+ 220 00f4 2002      		.word	544
+ 221 00f6 2102      		.word	545
+ 222 00f8 2202      		.word	546
+ 223 00fa 3602      		.word	566
+ 224 00fc 2F00      		.word	47
+ 225 00fe 2602      		.word	550
+ 226 0100 2F02      		.word	559
+ 227 0102 2402      		.word	548
+ 228 0104 3702      		.word	567
+ 229 0106 3000      		.word	48
+ 230 0108 2702      		.word	551
+ 231 010a 3002      		.word	560
+ 232 010c 2402      		.word	548
+ 233 010e 0000      		.word	0
+ 234 0110 2A44      		.word	17450
+ 235 0112 0100      		.word	1
+ 236 0114 2A43      		.word	17194
+ 237 0116 4A00      		.word	74
+ 238 0118 2502      		.word	549
+ 239 011a 2600      		.word	38
+ 240 011c 2500      		.word	37
+ 241 011e 2400      		.word	36
+ 242 0120 2302      		.word	547
+ 243 0122 2700      		.word	39
+ 244 0124 2300      		.word	35
+ 245 0126 2200      		.word	34
+ 246 0128 2100      		.word	33
+ 247 012a 2E00      		.word	46
+ 248 012c 2E02      		.word	558
+ 249 012e 2000      		.word	32
+ 250 0130 1F00      		.word	31
+ 251 0132 1E00      		.word	30
+ 252 0134 3500      		.word	53
+ 253 0136 0000      		.word	0
+ 254 0138 2C44      		.word	17452
+ 255 013a 2864      		.word	25640
+ 256 013c 2C41      		.word	16684
+ 257 013e 4D00      		.word	77
+ 258 0140 0100      		.word	1
+ 259 0142 0808      		.word	2056
+ 260 0144 5200      		.word	82
+ 261 0146 4B01      		.word	331
+ 262 0148 2B06      		.word	1579
+ 263 014a 2903      		.word	809
+ 264 014c 5000      		.word	80
+ 265 014e 5100      		.word	81
+ 266 0150 4F00      		.word	79
+ 267 0152 4B03      		.word	843
+ 268 0154 0100      		.word	1
+ 269 0156 3D04      		.word	1085
+ 270 0158 0100      		.word	1
+ 271 015a 4902      		.word	585
+ 272 015c 005C      		.word	23552
+ 273 015e 0000      		.word	0
+ 274 0160 0100      		.word	1
+ 275 0162 0100      		.word	1
+ 276 0164 2A43      		.word	17194
+ 277 0166 4A00      		.word	74
+ 278 0168 0F08      		.word	2063
+ 279 016a 0100      		.word	1
+ 280 016c 0100      		.word	1
+ 281 016e 4E01      		.word	334
+ 282 0170 2B04      		.word	1067
+ 283 0172 4C05      		.word	1356
+ 284 0174 0100      		.word	1
+ 285 0176 E300      		.word	227
+ 286 0178 2800      		.word	40
+ 287 017a 4E03      		.word	846
+ 288 017c 0100      		.word	1
+ 289 017e 0100      		.word	1
+ 290 0180 0100      		.word	1
+ 291 0182 0100      		.word	1
+ 292 0184 0100      		.word	1
+ 293 0186 0000      		.word	0
+ 294 0188 0100      		.word	1
+ 295 018a 0100      		.word	1
+ 296 018c 2C41      		.word	16684
+ 297 018e 4D00      		.word	77
+ 298               	.global	tap_dance_actions
+ 299               		.section	.data.tap_dance_actions,"aw"
+ 302               	tap_dance_actions:
+ 303 0000 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 304 0002 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 305 0004 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 306 0006 0000 0000 		.zero	14
+ 306      0000 0000 
+ 306      0000 0000 
+ 306      0000 
+ 307 0014 0000      		.word	__compound_literal.0
+ 308 0016 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 309 0018 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 310 001a 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 311 001c 0000 0000 		.zero	14
+ 311      0000 0000 
+ 311      0000 0000 
+ 311      0000 
+ 312 002a 0000      		.word	__compound_literal.1
+ 313 002c 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 314 002e 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 315 0030 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 316 0032 0000 0000 		.zero	14
+ 316      0000 0000 
+ 316      0000 0000 
+ 316      0000 
+ 317 0040 0000      		.word	__compound_literal.2
+ 318 0042 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 319 0044 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 320 0046 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 321 0048 0000 0000 		.zero	14
+ 321      0000 0000 
+ 321      0000 0000 
+ 321      0000 
+ 322 0056 0000      		.word	__compound_literal.3
+ 323 0058 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 324 005a 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 325 005c 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 326 005e 0000 0000 		.zero	14
+ 326      0000 0000 
+ 326      0000 0000 
+ 326      0000 
+ 327 006c 0000      		.word	__compound_literal.4
+ 328 006e 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 329 0070 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 330 0072 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 331 0074 0000 0000 		.zero	14
+ 331      0000 0000 
+ 331      0000 0000 
+ 331      0000 
+ 332 0082 0000      		.word	__compound_literal.5
+ 333 0084 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 334 0086 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 335 0088 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 336 008a 0000 0000 		.zero	14
+ 336      0000 0000 
+ 336      0000 0000 
+ 336      0000 
+ 337 0098 0000      		.word	__compound_literal.6
+ 338 009a 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 339 009c 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 340 009e 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 341 00a0 0000 0000 		.zero	14
+ 341      0000 0000 
+ 341      0000 0000 
+ 341      0000 
+ 342 00ae 0000      		.word	__compound_literal.7
+ 343 00b0 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 344 00b2 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 345 00b4 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 346 00b6 0000 0000 		.zero	14
+ 346      0000 0000 
+ 346      0000 0000 
+ 346      0000 
+ 347 00c4 0000      		.word	__compound_literal.8
+ 348 00c6 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 349 00c8 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 350 00ca 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 351 00cc 0000 0000 		.zero	14
+ 351      0000 0000 
+ 351      0000 0000 
+ 351      0000 
+ 352 00da 0000      		.word	__compound_literal.9
+ 353 00dc 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 354 00de 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 355 00e0 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 356 00e2 0000 0000 		.zero	14
+ 356      0000 0000 
+ 356      0000 0000 
+ 356      0000 
+ 357 00f0 0000      		.word	__compound_literal.10
+ 358 00f2 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 359 00f4 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 360 00f6 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 361 00f8 0000 0000 		.zero	14
+ 361      0000 0000 
+ 361      0000 0000 
+ 361      0000 
+ 362 0106 0000      		.word	__compound_literal.11
+ 363 0108 0000      		.word	gs(qk_tap_dance_pair_on_each_tap)
+ 364 010a 0000      		.word	gs(qk_tap_dance_pair_finished)
+ 365 010c 0000      		.word	gs(qk_tap_dance_pair_reset)
+ 366 010e 0000 0000 		.zero	14
+ 366      0000 0000 
+ 366      0000 0000 
+ 366      0000 
+ 367 011c 0000      		.word	__compound_literal.12
+ 368               		.section	.data.__compound_literal.12,"aw"
+ 371               	__compound_literal.12:
+ 372 0000 1100      		.word	17
+ 373 0002 3002      		.word	560
+ 374               		.section	.data.__compound_literal.11,"aw"
+ 377               	__compound_literal.11:
+ 378 0000 0B00      		.word	11
+ 379 0002 2702      		.word	551
+ 380               		.section	.data.__compound_literal.10,"aw"
+ 383               	__compound_literal.10:
+ 384 0000 1C00      		.word	28
+ 385 0002 3000      		.word	48
+ 386               		.section	.data.__compound_literal.9,"aw"
+ 389               	__compound_literal.9:
+ 390 0000 1200      		.word	18
+ 391 0002 2E00      		.word	46
+ 392               		.section	.data.__compound_literal.8,"aw"
+ 395               	__compound_literal.8:
+ 396 0000 0C00      		.word	12
+ 397 0002 3402      		.word	564
+ 398               		.section	.data.__compound_literal.7,"aw"
+ 401               	__compound_literal.7:
+ 402 0000 1800      		.word	24
+ 403 0002 2D02      		.word	557
+ 404               		.section	.data.__compound_literal.6,"aw"
+ 407               	__compound_literal.6:
+ 408 0000 0500      		.word	5
+ 409 0002 2F02      		.word	559
+ 410               		.section	.data.__compound_literal.5,"aw"
+ 413               	__compound_literal.5:
+ 414 0000 0A00      		.word	10
+ 415 0002 2602      		.word	550
+ 416               		.section	.data.__compound_literal.4,"aw"
+ 419               	__compound_literal.4:
+ 420 0000 1700      		.word	23
+ 421 0002 2F00      		.word	47
+ 422               		.section	.data.__compound_literal.3,"aw"
+ 425               	__compound_literal.3:
+ 426 0000 1500      		.word	21
+ 427 0002 2D00      		.word	45
+ 428               		.section	.data.__compound_literal.2,"aw"
+ 431               	__compound_literal.2:
+ 432 0000 0800      		.word	8
+ 433 0002 3400      		.word	52
+ 434               		.section	.data.__compound_literal.1,"aw"
+ 437               	__compound_literal.1:
+ 438 0000 1A00      		.word	26
+ 439 0002 1F02      		.word	543
+ 440               		.section	.data.__compound_literal.0,"aw"
+ 443               	__compound_literal.0:
+ 444 0000 1400      		.word	20
+ 445 0002 3502      		.word	565
+ 446               	.global	key_combos
+ 447               		.section	.data.key_combos,"aw"
+ 450               	key_combos:
+ 451 0000 0000      		.word	q_w_combo
+ 452 0002 3502      		.word	565
+ 453 0004 00        		.zero	1
+ 454 0005 0000      		.word	w_e_combo
+ 455 0007 3402      		.word	564
+ 456 0009 00        		.zero	1
+ 457 000a 0000      		.word	w_r_combo
+ 458 000c 2E00      		.word	46
+ 459 000e 00        		.zero	1
+ 460 000f 0000      		.word	e_r_combo
+ 461 0011 2D02      		.word	557
+ 462 0013 00        		.zero	1
+ 463 0014 0000      		.word	z_x_combo
+ 464 0016 2800      		.word	40
+ 465 0018 00        		.zero	1
+ 466 0019 0000      		.word	x_c_combo
+ 467 001b 1A01      		.word	282
+ 468 001d 00        		.zero	1
+ 469 001e 0000      		.word	c_v_combo
+ 470 0020 4C00      		.word	76
+ 471 0022 00        		.zero	1
+ 472 0023 0000      		.word	p_o_combo
+ 473 0025 2A00      		.word	42
+ 474 0027 00        		.zero	1
+ 475 0028 0000      		.word	o_u_combo
+ 476 002a 2E00      		.word	46
+ 477 002c 00        		.zero	1
+ 478 002d 0000      		.word	i_o_combo
+ 479 002f 3400      		.word	52
+ 480 0031 00        		.zero	1
+ 481 0032 0000      		.word	u_i_combo
+ 482 0034 2D00      		.word	45
+ 483 0036 00        		.zero	1
+ 484 0037 0000      		.word	slash_dot_combo
+ 485 0039 3102      		.word	561
+ 486 003b 00        		.zero	1
+ 487 003c 0000      		.word	dot_comma_combo
+ 488 003e 6500      		.word	101
+ 489 0040 00        		.zero	1
+ 490 0041 0000      		.word	comma_m_combo
+ 491 0043 4C00      		.word	76
+ 492 0045 00        		.zero	1
+ 493 0046 0000      		.word	z_slash_combo
+ 494 0048 4A00      		.word	74
+ 495 004a 00        		.zero	1
+ 496 004b 0000      		.word	x_comma_combo
+ 497 004d 4D00      		.word	77
+ 498 004f 00        		.zero	1
+ 499 0050 0000      		.word	j_f_combo
+ 500 0052 2800      		.word	40
+ 501 0054 00        		.zero	1
+ 502 0055 0000      		.word	g_h_combo
+ 503 0057 2E00      		.word	46
+ 504 0059 00        		.zero	1
+ 505 005a 0000 0000 		.zero	100
+ 505      0000 0000 
+ 505      0000 0000 
+ 505      0000 0000 
+ 505      0000 0000 
+ 506               	.global	g_h_combo
+ 507               		.section	.progmem.data.g_h_combo,"a"
+ 510               	g_h_combo:
+ 511 0000 0A00      		.word	10
+ 512 0002 0B00      		.word	11
+ 513 0004 0000      		.word	0
+ 514               	.global	j_f_combo
+ 515               		.section	.progmem.data.j_f_combo,"a"
+ 518               	j_f_combo:
+ 519 0000 0900      		.word	9
+ 520 0002 0D00      		.word	13
+ 521 0004 0000      		.word	0
+ 522               	.global	x_comma_combo
+ 523               		.section	.progmem.data.x_comma_combo,"a"
+ 526               	x_comma_combo:
+ 527 0000 1B00      		.word	27
+ 528 0002 3600      		.word	54
+ 529 0004 0000      		.word	0
+ 530               	.global	z_slash_combo
+ 531               		.section	.progmem.data.z_slash_combo,"a"
+ 534               	z_slash_combo:
+ 535 0000 1D00      		.word	29
+ 536 0002 3800      		.word	56
+ 537 0004 0000      		.word	0
+ 538               	.global	comma_m_combo
+ 539               		.section	.progmem.data.comma_m_combo,"a"
+ 542               	comma_m_combo:
+ 543 0000 3600      		.word	54
+ 544 0002 1000      		.word	16
+ 545 0004 0000      		.word	0
+ 546               	.global	dot_comma_combo
+ 547               		.section	.progmem.data.dot_comma_combo,"a"
+ 550               	dot_comma_combo:
+ 551 0000 3700      		.word	55
+ 552 0002 3600      		.word	54
+ 553 0004 0000      		.word	0
+ 554               	.global	slash_dot_combo
+ 555               		.section	.progmem.data.slash_dot_combo,"a"
+ 558               	slash_dot_combo:
+ 559 0000 3800      		.word	56
+ 560 0002 3700      		.word	55
+ 561 0004 0000      		.word	0
+ 562               	.global	u_i_combo
+ 563               		.section	.progmem.data.u_i_combo,"a"
+ 566               	u_i_combo:
+ 567 0000 1800      		.word	24
+ 568 0002 0C00      		.word	12
+ 569 0004 0000      		.word	0
+ 570               	.global	i_o_combo
+ 571               		.section	.progmem.data.i_o_combo,"a"
+ 574               	i_o_combo:
+ 575 0000 1200      		.word	18
+ 576 0002 0C00      		.word	12
+ 577 0004 0000      		.word	0
+ 578               	.global	o_u_combo
+ 579               		.section	.progmem.data.o_u_combo,"a"
+ 582               	o_u_combo:
+ 583 0000 1200      		.word	18
+ 584 0002 1800      		.word	24
+ 585 0004 0000      		.word	0
+ 586               	.global	p_o_combo
+ 587               		.section	.progmem.data.p_o_combo,"a"
+ 590               	p_o_combo:
+ 591 0000 1300      		.word	19
+ 592 0002 1200      		.word	18
+ 593 0004 0000      		.word	0
+ 594               	.global	c_v_combo
+ 595               		.section	.progmem.data.c_v_combo,"a"
+ 598               	c_v_combo:
+ 599 0000 0600      		.word	6
+ 600 0002 1900      		.word	25
+ 601 0004 0000      		.word	0
+ 602               	.global	x_c_combo
+ 603               		.section	.progmem.data.x_c_combo,"a"
+ 606               	x_c_combo:
+ 607 0000 1B00      		.word	27
+ 608 0002 0600      		.word	6
+ 609 0004 0000      		.word	0
+ 610               	.global	z_x_combo
+ 611               		.section	.progmem.data.z_x_combo,"a"
+ 614               	z_x_combo:
+ 615 0000 1D00      		.word	29
+ 616 0002 1B00      		.word	27
+ 617 0004 0000      		.word	0
+ 618               	.global	e_r_combo
+ 619               		.section	.progmem.data.e_r_combo,"a"
+ 622               	e_r_combo:
+ 623 0000 0800      		.word	8
+ 624 0002 1500      		.word	21
+ 625 0004 0000      		.word	0
+ 626               	.global	w_r_combo
+ 627               		.section	.progmem.data.w_r_combo,"a"
+ 630               	w_r_combo:
+ 631 0000 1A00      		.word	26
+ 632 0002 1500      		.word	21
+ 633 0004 0000      		.word	0
+ 634               	.global	w_e_combo
+ 635               		.section	.progmem.data.w_e_combo,"a"
+ 638               	w_e_combo:
+ 639 0000 1A00      		.word	26
+ 640 0002 0800      		.word	8
+ 641 0004 0000      		.word	0
+ 642               	.global	q_w_combo
+ 643               		.section	.progmem.data.q_w_combo,"a"
+ 646               	q_w_combo:
+ 647 0000 1400      		.word	20
+ 648 0002 1A00      		.word	26
+ 649 0004 0000      		.word	0
+ 650               		.text
+ 651               	.Letext0:
+ 652               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 653               		.file 3 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
+ 654               		.file 4 "tmk_core/common/keyboard.h"
+ 655               		.file 5 "tmk_core/common/keycode.h"
+ 656               		.file 6 "tmk_core/common/action_code.h"
+ 657               		.file 7 "tmk_core/common/action.h"
+ 658               		.file 8 "tmk_core/common/report.h"
+ 659               		.file 9 "tmk_core/common/host.h"
+ 660               		.file 10 "tmk_core/common/avr/xprintf.h"
+ 661               		.file 11 "tmk_core/common/debug.h"
+ 662               		.file 12 "quantum/keycode_config.h"
+ 663               		.file 13 "quantum/quantum_keycodes.h"
+ 664               		.file 14 "quantum/keymap.h"
+ 665               		.file 15 "tmk_core/common/action_layer.h"
+ 666               		.file 16 "tmk_core/common/timer.h"
+ 667               		.file 17 "tmk_core/common/action_util.h"
+ 668               		.file 18 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdlib.h"
+ 669               		.file 19 "quantum/process_keycode/process_tap_dance.h"
+ 670               		.file 20 "quantum/process_keycode/process_combo.h"
+ 671               		.file 21 "quantum/quantum.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 keymap.c
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:13     .text.process_record_user:0000000000000000 process_record_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:91     .progmem.data.__c.3632:0000000000000000 __c.3632
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:97     .progmem.data.keymaps:0000000000000000 keymaps
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:302    .data.tap_dance_actions:0000000000000000 tap_dance_actions
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:443    .data.__compound_literal.0:0000000000000000 __compound_literal.0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:437    .data.__compound_literal.1:0000000000000000 __compound_literal.1
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:431    .data.__compound_literal.2:0000000000000000 __compound_literal.2
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:425    .data.__compound_literal.3:0000000000000000 __compound_literal.3
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:419    .data.__compound_literal.4:0000000000000000 __compound_literal.4
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:413    .data.__compound_literal.5:0000000000000000 __compound_literal.5
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:407    .data.__compound_literal.6:0000000000000000 __compound_literal.6
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:401    .data.__compound_literal.7:0000000000000000 __compound_literal.7
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:395    .data.__compound_literal.8:0000000000000000 __compound_literal.8
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:389    .data.__compound_literal.9:0000000000000000 __compound_literal.9
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:383    .data.__compound_literal.10:0000000000000000 __compound_literal.10
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:377    .data.__compound_literal.11:0000000000000000 __compound_literal.11
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:371    .data.__compound_literal.12:0000000000000000 __compound_literal.12
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:450    .data.key_combos:0000000000000000 key_combos
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:646    .progmem.data.q_w_combo:0000000000000000 q_w_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:638    .progmem.data.w_e_combo:0000000000000000 w_e_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:630    .progmem.data.w_r_combo:0000000000000000 w_r_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:622    .progmem.data.e_r_combo:0000000000000000 e_r_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:614    .progmem.data.z_x_combo:0000000000000000 z_x_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:606    .progmem.data.x_c_combo:0000000000000000 x_c_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:598    .progmem.data.c_v_combo:0000000000000000 c_v_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:590    .progmem.data.p_o_combo:0000000000000000 p_o_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:582    .progmem.data.o_u_combo:0000000000000000 o_u_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:574    .progmem.data.i_o_combo:0000000000000000 i_o_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:566    .progmem.data.u_i_combo:0000000000000000 u_i_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:558    .progmem.data.slash_dot_combo:0000000000000000 slash_dot_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:550    .progmem.data.dot_comma_combo:0000000000000000 dot_comma_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:542    .progmem.data.comma_m_combo:0000000000000000 comma_m_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:534    .progmem.data.z_slash_combo:0000000000000000 z_slash_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:526    .progmem.data.x_comma_combo:0000000000000000 x_comma_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:518    .progmem.data.j_f_combo:0000000000000000 j_f_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:510    .progmem.data.g_h_combo:0000000000000000 g_h_combo
+
+UNDEFINED SYMBOLS
+__xprintf
+qk_tap_dance_pair_on_each_tap
+qk_tap_dance_pair_finished
+qk_tap_dance_pair_reset
+__do_copy_data
