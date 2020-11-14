@@ -181,15 +181,15 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_BASE] = LAYOUT_complicated(
     KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
-    SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),   KC_G,       KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_SCLN,
+    SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),       KC_G,   KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_SCLN,
     KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
                             KC_TAB,KC_HOME,                KC_CLCK, RS_SPC,
                             LW_BSPC,LT(_SYMBOL, KC_ESC),    ALT_ENT,RS_SPC
 ),
 [_RAISE] = LAYOUT_complicated(
-    KC_EXLM,    KC_AT,  KC_MS_U,    KC_LCBR,KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
-    KC_BTN2,  KC_MS_L,    KC_MS_D,KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
-    KC_LBRC,KC_RBRC,KC_LPRN,KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
+    KC_EXLM,    KC_AT,      KC_MS_U,    KC_LCBR,    KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
+    KC_BTN2,    KC_MS_L,    KC_MS_D,    KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+    KC_LBRC,    KC_RBRC,    KC_LPRN,    KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
