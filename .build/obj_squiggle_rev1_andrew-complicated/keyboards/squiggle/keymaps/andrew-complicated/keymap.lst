@@ -105,7 +105,7 @@
   90:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define ADDDD    LT(_ADJUST, KC_BSPC)
   91:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
   92:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** // idk, man. not used, i guess.
-  93:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define RAISE    MO(_RAISE)
+  93:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** //#define RAISE    MO(_RAISE)
   94:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define LOWER    MO(_LOWER)
   95:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** #define MUIS     MO(_MUIS)
   96:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** 
@@ -196,37 +196,37 @@
  181:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  182:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_BASE] = LAYOUT_complicated(
  183:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
- 184:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),   KC_G,       KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_
+ 184:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),       KC_G,   KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_
  185:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
- 186:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             KC_TAB,KC_HOME,                KC_CLCK, RS_SPC,
+ 186:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             KC_TAB,LT(_RAISE,KC_HOME),                KC_CLCK, RS_SPC,
  187:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,LT(_SYMBOL, KC_ESC),    ALT_ENT,RS_SPC
  188:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
  189:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_RAISE] = LAYOUT_complicated(
- 190:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_EXLM,    KC_AT,  KC_MS_U,    KC_LCBR,KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
- 191:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_BTN2,  KC_MS_L,    KC_MS_D,KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
- 192:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_LBRC,KC_RBRC,KC_LPRN,KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
- 193:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 190:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_EXLM,    KC_AT,      KC_MS_U,    KC_LCBR,    KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_
+ 191:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_BTN2,    KC_MS_L,    KC_MS_D,    KC_MS_R,    KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC
+ 192:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_LBRC,    KC_RBRC,    KC_LPRN,    KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS
+ 193:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,_______,    KC_END, RS_SPC,
  194:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
  195:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
  196:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_SYMBOL] = LAYOUT_complicated(
  197:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_EXLM,    KC_AT,  KC_HASH,    KC_DOLLAR,KC_PERCENT,    KC_CIRC,KC_7,   KC_8,   KC_9,   KC_AST
  198:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_LT,  KC_LBRC,    KC_LPRN,KC_LCBR,  KC_AMPR,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
  199:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_GT,KC_RBRC,KC_RPRN,KC_RCBR,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
- 200:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 200:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,_______,    KC_END, RS_SPC,
  201:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
  202:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
  203:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_LOWER] = LAYOUT_complicated(
- 204:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LGUI(KC_GRAVE), KC_QUES,KC_WH_U,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_WH_U,   
- 205:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LCTL_T(KC_ESC),  LSFT_T(KC_TAB), KC_LALT,LGUI_T(KC_BTN1),  LCTL_T(KC_BTN2),    KC_LEFT,     KC_
+ 204:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LGUI(KC_GRAVE), KC_QUES,KC_AUDIO_VOL_UP,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_
+ 205:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     LCTL_T(KC_ESC), KC_MEDIA_PLAY_PAUSE, KC_AUDIO_VOL_DOWN,KC_MEDIA_NEXT_TRACK, KC_BTN1,    KC_LEFT
  206:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     KC_CLCK,         G(KC_X),G(KC_C),G(KC_V),G(KC_Z),        KC_MS_L,  KC_MS_D,    KC_MS_U,    KC_M
- 207:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 207:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,_______,    KC_END, RS_SPC,
  208:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
  209:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
  210:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** [_ADJUST] = LAYOUT_complicated(
  211:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _______,EXPLR,  KC_UP,  PRVTAB, PRVWIN,     NXTWIN, NXTTAB, _______,_______,LCKGUI,
  212:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     TSKMGR, KC_LEFT,KC_DOWN,KC_RGHT,UPTAB,      DNTAB,  KC_ENT, KC_LGUI,_______,CALDL,
  213:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****     _______,CLSGUI, _______,CONPST, RESET,      _______,_______,_______,_______,_______,
- 214:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+ 214:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             LW_BSPC,_______,    KC_END, RS_SPC,
  215:keyboards/squiggle/keymaps/andrew-complicated/keymap.c ****                             _______,_______,    _______,_______
  216:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** ),
  217:keyboards/squiggle/keymaps/andrew-complicated/keymap.c **** };
@@ -337,7 +337,7 @@
  114 0020 2A43      		.word	17194
  115 0022 2943      		.word	17193
  116 0024 2B00      		.word	43
- 117 0026 4A00      		.word	74
+ 117 0026 4A42      		.word	16970
  118 0028 1300      		.word	19
  119 002a 1200      		.word	18
  120 002c 0C00      		.word	12
@@ -360,14 +360,14 @@
  137 004e 3900      		.word	57
  138 0050 3508      		.word	2101
  139 0052 3802      		.word	568
- 140 0054 F900      		.word	249
+ 140 0054 A900      		.word	169
  141 0056 FA00      		.word	250
  142 0058 3900      		.word	57
  143 005a 2961      		.word	24873
- 144 005c 2B62      		.word	25131
- 145 005e E200      		.word	226
- 146 0060 F468      		.word	26868
- 147 0062 F561      		.word	25077
+ 144 005c AE00      		.word	174
+ 145 005e AA00      		.word	170
+ 146 0060 AB00      		.word	171
+ 147 0062 F400      		.word	244
  148 0064 3900      		.word	57
  149 0066 1B08      		.word	2075
  150 0068 0608      		.word	2054
@@ -377,7 +377,7 @@
  154 0070 2A44      		.word	17450
  155 0072 0100      		.word	1
  156 0074 2A43      		.word	17194
- 157 0076 4A00      		.word	74
+ 157 0076 0100      		.word	1
  158 0078 2A00      		.word	42
  159 007a 4E00      		.word	78
  160 007c 5200      		.word	82
@@ -417,7 +417,7 @@
  194 00c0 2A44      		.word	17450
  195 00c2 0100      		.word	1
  196 00c4 2A43      		.word	17194
- 197 00c6 4A00      		.word	74
+ 197 00c6 0100      		.word	1
  198 00c8 2502      		.word	549
  199 00ca 2600      		.word	38
  200 00cc 2500      		.word	37
@@ -457,7 +457,7 @@
  234 0110 2A44      		.word	17450
  235 0112 0100      		.word	1
  236 0114 2A43      		.word	17194
- 237 0116 4A00      		.word	74
+ 237 0116 0100      		.word	1
  238 0118 2502      		.word	549
  239 011a 2600      		.word	38
  240 011c 2500      		.word	37
@@ -497,7 +497,7 @@
  274 0160 0100      		.word	1
  275 0162 0100      		.word	1
  276 0164 2A43      		.word	17194
- 277 0166 4A00      		.word	74
+ 277 0166 0100      		.word	1
  278 0168 0F08      		.word	2063
  279 016a 0100      		.word	1
  280 016c 0100      		.word	1
@@ -871,47 +871,47 @@
  671               		.file 21 "quantum/quantum.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 keymap.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:13     .text.process_record_user:0000000000000000 process_record_user
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:91     .progmem.data.__c.3632:0000000000000000 __c.3632
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:97     .progmem.data.keymaps:0000000000000000 keymaps
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:302    .data.tap_dance_actions:0000000000000000 tap_dance_actions
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:443    .data.__compound_literal.0:0000000000000000 __compound_literal.0
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:437    .data.__compound_literal.1:0000000000000000 __compound_literal.1
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:431    .data.__compound_literal.2:0000000000000000 __compound_literal.2
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:425    .data.__compound_literal.3:0000000000000000 __compound_literal.3
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:419    .data.__compound_literal.4:0000000000000000 __compound_literal.4
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:413    .data.__compound_literal.5:0000000000000000 __compound_literal.5
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:407    .data.__compound_literal.6:0000000000000000 __compound_literal.6
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:401    .data.__compound_literal.7:0000000000000000 __compound_literal.7
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:395    .data.__compound_literal.8:0000000000000000 __compound_literal.8
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:389    .data.__compound_literal.9:0000000000000000 __compound_literal.9
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:383    .data.__compound_literal.10:0000000000000000 __compound_literal.10
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:377    .data.__compound_literal.11:0000000000000000 __compound_literal.11
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:371    .data.__compound_literal.12:0000000000000000 __compound_literal.12
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:450    .data.key_combos:0000000000000000 key_combos
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:646    .progmem.data.q_w_combo:0000000000000000 q_w_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:638    .progmem.data.w_e_combo:0000000000000000 w_e_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:630    .progmem.data.w_r_combo:0000000000000000 w_r_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:622    .progmem.data.e_r_combo:0000000000000000 e_r_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:614    .progmem.data.z_x_combo:0000000000000000 z_x_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:606    .progmem.data.x_c_combo:0000000000000000 x_c_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:598    .progmem.data.c_v_combo:0000000000000000 c_v_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:590    .progmem.data.p_o_combo:0000000000000000 p_o_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:582    .progmem.data.o_u_combo:0000000000000000 o_u_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:574    .progmem.data.i_o_combo:0000000000000000 i_o_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:566    .progmem.data.u_i_combo:0000000000000000 u_i_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:558    .progmem.data.slash_dot_combo:0000000000000000 slash_dot_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:550    .progmem.data.dot_comma_combo:0000000000000000 dot_comma_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:542    .progmem.data.comma_m_combo:0000000000000000 comma_m_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:534    .progmem.data.z_slash_combo:0000000000000000 z_slash_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:526    .progmem.data.x_comma_combo:0000000000000000 x_comma_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:518    .progmem.data.j_f_combo:0000000000000000 j_f_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccSoat9Y.s:510    .progmem.data.g_h_combo:0000000000000000 g_h_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:13     .text.process_record_user:0000000000000000 process_record_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:91     .progmem.data.__c.3632:0000000000000000 __c.3632
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:97     .progmem.data.keymaps:0000000000000000 keymaps
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:302    .data.tap_dance_actions:0000000000000000 tap_dance_actions
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:443    .data.__compound_literal.0:0000000000000000 __compound_literal.0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:437    .data.__compound_literal.1:0000000000000000 __compound_literal.1
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:431    .data.__compound_literal.2:0000000000000000 __compound_literal.2
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:425    .data.__compound_literal.3:0000000000000000 __compound_literal.3
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:419    .data.__compound_literal.4:0000000000000000 __compound_literal.4
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:413    .data.__compound_literal.5:0000000000000000 __compound_literal.5
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:407    .data.__compound_literal.6:0000000000000000 __compound_literal.6
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:401    .data.__compound_literal.7:0000000000000000 __compound_literal.7
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:395    .data.__compound_literal.8:0000000000000000 __compound_literal.8
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:389    .data.__compound_literal.9:0000000000000000 __compound_literal.9
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:383    .data.__compound_literal.10:0000000000000000 __compound_literal.10
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:377    .data.__compound_literal.11:0000000000000000 __compound_literal.11
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:371    .data.__compound_literal.12:0000000000000000 __compound_literal.12
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:450    .data.key_combos:0000000000000000 key_combos
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:646    .progmem.data.q_w_combo:0000000000000000 q_w_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:638    .progmem.data.w_e_combo:0000000000000000 w_e_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:630    .progmem.data.w_r_combo:0000000000000000 w_r_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:622    .progmem.data.e_r_combo:0000000000000000 e_r_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:614    .progmem.data.z_x_combo:0000000000000000 z_x_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:606    .progmem.data.x_c_combo:0000000000000000 x_c_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:598    .progmem.data.c_v_combo:0000000000000000 c_v_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:590    .progmem.data.p_o_combo:0000000000000000 p_o_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:582    .progmem.data.o_u_combo:0000000000000000 o_u_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:574    .progmem.data.i_o_combo:0000000000000000 i_o_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:566    .progmem.data.u_i_combo:0000000000000000 u_i_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:558    .progmem.data.slash_dot_combo:0000000000000000 slash_dot_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:550    .progmem.data.dot_comma_combo:0000000000000000 dot_comma_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:542    .progmem.data.comma_m_combo:0000000000000000 comma_m_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:534    .progmem.data.z_slash_combo:0000000000000000 z_slash_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:526    .progmem.data.x_comma_combo:0000000000000000 x_comma_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:518    .progmem.data.j_f_combo:0000000000000000 j_f_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccYAJEDD.s:510    .progmem.data.g_h_combo:0000000000000000 g_h_combo
 
 UNDEFINED SYMBOLS
 __xprintf

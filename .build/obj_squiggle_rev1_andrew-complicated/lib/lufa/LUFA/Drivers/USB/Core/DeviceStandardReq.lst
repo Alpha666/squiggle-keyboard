@@ -2920,12 +2920,12 @@
  1042               		.file 12 "lib/lufa/LUFA/Drivers/USB/Core/Events.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 DeviceStandardReq.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc406QBy.s:13     .text.USB_Device_ProcessControlRequest:0000000000000000 USB_Device_ProcessControlRequest
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccKVR0sZ.s:13     .text.USB_Device_ProcessControlRequest:0000000000000000 USB_Device_ProcessControlRequest
                             *COM*:0000000000000001 USB_Device_CurrentlySelfPowered
                             *COM*:0000000000000001 USB_Device_RemoteWakeupEnabled
                             *COM*:0000000000000001 USB_Device_ConfigurationNumber

@@ -619,18 +619,18 @@
  342               		.file 8 "tmk_core/common/keycode.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 report.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:13     .text.has_anykey:0000000000000000 has_anykey
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:69     .text.get_first_key:0000000000000000 get_first_key
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:92     .text.is_key_pressed:0000000000000000 is_key_pressed
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:147    .text.add_key_byte:0000000000000000 add_key_byte
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:223    .text.del_key_byte:0000000000000000 del_key_byte
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:271    .text.add_key_to_report:0000000000000000 add_key_to_report
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:290    .text.del_key_from_report:0000000000000000 del_key_from_report
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnmg6t7.s:309    .text.clear_keys_from_report:0000000000000000 clear_keys_from_report
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:13     .text.has_anykey:0000000000000000 has_anykey
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:69     .text.get_first_key:0000000000000000 get_first_key
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:92     .text.is_key_pressed:0000000000000000 is_key_pressed
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:147    .text.add_key_byte:0000000000000000 add_key_byte
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:223    .text.del_key_byte:0000000000000000 del_key_byte
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:271    .text.add_key_to_report:0000000000000000 add_key_to_report
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:290    .text.del_key_from_report:0000000000000000 del_key_from_report
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfv2kXN.s:309    .text.clear_keys_from_report:0000000000000000 clear_keys_from_report
 
 NO UNDEFINED SYMBOLS

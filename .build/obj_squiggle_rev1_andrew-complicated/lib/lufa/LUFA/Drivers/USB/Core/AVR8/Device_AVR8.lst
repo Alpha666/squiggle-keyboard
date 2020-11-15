@@ -530,11 +530,11 @@
   90               		.file 6 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../AVR8/../AVR8/../USBTask.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 Device_AVR8.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccHz00kc.s:13     .text.USB_Device_SendRemoteWakeup:0000000000000000 USB_Device_SendRemoteWakeup
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cco3tphZ.s:13     .text.USB_Device_SendRemoteWakeup:0000000000000000 USB_Device_SendRemoteWakeup
 
 NO UNDEFINED SYMBOLS

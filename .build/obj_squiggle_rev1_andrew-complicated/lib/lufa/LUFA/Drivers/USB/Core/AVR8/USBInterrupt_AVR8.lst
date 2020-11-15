@@ -2996,15 +2996,15 @@
  978               		.file 12 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../AVR8/../Events.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 USBInterrupt_AVR8.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:13     .text.USB_INT_DisableAllInterrupts:0000000000000000 USB_INT_DisableAllInterrupts
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:41     .text.USB_INT_ClearAllInterrupts:0000000000000000 USB_INT_ClearAllInterrupts
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:64     .text.__vector_10:0000000000000000 __vector_10
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccvFPEMy.s:740    .text.__vector_11:0000000000000000 __vector_11
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:13     .text.USB_INT_DisableAllInterrupts:0000000000000000 USB_INT_DisableAllInterrupts
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:41     .text.USB_INT_ClearAllInterrupts:0000000000000000 USB_INT_ClearAllInterrupts
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:64     .text.__vector_10:0000000000000000 __vector_10
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccfWsYal.s:740    .text.__vector_11:0000000000000000 __vector_11
 
 UNDEFINED SYMBOLS
 EVENT_USB_Device_StartOfFrame

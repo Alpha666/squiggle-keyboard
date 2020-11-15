@@ -910,13 +910,13 @@
  152               		.file 8 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdio.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 bootloader.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:13     .text.bootloader_jump:0000000000000000 bootloader_jump
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:66     .init3:0000000000000000 bootloader_jump_after_watchdog_reset
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOJuYjV.s:143    .noinit:0000000000000000 reset_key
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:13     .text.bootloader_jump:0000000000000000 bootloader_jump
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:66     .init3:0000000000000000 bootloader_jump_after_watchdog_reset
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccrtjZO7.s:143    .noinit:0000000000000000 reset_key
 
 NO UNDEFINED SYMBOLS

@@ -90,7 +90,7 @@ enum {
 #define ADDDD    LT(_ADJUST, KC_BSPC)
 
 // idk, man. not used, i guess.
-#define RAISE    MO(_RAISE)
+//#define RAISE    MO(_RAISE)
 #define LOWER    MO(_LOWER)
 #define MUIS     MO(_MUIS)
 
@@ -183,35 +183,35 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,
     SH_A,   CT_S,   AL_D,   LGUI_T(KC_F),       KC_G,   KC_H,   LGUI_T(KC_J),   AL_K,   CT_L,   SH_SCLN,
     KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH,
-                            KC_TAB,KC_HOME,                KC_CLCK, RS_SPC,
+                            KC_TAB,LT(_RAISE,KC_HOME),                KC_CLCK, RS_SPC,
                             LW_BSPC,LT(_SYMBOL, KC_ESC),    ALT_ENT,RS_SPC
 ),
 [_RAISE] = LAYOUT_complicated(
     KC_EXLM,    KC_AT,      KC_MS_U,    KC_LCBR,    KC_RCBR,    KC_BSLS,KC_7,   KC_8,   KC_9,   KC_ASTR ,
-    KC_BTN2,    KC_MS_L,    KC_MS_D,    KC_MS_R,  KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
+    KC_BTN2,    KC_MS_L,    KC_MS_D,    KC_MS_R,    KC_BTN1,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
     KC_LBRC,    KC_RBRC,    KC_LPRN,    KC_RPRN,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
-                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            LW_BSPC,_______,    KC_END, RS_SPC,
                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_SYMBOL] = LAYOUT_complicated(
     KC_EXLM,    KC_AT,  KC_HASH,    KC_DOLLAR,KC_PERCENT,    KC_CIRC,KC_7,   KC_8,   KC_9,   KC_ASTR ,
     KC_LT,  KC_LBRC,    KC_LPRN,KC_LCBR,  KC_AMPR,     KC_EQL, KC_4,   KC_5,   KC_6,   KC_0 ,
     KC_GT,KC_RBRC,KC_RPRN,KC_RCBR,KC_AMPR,    KC_GRV, KC_1,   KC_2,   KC_3,   KC_PLUS ,
-                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            LW_BSPC,_______,    KC_END, RS_SPC,
                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_LOWER] = LAYOUT_complicated(
-    LGUI(KC_GRAVE), KC_QUES,KC_WH_U,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_WH_U,    KC_UP,  KC_PGDN,    KC_BSPC,
-    LCTL_T(KC_ESC),  LSFT_T(KC_TAB), KC_LALT,LGUI_T(KC_BTN1),  LCTL_T(KC_BTN2),    KC_LEFT,     KC_DOWN,    KC_UP,KC_RIGHT,   KC_CLCK,
+    LGUI(KC_GRAVE), KC_QUES,KC_AUDIO_VOL_UP,    KC_WH_D,  KC_CLCK,                  KC_BSPC,    KC_WH_U,    KC_UP,  KC_PGDN,    KC_BSPC,
+    LCTL_T(KC_ESC), KC_MEDIA_PLAY_PAUSE, KC_AUDIO_VOL_DOWN,KC_MEDIA_NEXT_TRACK, KC_BTN1,    KC_LEFT,     KC_DOWN,    KC_UP,KC_RIGHT,   KC_CLCK,
     KC_CLCK,         G(KC_X),G(KC_C),G(KC_V),G(KC_Z),        KC_MS_L,  KC_MS_D,    KC_MS_U,    KC_MS_R, _______,
-                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            LW_BSPC,_______,    KC_END, RS_SPC,
                             ADDDD,  _______,    ALT_ENT,LT(_ADJUST, KC_SPC)
 ),
 [_ADJUST] = LAYOUT_complicated(
     _______,EXPLR,  KC_UP,  PRVTAB, PRVWIN,     NXTWIN, NXTTAB, _______,_______,LCKGUI,
     TSKMGR, KC_LEFT,KC_DOWN,KC_RGHT,UPTAB,      DNTAB,  KC_ENT, KC_LGUI,_______,CALDL,
     _______,CLSGUI, _______,CONPST, RESET,      _______,_______,_______,_______,_______,
-                            LW_BSPC,KC_HOME,    KC_END, RS_SPC,
+                            LW_BSPC,_______,    KC_END, RS_SPC,
                             _______,_______,    _______,_______
 ),
 };

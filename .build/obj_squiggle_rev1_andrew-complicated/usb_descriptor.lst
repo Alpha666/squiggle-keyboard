@@ -1379,7 +1379,7 @@
  231               		.section	.rodata.CSWTCH.2,"a"
  234               	CSWTCH.2:
  235 0000 40        		.byte	64
- 236 0001 4F        		.byte	79
+ 236 0001 81        		.byte	-127
  237 0002 22        		.byte	34
  238               		.section	.rodata.CSWTCH.1,"a"
  241               	CSWTCH.1:
@@ -1481,7 +1481,7 @@
  349 002f 00        		.byte	0
  350 0030 01        		.byte	1
  351 0031 22        		.byte	34
- 352 0032 4F00      		.word	79
+ 352 0032 8100      		.word	129
  353 0034 07        		.byte	7
  354 0035 05        		.byte	5
  355 0036 82        		.byte	-126
@@ -1652,106 +1652,156 @@
  526 004c 06        		.byte	6
  527 004d C0        		.byte	-64
  528 004e C0        		.byte	-64
- 529               	.global	KeyboardReport
- 530               		.section	.progmem.data.KeyboardReport,"a"
- 533               	KeyboardReport:
- 534 0000 05        		.byte	5
- 535 0001 01        		.byte	1
- 536 0002 09        		.byte	9
- 537 0003 06        		.byte	6
- 538 0004 A1        		.byte	-95
- 539 0005 01        		.byte	1
- 540 0006 05        		.byte	5
- 541 0007 07        		.byte	7
- 542 0008 19        		.byte	25
- 543 0009 E0        		.byte	-32
- 544 000a 29        		.byte	41
- 545 000b E7        		.byte	-25
- 546 000c 15        		.byte	21
- 547 000d 00        		.byte	0
- 548 000e 25        		.byte	37
- 549 000f 01        		.byte	1
- 550 0010 95        		.byte	-107
- 551 0011 08        		.byte	8
- 552 0012 75        		.byte	117
- 553 0013 01        		.byte	1
- 554 0014 81        		.byte	-127
- 555 0015 02        		.byte	2
- 556 0016 95        		.byte	-107
- 557 0017 01        		.byte	1
- 558 0018 75        		.byte	117
- 559 0019 08        		.byte	8
- 560 001a 81        		.byte	-127
- 561 001b 01        		.byte	1
- 562 001c 05        		.byte	5
- 563 001d 07        		.byte	7
- 564 001e 19        		.byte	25
- 565 001f 00        		.byte	0
- 566 0020 29        		.byte	41
- 567 0021 FF        		.byte	-1
- 568 0022 15        		.byte	21
- 569 0023 00        		.byte	0
- 570 0024 26        		.byte	38
- 571 0025 FF        		.byte	-1
- 572 0026 00        		.byte	0
- 573 0027 95        		.byte	-107
- 574 0028 06        		.byte	6
- 575 0029 75        		.byte	117
- 576 002a 08        		.byte	8
- 577 002b 81        		.byte	-127
- 578 002c 00        		.byte	0
- 579 002d 05        		.byte	5
- 580 002e 08        		.byte	8
- 581 002f 19        		.byte	25
- 582 0030 01        		.byte	1
- 583 0031 29        		.byte	41
- 584 0032 05        		.byte	5
- 585 0033 95        		.byte	-107
- 586 0034 05        		.byte	5
- 587 0035 75        		.byte	117
- 588 0036 01        		.byte	1
- 589 0037 91        		.byte	-111
- 590 0038 02        		.byte	2
- 591 0039 95        		.byte	-107
- 592 003a 01        		.byte	1
- 593 003b 75        		.byte	117
- 594 003c 03        		.byte	3
- 595 003d 91        		.byte	-111
- 596 003e 01        		.byte	1
- 597 003f C0        		.byte	-64
- 598               		.text
- 599               	.Letext0:
- 600               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
- 601               		.file 3 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
- 602               		.file 4 "tmk_core/common/report.h"
- 603               		.file 5 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../StdDescriptors.h"
- 604               		.file 6 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../StdRequestType.h"
- 605               		.file 7 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../DeviceStandardReq.h"
- 606               		.file 8 "lib/lufa/LUFA/Drivers/USB/Core/USBTask.h"
- 607               		.file 9 "lib/lufa/LUFA/Drivers/USB/Core/HostStandardReq.h"
- 608               		.file 10 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdio.h"
- 609               		.file 11 "lib/lufa/LUFA/Drivers/USB/Class/Device/../Common/HIDClassCommon.h"
- 610               		.file 12 "tmk_core/protocol/usb_descriptor.h"
+ 529 004f 05        		.byte	5
+ 530 0050 01        		.byte	1
+ 531 0051 09        		.byte	9
+ 532 0052 80        		.byte	-128
+ 533 0053 A1        		.byte	-95
+ 534 0054 01        		.byte	1
+ 535 0055 85        		.byte	-123
+ 536 0056 03        		.byte	3
+ 537 0057 19        		.byte	25
+ 538 0058 01        		.byte	1
+ 539 0059 2A        		.byte	42
+ 540 005a B7        		.byte	-73
+ 541 005b 00        		.byte	0
+ 542 005c 15        		.byte	21
+ 543 005d 01        		.byte	1
+ 544 005e 26        		.byte	38
+ 545 005f B7        		.byte	-73
+ 546 0060 00        		.byte	0
+ 547 0061 95        		.byte	-107
+ 548 0062 01        		.byte	1
+ 549 0063 75        		.byte	117
+ 550 0064 10        		.byte	16
+ 551 0065 81        		.byte	-127
+ 552 0066 00        		.byte	0
+ 553 0067 C0        		.byte	-64
+ 554 0068 05        		.byte	5
+ 555 0069 0C        		.byte	12
+ 556 006a 09        		.byte	9
+ 557 006b 01        		.byte	1
+ 558 006c A1        		.byte	-95
+ 559 006d 01        		.byte	1
+ 560 006e 85        		.byte	-123
+ 561 006f 04        		.byte	4
+ 562 0070 19        		.byte	25
+ 563 0071 01        		.byte	1
+ 564 0072 2A        		.byte	42
+ 565 0073 A0        		.byte	-96
+ 566 0074 02        		.byte	2
+ 567 0075 15        		.byte	21
+ 568 0076 01        		.byte	1
+ 569 0077 26        		.byte	38
+ 570 0078 A0        		.byte	-96
+ 571 0079 02        		.byte	2
+ 572 007a 95        		.byte	-107
+ 573 007b 01        		.byte	1
+ 574 007c 75        		.byte	117
+ 575 007d 10        		.byte	16
+ 576 007e 81        		.byte	-127
+ 577 007f 00        		.byte	0
+ 578 0080 C0        		.byte	-64
+ 579               	.global	KeyboardReport
+ 580               		.section	.progmem.data.KeyboardReport,"a"
+ 583               	KeyboardReport:
+ 584 0000 05        		.byte	5
+ 585 0001 01        		.byte	1
+ 586 0002 09        		.byte	9
+ 587 0003 06        		.byte	6
+ 588 0004 A1        		.byte	-95
+ 589 0005 01        		.byte	1
+ 590 0006 05        		.byte	5
+ 591 0007 07        		.byte	7
+ 592 0008 19        		.byte	25
+ 593 0009 E0        		.byte	-32
+ 594 000a 29        		.byte	41
+ 595 000b E7        		.byte	-25
+ 596 000c 15        		.byte	21
+ 597 000d 00        		.byte	0
+ 598 000e 25        		.byte	37
+ 599 000f 01        		.byte	1
+ 600 0010 95        		.byte	-107
+ 601 0011 08        		.byte	8
+ 602 0012 75        		.byte	117
+ 603 0013 01        		.byte	1
+ 604 0014 81        		.byte	-127
+ 605 0015 02        		.byte	2
+ 606 0016 95        		.byte	-107
+ 607 0017 01        		.byte	1
+ 608 0018 75        		.byte	117
+ 609 0019 08        		.byte	8
+ 610 001a 81        		.byte	-127
+ 611 001b 01        		.byte	1
+ 612 001c 05        		.byte	5
+ 613 001d 07        		.byte	7
+ 614 001e 19        		.byte	25
+ 615 001f 00        		.byte	0
+ 616 0020 29        		.byte	41
+ 617 0021 FF        		.byte	-1
+ 618 0022 15        		.byte	21
+ 619 0023 00        		.byte	0
+ 620 0024 26        		.byte	38
+ 621 0025 FF        		.byte	-1
+ 622 0026 00        		.byte	0
+ 623 0027 95        		.byte	-107
+ 624 0028 06        		.byte	6
+ 625 0029 75        		.byte	117
+ 626 002a 08        		.byte	8
+ 627 002b 81        		.byte	-127
+ 628 002c 00        		.byte	0
+ 629 002d 05        		.byte	5
+ 630 002e 08        		.byte	8
+ 631 002f 19        		.byte	25
+ 632 0030 01        		.byte	1
+ 633 0031 29        		.byte	41
+ 634 0032 05        		.byte	5
+ 635 0033 95        		.byte	-107
+ 636 0034 05        		.byte	5
+ 637 0035 75        		.byte	117
+ 638 0036 01        		.byte	1
+ 639 0037 91        		.byte	-111
+ 640 0038 02        		.byte	2
+ 641 0039 95        		.byte	-107
+ 642 003a 01        		.byte	1
+ 643 003b 75        		.byte	117
+ 644 003c 03        		.byte	3
+ 645 003d 91        		.byte	-111
+ 646 003e 01        		.byte	1
+ 647 003f C0        		.byte	-64
+ 648               		.text
+ 649               	.Letext0:
+ 650               		.file 2 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdint.h"
+ 651               		.file 3 "/usr/local/Cellar/avr-gcc@8/8.4.0/lib/avr-gcc/8/gcc/avr/8.4.0/include/stddef.h"
+ 652               		.file 4 "tmk_core/common/report.h"
+ 653               		.file 5 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../StdDescriptors.h"
+ 654               		.file 6 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../StdRequestType.h"
+ 655               		.file 7 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../DeviceStandardReq.h"
+ 656               		.file 8 "lib/lufa/LUFA/Drivers/USB/Core/USBTask.h"
+ 657               		.file 9 "lib/lufa/LUFA/Drivers/USB/Core/HostStandardReq.h"
+ 658               		.file 10 "/usr/local/Cellar/avr-gcc@8/8.4.0/avr/include/stdio.h"
+ 659               		.file 11 "lib/lufa/LUFA/Drivers/USB/Class/Device/../Common/HIDClassCommon.h"
+ 660               		.file 12 "tmk_core/protocol/usb_descriptor.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 usb_descriptor.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:13     .text.get_usb_descriptor:0000000000000000 get_usb_descriptor
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:241    .rodata.CSWTCH.1:0000000000000000 CSWTCH.1
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:234    .rodata.CSWTCH.2:0000000000000000 CSWTCH.2
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:256    .progmem.data.SerialNumberString:0000000000000000 SerialNumberString
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:298    .progmem.data.LanguageString:0000000000000000 LanguageString
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:283    .progmem.data.ManufacturerString:0000000000000000 ManufacturerString
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:266    .progmem.data.ProductString:0000000000000000 ProductString
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:248    .rodata.CSWTCH.0:0000000000000000 CSWTCH.0
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:391    .progmem.data.DeviceDescriptor:0000000000000000 DeviceDescriptor
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:306    .progmem.data.ConfigurationDescriptor:0000000000000000 ConfigurationDescriptor
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:533    .progmem.data.KeyboardReport:0000000000000000 KeyboardReport
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:449    .progmem.data.SharedReport:0000000000000000 SharedReport
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cctuBp1g.s:410    .progmem.data.ConsoleReport:0000000000000000 ConsoleReport
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:13     .text.get_usb_descriptor:0000000000000000 get_usb_descriptor
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:241    .rodata.CSWTCH.1:0000000000000000 CSWTCH.1
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:234    .rodata.CSWTCH.2:0000000000000000 CSWTCH.2
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:256    .progmem.data.SerialNumberString:0000000000000000 SerialNumberString
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:298    .progmem.data.LanguageString:0000000000000000 LanguageString
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:283    .progmem.data.ManufacturerString:0000000000000000 ManufacturerString
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:266    .progmem.data.ProductString:0000000000000000 ProductString
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:248    .rodata.CSWTCH.0:0000000000000000 CSWTCH.0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:391    .progmem.data.DeviceDescriptor:0000000000000000 DeviceDescriptor
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:306    .progmem.data.ConfigurationDescriptor:0000000000000000 ConfigurationDescriptor
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:583    .progmem.data.KeyboardReport:0000000000000000 KeyboardReport
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:449    .progmem.data.SharedReport:0000000000000000 SharedReport
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOR0A0H.s:410    .progmem.data.ConsoleReport:0000000000000000 ConsoleReport
 
 UNDEFINED SYMBOLS
 __do_copy_data

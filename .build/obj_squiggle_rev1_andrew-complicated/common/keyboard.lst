@@ -1144,29 +1144,29 @@
  653               		.file 16 "tmk_core/common/magic.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 keyboard.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:13     .text.disable_jtag:0000000000000000 disable_jtag
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:41     .text.keyboard_pre_init_user:0000000000000000 keyboard_pre_init_user
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:41     .text.keyboard_pre_init_user:0000000000000000 keyboard_pre_init_user.localalias.0
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:60     .text.matrix_setup:0000000000000000 matrix_setup
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:75     .text.keyboard_pre_init_kb:0000000000000000 keyboard_pre_init_kb
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:92     .text.keyboard_post_init_user:0000000000000000 keyboard_post_init_user
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:107    .text.keyboard_post_init_kb:0000000000000000 keyboard_post_init_kb
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:124    .text.keyboard_setup:0000000000000000 keyboard_setup
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:147    .text.is_keyboard_master:0000000000000000 is_keyboard_master
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:166    .text.should_process_keypress:0000000000000000 should_process_keypress
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:184    .text.keyboard_init:0000000000000000 keyboard_init
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:210    .text.keyboard_set_leds:0000000000000000 keyboard_set_leds
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:625    .progmem.data.__c.3042:0000000000000000 __c.3042
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:620    .progmem.data.__c.3044:0000000000000000 __c.3044
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:615    .progmem.data.__c.3046:0000000000000000 __c.3046
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:311    .text.keyboard_task:0000000000000000 keyboard_task
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:635    .bss.matrix_prev.3021:0000000000000000 matrix_prev.3021
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccbBNM5z.s:630    .bss.led_status.3022:0000000000000000 led_status.3022
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:13     .text.disable_jtag:0000000000000000 disable_jtag
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:41     .text.keyboard_pre_init_user:0000000000000000 keyboard_pre_init_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:41     .text.keyboard_pre_init_user:0000000000000000 keyboard_pre_init_user.localalias.0
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:60     .text.matrix_setup:0000000000000000 matrix_setup
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:75     .text.keyboard_pre_init_kb:0000000000000000 keyboard_pre_init_kb
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:92     .text.keyboard_post_init_user:0000000000000000 keyboard_post_init_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:107    .text.keyboard_post_init_kb:0000000000000000 keyboard_post_init_kb
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:124    .text.keyboard_setup:0000000000000000 keyboard_setup
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:147    .text.is_keyboard_master:0000000000000000 is_keyboard_master
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:166    .text.should_process_keypress:0000000000000000 should_process_keypress
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:184    .text.keyboard_init:0000000000000000 keyboard_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:210    .text.keyboard_set_leds:0000000000000000 keyboard_set_leds
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:625    .progmem.data.__c.3042:0000000000000000 __c.3042
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:620    .progmem.data.__c.3044:0000000000000000 __c.3044
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:615    .progmem.data.__c.3046:0000000000000000 __c.3046
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:311    .text.keyboard_task:0000000000000000 keyboard_task
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:635    .bss.matrix_prev.3021:0000000000000000 matrix_prev.3021
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccQ2YKFl.s:630    .bss.led_status.3022:0000000000000000 led_status.3022
 
 UNDEFINED SYMBOLS
 timer_init

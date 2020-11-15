@@ -1719,16 +1719,16 @@
  718               		.file 9 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../AVR8/../AVR8/../Device.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 Endpoint_AVR8.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:13     .text.Endpoint_ConfigureEndpoint_Prv:0000000000000000 Endpoint_ConfigureEndpoint_Prv
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:185    .text.Endpoint_ConfigureEndpointTable:0000000000000000 Endpoint_ConfigureEndpointTable
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:382    .text.Endpoint_ClearEndpoints:0000000000000000 Endpoint_ClearEndpoints
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:453    .text.Endpoint_ClearStatusStage:0000000000000000 Endpoint_ClearStatusStage
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccDlvTMC.s:549    .text.Endpoint_WaitUntilReady:0000000000000000 Endpoint_WaitUntilReady
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:13     .text.Endpoint_ConfigureEndpoint_Prv:0000000000000000 Endpoint_ConfigureEndpoint_Prv
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:185    .text.Endpoint_ConfigureEndpointTable:0000000000000000 Endpoint_ConfigureEndpointTable
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:382    .text.Endpoint_ClearEndpoints:0000000000000000 Endpoint_ClearEndpoints
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:453    .text.Endpoint_ClearStatusStage:0000000000000000 Endpoint_ClearStatusStage
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9huP7v.s:549    .text.Endpoint_WaitUntilReady:0000000000000000 Endpoint_WaitUntilReady
 
 UNDEFINED SYMBOLS
 USB_ControlRequest

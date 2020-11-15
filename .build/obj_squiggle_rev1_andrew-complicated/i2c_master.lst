@@ -1539,21 +1539,21 @@
  1166               		.file 4 "tmk_core/common/timer.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 i2c_master.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:13     .text.i2c_init:0000000000000000 i2c_init
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:38     .text.i2c_start:0000000000000000 i2c_start
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:224    .text.i2c_write:0000000000000000 i2c_write
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:330    .text.i2c_read_ack:0000000000000000 i2c_read_ack
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:420    .text.i2c_read_nack:0000000000000000 i2c_read_nack
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:510    .text.i2c_transmit:0000000000000000 i2c_transmit
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:632    .text.i2c_receive:0000000000000000 i2c_receive
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:809    .text.i2c_writeReg:0000000000000000 i2c_writeReg
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:944    .text.i2c_readReg:0000000000000000 i2c_readReg
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccnO4wlB.s:1144   .text.i2c_stop:0000000000000000 i2c_stop
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:13     .text.i2c_init:0000000000000000 i2c_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:38     .text.i2c_start:0000000000000000 i2c_start
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:224    .text.i2c_write:0000000000000000 i2c_write
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:330    .text.i2c_read_ack:0000000000000000 i2c_read_ack
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:420    .text.i2c_read_nack:0000000000000000 i2c_read_nack
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:510    .text.i2c_transmit:0000000000000000 i2c_transmit
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:632    .text.i2c_receive:0000000000000000 i2c_receive
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:809    .text.i2c_writeReg:0000000000000000 i2c_writeReg
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:944    .text.i2c_readReg:0000000000000000 i2c_readReg
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccaSmiEm.s:1144   .text.i2c_stop:0000000000000000 i2c_stop
 
 UNDEFINED SYMBOLS
 timer_read

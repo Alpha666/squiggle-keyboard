@@ -642,12 +642,12 @@
  130               		.file 7 "lib/lufa/LUFA/Drivers/USB/Core/AVR8/../Device.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 USBTask.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc9LLEgA.s:13     .text.USB_USBTask:0000000000000000 USB_USBTask
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc65Y3bZ.s:13     .text.USB_USBTask:0000000000000000 USB_USBTask
                             *COM*:0000000000000001 USB_DeviceState
                             *COM*:0000000000000008 USB_ControlRequest
                             *COM*:0000000000000001 USB_IsInitialized

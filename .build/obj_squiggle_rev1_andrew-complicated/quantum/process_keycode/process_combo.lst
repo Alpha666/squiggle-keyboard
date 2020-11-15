@@ -1323,27 +1323,27 @@
  958               		.file 19 "quantum/quantum_keycodes.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 process_combo.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:12     .text.dump_key_buffer:0000000000000000 dump_key_buffer
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:906    .bss.buffer_size:0000000000000000 buffer_size
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:901    .bss.key_buffer:0000000000000000 key_buffer
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:99     .text.process_combo_event:0000000000000000 process_combo_event
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:118    .text.matrix_scan_combo:0000000000000000 matrix_scan_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:911    .data.b_combo_enable:0000000000000000 b_combo_enable
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:916    .bss.is_active:0000000000000000 is_active
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:931    .bss.timer:0000000000000000 timer
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:163    .text.combo_enable:0000000000000000 combo_enable
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:184    .text.combo_disable:0000000000000000 combo_disable
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:211    .text.combo_toggle:0000000000000000 combo_toggle
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:247    .text.process_combo:0000000000000000 process_combo
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:921    .bss.drop_buffer:0000000000000000 drop_buffer
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:926    .bss.current_combo_index:0000000000000000 current_combo_index
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:937    .bss.key_combos:0000000000000000 key_combos
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAzDTpF.s:882    .text.is_combo_enabled:0000000000000000 is_combo_enabled
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:12     .text.dump_key_buffer:0000000000000000 dump_key_buffer
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:906    .bss.buffer_size:0000000000000000 buffer_size
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:901    .bss.key_buffer:0000000000000000 key_buffer
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:99     .text.process_combo_event:0000000000000000 process_combo_event
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:118    .text.matrix_scan_combo:0000000000000000 matrix_scan_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:911    .data.b_combo_enable:0000000000000000 b_combo_enable
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:916    .bss.is_active:0000000000000000 is_active
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:931    .bss.timer:0000000000000000 timer
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:163    .text.combo_enable:0000000000000000 combo_enable
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:184    .text.combo_disable:0000000000000000 combo_disable
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:211    .text.combo_toggle:0000000000000000 combo_toggle
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:247    .text.process_combo:0000000000000000 process_combo
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:921    .bss.drop_buffer:0000000000000000 drop_buffer
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:926    .bss.current_combo_index:0000000000000000 current_combo_index
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:937    .bss.key_combos:0000000000000000 key_combos
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccAnXHdP.s:882    .text.is_combo_enabled:0000000000000000 is_combo_enabled
 
 UNDEFINED SYMBOLS
 register_code16

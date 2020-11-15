@@ -340,18 +340,18 @@
  231               		.file 3 "drivers/avr/i2c_slave.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 i2c_slave.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:13     .text.i2c_slave_init:0000000000000000 i2c_slave_init
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:42     .text.i2c_slave_stop:0000000000000000 i2c_slave_stop
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:66     .text.__vector_36:0000000000000000 __vector_36
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:13     .text.i2c_slave_init:0000000000000000 i2c_slave_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:42     .text.i2c_slave_stop:0000000000000000 i2c_slave_stop
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:66     .text.__vector_36:0000000000000000 __vector_36
                             *ABS*:0000000000000003 __gcc_isr.n_pushed.001
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:225    .bss.buffer_address:0000000000000000 buffer_address
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:225    .bss.buffer_address:0000000000000000 buffer_address
                             *COM*:000000000000001e i2c_slave_reg
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cczQnDOj.s:220    .bss.slave_has_register_set:0000000000000000 slave_has_register_set
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVkhr8k.s:220    .bss.slave_has_register_set:0000000000000000 slave_has_register_set
 
 UNDEFINED SYMBOLS
 __do_clear_bss

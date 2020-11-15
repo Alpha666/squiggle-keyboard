@@ -224,13 +224,13 @@
  147               		.file 19 "quantum/quantum.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 process_grave_esc.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:13     .text.process_grave_esc:0000000000000000 process_grave_esc
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccCRXRL9.s:126    .bss.grave_esc_was_shifted:0000000000000000 grave_esc_was_shifted
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:13     .text.process_grave_esc:0000000000000000 process_grave_esc
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccJ3gNQK.s:126    .bss.grave_esc_was_shifted:0000000000000000 grave_esc_was_shifted
 
 UNDEFINED SYMBOLS
 get_mods

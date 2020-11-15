@@ -67,12 +67,12 @@
   35               		.file 3 "tmk_core/common/avr/xprintf.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 print.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccOLB5jE.s:13     .text.print_set_sendchar:0000000000000000 print_set_sendchar
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc5F4MCJ.s:13     .text.print_set_sendchar:0000000000000000 print_set_sendchar
 
 UNDEFINED SYMBOLS
 xfunc_out

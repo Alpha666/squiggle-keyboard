@@ -1004,20 +1004,20 @@
  654               		.file 22 "tmk_core/common/keyboard.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 matrix.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:13     .text.matrix_slave_scan_user:0000000000000000 matrix_slave_scan_user
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:32     .text.matrix_init:0000000000000000 matrix_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:13     .text.matrix_slave_scan_user:0000000000000000 matrix_slave_scan_user
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:32     .text.matrix_init:0000000000000000 matrix_init
                             *COM*:0000000000000001 thisHand
                             *COM*:0000000000000001 thatHand
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:626    .rodata.row_pins:0000000000000000 row_pins
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:617    .rodata.col_pins:0000000000000000 col_pins
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:204    .text.matrix_post_scan:0000000000000000 matrix_post_scan
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:610    .bss.error_count.3830:0000000000000000 error_count.3830
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//cc93xZ5Z.s:301    .text.matrix_scan:0000000000000000 matrix_scan
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:626    .rodata.row_pins:0000000000000000 row_pins
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:617    .rodata.col_pins:0000000000000000 col_pins
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:204    .text.matrix_post_scan:0000000000000000 matrix_post_scan
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:610    .bss.error_count.3830:0000000000000000 error_count.3830
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccieaI38.s:301    .text.matrix_scan:0000000000000000 matrix_scan
 
 UNDEFINED SYMBOLS
 split_pre_init

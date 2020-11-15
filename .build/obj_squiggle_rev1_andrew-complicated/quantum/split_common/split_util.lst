@@ -1025,17 +1025,17 @@
  219               		.file 25 "quantum/split_common/transport.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 split_util.c
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:2      *ABS*:000000000000003e __SP_H__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:3      *ABS*:000000000000003d __SP_L__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:4      *ABS*:000000000000003f __SREG__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:5      *ABS*:0000000000000000 __tmp_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:6      *ABS*:0000000000000001 __zero_reg__
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:13     .text.is_keyboard_master:0000000000000000 is_keyboard_master
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:188    .bss.usbstate.6078:0000000000000000 usbstate.6078
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:109    .text.is_keyboard_left:0000000000000000 is_keyboard_left
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:127    .text.split_pre_init:0000000000000000 split_pre_init
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:194    .data.isLeftHand:0000000000000000 isLeftHand
-/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccXfYYAa.s:160    .text.split_post_init:0000000000000000 split_post_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:2      *ABS*:000000000000003e __SP_H__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:3      *ABS*:000000000000003d __SP_L__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:4      *ABS*:000000000000003f __SREG__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:13     .text.is_keyboard_master:0000000000000000 is_keyboard_master
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:188    .bss.usbstate.6078:0000000000000000 usbstate.6078
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:109    .text.is_keyboard_left:0000000000000000 is_keyboard_left
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:127    .text.split_pre_init:0000000000000000 split_pre_init
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:194    .data.isLeftHand:0000000000000000 isLeftHand
+/var/folders/7y/kbn66ztx1rs80r6yv6v16f4r0000gn/T//ccVz8mPF.s:160    .text.split_post_init:0000000000000000 split_post_init
 
 UNDEFINED SYMBOLS
 transport_master_init
